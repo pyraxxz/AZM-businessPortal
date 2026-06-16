@@ -8,6 +8,12 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('biz_token');
+
+  // The login endpoint authenticates by email/password, so a 401 here means
+  // "wrong credentials" — NOT an expired session. Let its real message reach
+  // the login form instead of hijacking it into a redirect.
+  const isLoginCall = path.startsWith('/api/auth/login');
+
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
@@ -17,15 +23,25 @@ async function request(path, options = {}) {
     ...options,
   });
 
-  if (res.status === 401) {
-    localStorage.removeItem('biz_token');
-    localStorage.removeItem('biz_user');
-    window.location.href = '/login';
-    throw new Error('Session expired');
+  const data = await res.json().catch(() => ({ message: res.statusText }));
+
+  if (!res.ok) {
+    const msg = data.message || data.error || 'Request failed';
+
+    // A 401 on a PROTECTED call means the stored token is missing/expired.
+    // Clear it and bounce to the app root. '/' is always served by a static
+    // host even when SPA rewrites aren't configured, so this avoids the
+    // "Not Found" page; React Router then renders the login screen.
+    if (res.status === 401 && !isLoginCall) {
+      localStorage.removeItem('biz_token');
+      localStorage.removeItem('biz_user');
+      if (window.location.pathname !== '/') window.location.replace('/');
+      throw new Error('Session expired');
+    }
+
+    throw new Error(msg);
   }
 
-  const data = await res.json().catch(() => ({ message: res.statusText }));
-  if (!res.ok) throw new Error(data.message || 'Request failed');
   return data;
 }
 
