@@ -31,9 +31,9 @@ async function request(path, options = {}) {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const auth = {
-  login:   (email, password) =>
+  // POST /api/auth/login — returns { success, token, accessToken, user }
+  login: (email, password) =>
     request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-  me:      () => request('/api/auth/me'),
 };
 
 // ── Business Profile ──────────────────────────────────────────────────────────
