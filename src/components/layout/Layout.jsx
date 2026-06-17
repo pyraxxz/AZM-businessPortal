@@ -5,9 +5,10 @@ import { useAuth } from '@/lib/AuthContext';
 import { KYB_STATUS_META } from '@/lib/utils';
 import {
   LayoutDashboard, Package, ShoppingBag, FileCheck,
-  Settings, LogOut, ChevronLeft, ChevronRight, Bell,
+  Settings, LogOut, ChevronLeft, ChevronRight,
   Store, Building2, CheckCircle2, AlertCircle,
 } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const NAV = [
   { label: 'Dashboard',  icon: LayoutDashboard, to: '/' },
@@ -164,9 +165,7 @@ export default function Layout() {
               </Link>
             )}
 
-            <button className="relative p-2 rounded-xl hover:bg-[#13131e] transition-colors">
-              <Bell className="w-4 h-4 text-[#4a4a6a]" />
-            </button>
+            <NotificationBell />
           </div>
         </header>
 

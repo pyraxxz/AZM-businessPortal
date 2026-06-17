@@ -83,6 +83,17 @@ export const orders = {
     request(`/api/business/orders/${id}/delivered`, { method: 'PATCH', body: JSON.stringify({ deliveryNotes }) }),
 };
 
+// ── Notifications ───────────────────────────────────────────────────────────────
+export const notifications = {
+  list:        (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business/notifications${qs ? `?${qs}` : ''}`);
+  },
+  unreadCount: ()   => request('/api/business/notifications/unread-count'),
+  markRead:    (id) => request(`/api/business/notifications/read/${id}`, { method: 'POST' }),
+  markAllRead: ()   => request('/api/business/notifications/read-all', { method: 'POST' }),
+};
+
 // ── KYB ───────────────────────────────────────────────────────────────────────
 export const kyb = {
   status: () => request('/api/business/kyb/status'),
