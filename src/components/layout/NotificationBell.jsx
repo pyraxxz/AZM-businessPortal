@@ -63,13 +63,19 @@ export default function NotificationBell() {
     refreshCount();
     const id = setInterval(refreshCount, POLL_MS);
 
-    const sock = window.__azSocket; // set by the app if a socket is wired; optional
+    const sock = window.__azSocket; // set by AuthContext once the socket is wired
     const onNudge = () => { refreshCount(); if (open) refreshFeed(); };
-    if (sock?.on) sock.on('biz_notification', onNudge);
+    if (sock?.on) {
+      sock.on('biz_notification', onNudge);          // new notification arrived
+      sock.on('biz_notifications_updated', onNudge); // read-state changed elsewhere
+    }
 
     return () => {
       clearInterval(id);
-      if (sock?.off) sock.off('biz_notification', onNudge);
+      if (sock?.off) {
+        sock.off('biz_notification', onNudge);
+        sock.off('biz_notifications_updated', onNudge);
+      }
     };
   }, [refreshCount, refreshFeed, open]);
 
@@ -179,6 +185,14 @@ export default function NotificationBell() {
               })
             )}
           </div>
+
+          {/* Footer — full feed */}
+          <button
+            onClick={() => { setOpen(false); navigate('/notifications'); }}
+            className="flex-shrink-0 w-full px-4 py-3 border-t border-[#1e1e2e] text-xs font-semibold text-[#00d97e] hover:bg-[#13131e] transition-colors"
+          >
+            View all notifications
+          </button>
         </div>
       )}
     </div>

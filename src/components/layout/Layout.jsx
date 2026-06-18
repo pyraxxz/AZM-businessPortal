@@ -6,7 +6,7 @@ import { KYB_STATUS_META } from '@/lib/utils';
 import {
   LayoutDashboard, Package, ShoppingBag, FileCheck,
   Settings, LogOut, ChevronLeft, ChevronRight,
-  Store, Building2, CheckCircle2, AlertCircle,
+  Store, Building2, CheckCircle2, AlertCircle, Bell,
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
@@ -14,6 +14,7 @@ const NAV = [
   { label: 'Dashboard',  icon: LayoutDashboard, to: '/' },
   { label: 'Orders',     icon: ShoppingBag,      to: '/orders' },
   { label: 'Products',   icon: Package,          to: '/products' },
+  { label: 'Notifications', icon: Bell,          to: '/notifications' },
   { label: 'Verification', icon: FileCheck,      to: '/kyb' },
   { label: 'Settings',   icon: Settings,         to: '/settings' },
 ];

@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { products as productsApi } from '@/lib/api';
 import { Card, Badge, Button, Input, Textarea, Select, Empty, Skeleton, Modal } from '@/components/ui';
 import { fmtUSDC, fmt } from '@/lib/utils';
-import { Package, Plus, Pencil, ToggleLeft, ToggleRight, AlertCircle } from 'lucide-react';
+import { Package, Plus, Pencil, ToggleLeft, ToggleRight, AlertCircle, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { uploadImageToCloudinary, isCloudinaryConfigured, validateImageFile } from '@/lib/cloudinary';
 
 const CATEGORIES = [
   { value: '', label: 'Select category...' },
@@ -21,13 +22,15 @@ const CATEGORIES = [
   { value: 'OTHER',              label: 'Other' },
 ];
 
-const BLANK = { name: '', description: '', priceUsdc: '', category: '', imageUrls: '' };
+const BLANK = { name: '', description: '', priceUsdc: '', category: '', imageUrls: [] };
+const MAX_IMAGES = 5;
 
 export default function Products() {
   const qc = useQueryClient();
   const [modal, setModal]   = useState(null); // null | 'create' | { ...product }
   const [form, setForm]     = useState(BLANK);
   const [formError, setFormError] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['products'],
@@ -62,12 +65,33 @@ export default function Products() {
       description: p.description || '',
       priceUsdc: String(p.priceUsdc),
       category: p.category || '',
-      imageUrls: Array.isArray(p.imageUrls) ? p.imageUrls.join('\n') : '',
+      imageUrls: Array.isArray(p.imageUrls) ? p.imageUrls : [],
     });
     setFormError('');
     setModal(p);
   };
-  const closeModal = () => { setModal(null); setFormError(''); };
+  const closeModal = () => { setModal(null); setFormError(''); setUploading(false); };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    const invalid = validateImageFile(file);
+    if (invalid) return toast.error(invalid);
+    setUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file);
+      setForm(f => ({ ...f, imageUrls: [...f.imageUrls, url] }));
+      toast.success('Image uploaded');
+    } catch (err) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (idx) =>
+    setForm(f => ({ ...f, imageUrls: f.imageUrls.filter((_, i) => i !== idx) }));
 
   const handleSubmit = () => {
     setFormError('');
@@ -76,7 +100,7 @@ export default function Products() {
     const price = Number(form.priceUsdc);
     if (isNaN(price) || price <= 0) return setFormError('Price must be a positive number.');
 
-    const urls = form.imageUrls.split('\n').map(u => u.trim()).filter(Boolean);
+    const urls = (form.imageUrls || []).map(u => u.trim()).filter(Boolean);
     const payload = {
       name:        form.name.trim(),
       description: form.description.trim() || null,
@@ -179,13 +203,47 @@ export default function Products() {
             value={form.category}
             onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
           />
-          <Textarea
-            label="Image URLs (optional — one per line)"
-            placeholder="https://res.cloudinary.com/..."
-            rows={2}
-            value={form.imageUrls}
-            onChange={e => setForm(f => ({ ...f, imageUrls: e.target.value }))}
-          />
+          {/* Product images */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-[#7b7b9a] uppercase tracking-wider">Product Images</p>
+            <div className="grid grid-cols-3 gap-2">
+              {form.imageUrls.map((url, idx) => (
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-[#0a0a12] border border-[#2a2a3e] group">
+                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  {idx === 0 && (
+                    <span className="absolute bottom-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#00d97e] text-[#0a0a0f]">COVER</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-1 right-1 w-5 h-5 bg-[#f43f5e] rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {form.imageUrls.length < MAX_IMAGES && (
+                <label className={`aspect-square rounded-xl border-2 border-dashed border-[#2a2a3e] flex flex-col items-center justify-center transition-colors ${uploading ? 'opacity-60' : 'cursor-pointer hover:border-[#00d97e40]'}`}>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="hidden"
+                  />
+                  {uploading
+                    ? <Loader2 className="w-5 h-5 text-[#00d97e] animate-spin" />
+                    : <><Plus className="w-5 h-5 text-[#4a4a6a]" /><span className="text-xs text-[#4a4a6a] mt-1">Add Image</span></>
+                  }
+                </label>
+              )}
+            </div>
+            <p className="text-xs text-[#4a4a6a]">
+              {isCloudinaryConfigured()
+                ? 'Up to 5 images, 5MB each (JPEG/PNG/WebP). The first image is the cover.'
+                : 'Image upload is not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to enable uploads.'}
+            </p>
+          </div>
 
           {formError && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-[#f43f5e1a] border border-[#f43f5e30]">

@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { kyb as kybApi } from '@/lib/api';
 import { Card, Badge, Button, Input, Empty } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
-import { FileCheck, Upload, CheckCircle2, Clock, XCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { FileCheck, Upload, CheckCircle2, Clock, XCircle, AlertCircle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { uploadImageToCloudinary, isCloudinaryConfigured, validateImageFile } from '@/lib/cloudinary';
 
 const DOC_TYPES = [
   { value: 'BUSINESS_REGISTRATION_CERT', label: 'Business Registration Certificate', desc: 'Official certificate from the Registrar General\'s Department' },
@@ -25,6 +26,25 @@ export default function KYB() {
   const qc = useQueryClient();
   const [urls, setUrls] = useState({}); // { [docType]: url }
   const [expanded, setExpanded] = useState(null);
+  const [uploadingType, setUploadingType] = useState(null);
+
+  const handleFileUpload = async (documentType, e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const invalid = validateImageFile(file);
+    if (invalid) return toast.error(invalid);
+    setUploadingType(documentType);
+    try {
+      const url = await uploadImageToCloudinary(file, 'azaman-kyb');
+      setUrls(u => ({ ...u, [documentType]: url }));
+      toast.success('Document uploaded — submit to send for review');
+    } catch (err) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setUploadingType(null);
+    }
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['kyb-status'],
@@ -168,6 +188,28 @@ export default function KYB() {
                               </div>
                             </div>
                           )}
+                          {isCloudinaryConfigured() && (
+                            <div className="flex items-center gap-3">
+                              <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors ${uploadingType === value ? 'opacity-60 border-[#2a2a3e] text-[#4a4a6a]' : 'cursor-pointer border-[#00d97e40] text-[#00d97e] hover:bg-[#00d97e10]'}`}>
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp"
+                                  onChange={(e) => handleFileUpload(value, e)}
+                                  disabled={uploadingType === value}
+                                  className="hidden"
+                                />
+                                {uploadingType === value
+                                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</>
+                                  : <><Upload className="w-3.5 h-3.5" /> Upload File</>
+                                }
+                              </label>
+                              {urls[value] && uploadingType !== value && (
+                                <span className="flex items-center gap-1 text-xs text-[#00d97e]">
+                                  <CheckCircle2 className="w-3.5 h-3.5" /> Ready to submit
+                                </span>
+                              )}
+                            </div>
+                          )}
                           <Input
                             label="Cloudinary Document URL"
                             placeholder="https://res.cloudinary.com/your-cloud/image/upload/..."
@@ -175,8 +217,19 @@ export default function KYB() {
                             onChange={e => setUrls(u => ({ ...u, [value]: e.target.value }))}
                           />
                           <p className="text-xs text-[#4a4a6a]">
-                            Upload your document to Cloudinary first, then paste the URL here.
+                            {isCloudinaryConfigured()
+                              ? 'Upload an image directly, or paste a Cloudinary URL (e.g. for PDFs).'
+                              : 'Upload your document to Cloudinary first, then paste the URL here.'}
                           </p>
+                          {existing?.status === 'REJECTED' && (urls[value] || '').trim() && (
+                            <Button
+                              size="sm"
+                              onClick={() => submitMutation.mutate([{ documentType: value, documentUrl: urls[value].trim() }])}
+                              loading={submitMutation.isPending}
+                            >
+                              <Upload className="w-3.5 h-3.5" /> Re-submit this document
+                            </Button>
+                          )}
                         </>
                       )}
                     </div>

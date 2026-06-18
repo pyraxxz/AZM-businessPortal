@@ -10,6 +10,7 @@ import OrderDetail from '@/pages/OrderDetail';
 import Products from '@/pages/Products';
 import KYB from '@/pages/KYB';
 import Settings from '@/pages/Settings';
+import Notifications from '@/pages/Notifications';
 import Onboarding from '@/pages/Onboarding';
 
 const qc = new QueryClient({
@@ -62,6 +63,7 @@ function AppRoutes() {
         <Route path="/orders/:id"     element={<OrderDetail />} />
         <Route path="/products"       element={<Products />} />
         <Route path="/kyb"            element={<KYB />} />
+        <Route path="/notifications"  element={<Notifications />} />
         <Route path="/settings"       element={<Settings />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />

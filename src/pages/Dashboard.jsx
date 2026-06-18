@@ -1,13 +1,48 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { orders as ordersApi } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { StatCard, Card, Badge, Empty, Skeleton } from '@/components/ui';
 import { fmtUSDC, fmt, relativeTime, ORDER_STATUS_META, KYB_STATUS_META } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   ShoppingBag, TrendingUp, Clock, CheckCircle2,
   AlertTriangle, ArrowRight, Package, FileCheck,
 } from 'lucide-react';
+
+// Group COMPLETED order revenue by day for the last `days` days. Computed
+// client-side because the stats endpoint returns aggregate totals only.
+function computeDailyRevenue(orders, days = 30) {
+  const map = {};
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    map[key] = { date: key, label: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }), revenue: 0 };
+  }
+  orders
+    .filter(o => o.status === 'COMPLETED')
+    .forEach(o => {
+      const key = new Date(o.createdAt).toISOString().split('T')[0];
+      if (map[key]) map[key].revenue += Number(o.amountUsdc) || 0;
+    });
+  return Object.values(map);
+}
+
+// Cumulative order funnel from the loaded orders. Each later stage counts
+// orders that reached at least that point in the lifecycle.
+function computeFunnel(orders) {
+  const funded    = ['PAID', 'DELIVERED', 'COMPLETED', 'DISPUTED'];
+  const delivered = ['DELIVERED', 'COMPLETED'];
+  return [
+    { label: 'Total',     count: orders.length,                                          color: '#4f8ef7' },
+    { label: 'Paid',      count: orders.filter(o => funded.includes(o.status)).length,    color: '#a78bfa' },
+    { label: 'Delivered', count: orders.filter(o => delivered.includes(o.status)).length, color: '#00b8d9' },
+    { label: 'Completed', count: orders.filter(o => o.status === 'COMPLETED').length,      color: '#00d97e' },
+  ];
+}
 
 export default function Dashboard() {
   const { bizProfile } = useAuth();
@@ -24,8 +59,21 @@ export default function Dashboard() {
     refetchInterval: 30_000,
   });
 
+  // Larger window for the analytics computations (API caps at 50).
+  const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
+    queryKey: ['dashboard-analytics-orders'],
+    queryFn:  () => ordersApi.list({ limit: 50 }),
+    refetchInterval: 60_000,
+  });
+
   const stats  = statsData?.stats  || {};
   const recent = recentData?.orders || [];
+  const analyticsOrders = analyticsData?.orders || [];
+
+  const dailyRevenue = useMemo(() => computeDailyRevenue(analyticsOrders, 30), [analyticsOrders]);
+  const funnel       = useMemo(() => computeFunnel(analyticsOrders), [analyticsOrders]);
+  const hasRevenue   = dailyRevenue.some(d => d.revenue > 0);
+  const funnelMax    = Math.max(funnel[0]?.count || 0, 1);
 
   const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
   const needsKyb = bizProfile?.kybStatus !== 'VERIFIED';
@@ -114,6 +162,76 @@ export default function Dashboard() {
           color="#00d97e"
           loading={statsLoading}
         />
+      </div>
+
+      {/* Analytics — revenue trend + order funnel */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Revenue trend */}
+        <div className="lg:col-span-2">
+          <Card className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-[#e8e8f0]">Revenue Trend</h2>
+                <p className="text-xs text-[#4a4a6a] mt-0.5">Completed orders · last 30 days</p>
+              </div>
+              <TrendingUp className="w-4 h-4 text-[#00d97e]" />
+            </div>
+            {analyticsLoading ? (
+              <Skeleton className="h-[200px]" />
+            ) : !hasRevenue ? (
+              <div className="h-[200px] flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-2xl bg-[#00d97e1a] border border-[#00d97e30] flex items-center justify-center mb-3">
+                  <TrendingUp className="w-6 h-6 text-[#00d97e]" />
+                </div>
+                <p className="text-sm text-[#7b7b9a]">Complete your first order to see revenue.</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={dailyRevenue} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                  <XAxis dataKey="label" tick={{ fill: '#4a4a6a', fontSize: 10 }} tickLine={false} axisLine={false} interval={4} />
+                  <YAxis tick={{ fill: '#4a4a6a', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v.toFixed(0)}`} />
+                  <Tooltip
+                    cursor={{ fill: '#ffffff08' }}
+                    contentStyle={{ background: '#13131e', border: '1px solid #2a2a3e', borderRadius: 12 }}
+                    labelStyle={{ color: '#e8e8f0', fontSize: 12 }}
+                    formatter={(v) => [`$${Number(v).toFixed(2)} USDC`, 'Revenue']}
+                  />
+                  <Bar dataKey="revenue" fill="#00d97e" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </Card>
+        </div>
+
+        {/* Order funnel */}
+        <Card className="space-y-4">
+          <div>
+            <h2 className="text-sm font-bold text-[#e8e8f0]">Order Funnel</h2>
+            <p className="text-xs text-[#4a4a6a] mt-0.5">Where orders are in their lifecycle</p>
+          </div>
+          {analyticsLoading ? (
+            <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-9" />)}</div>
+          ) : funnel[0].count === 0 ? (
+            <div className="py-8 text-center text-sm text-[#7b7b9a]">No orders to chart yet.</div>
+          ) : (
+            <div className="space-y-3">
+              {funnel.map(({ label, count, color }) => (
+                <div key={label} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#7b7b9a]">{label}</span>
+                    <span className="font-bold text-[#e8e8f0] az-mono">{fmt(count, 0)}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-[#0f0f17] overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${Math.max((count / funnelMax) * 100, count > 0 ? 4 : 0)}%`, background: color }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
       </div>
 
       {/* Recent orders + quick links */}

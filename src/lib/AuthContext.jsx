@@ -1,5 +1,16 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { auth, business } from './api';
+import { connectSocket, joinUserRoom, disconnectSocket } from './socket';
+
+/** Open the live socket and join the user's room. Safe to call repeatedly. */
+function wireSocket(token, userId) {
+  if (!token) return;
+  const sock = connectSocket(token);
+  if (userId != null) {
+    if (sock.connected) joinUserRoom(userId);
+    else sock.once('connect', () => joinUserRoom(userId));
+  }
+}
 
 const AuthContext = createContext(null);
 
@@ -30,14 +41,22 @@ export function AuthProvider({ children }) {
 
     // Optimistically restore from cache
     if (cached) {
-      try { setUser(JSON.parse(cached)); setAuthed(true); } catch { /* ignore */ }
+      try {
+        const u = JSON.parse(cached);
+        setUser(u); setAuthed(true);
+        wireSocket(token, u?.id);
+      } catch { /* ignore */ }
     }
 
     // Verify token by hitting a real protected endpoint
     loadProfile()
       .then(() => {
         if (cached) {
-          try { setUser(JSON.parse(cached)); } catch { /* ignore */ }
+          try {
+            const u = JSON.parse(cached);
+            setUser(u);
+            wireSocket(token, u?.id);
+          } catch { /* ignore */ }
         }
         setAuthed(true);
       })
@@ -62,11 +81,15 @@ export function AuthProvider({ children }) {
     setUser(me);
     setAuthed(true);
 
+    // Go live: open the socket and join the owner's room.
+    wireSocket(token, me?.id);
+
     await loadProfile();
     return me;
   }, [loadProfile]);
 
   const logout = useCallback(() => {
+    disconnectSocket();
     localStorage.removeItem('biz_token');
     localStorage.removeItem('biz_user');
     setUser(null);

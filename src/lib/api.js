@@ -54,9 +54,11 @@ export const auth = {
 
 // ── Business Profile ──────────────────────────────────────────────────────────
 export const business = {
-  me:       ()     => request('/api/business/me'),
-  register: (data) => request('/api/business/register', { method: 'POST', body: JSON.stringify(data) }),
-  update:   (data) => request('/api/business/profile',  { method: 'PATCH', body: JSON.stringify(data) }),
+  me:       ()      => request('/api/business/me'),
+  register: (data)  => request('/api/business/register', { method: 'POST', body: JSON.stringify(data) }),
+  update:   (data)  => request('/api/business/profile',  { method: 'PATCH', body: JSON.stringify(data) }),
+  // Public storefront lookup (no auth required) — used by the profile preview.
+  getPublic:(bizId) => request(`/api/business/${bizId}`),
 };
 
 // ── Products ──────────────────────────────────────────────────────────────────
@@ -92,6 +94,23 @@ export const notifications = {
   unreadCount: ()   => request('/api/business/notifications/unread-count'),
   markRead:    (id) => request(`/api/business/notifications/read/${id}`, { method: 'POST' }),
   markAllRead: ()   => request('/api/business/notifications/read-all', { method: 'POST' }),
+};
+
+// ── Escrow ──────────────────────────────────────────────────────────────────────
+// The business owner is the escrow payee and a participant on the linked ticket,
+// so these protected endpoints authorize them. `getForTicket` may 404 when a
+// ticket has no escrow — callers must handle that gracefully.
+export const escrow = {
+  getForTicket: (ticketId)        => request(`/api/escrow/ticket/${ticketId}`),
+  satisfy:      (escrowId)        => request('/api/escrow/satisfy', { method: 'POST', body: JSON.stringify({ escrowId }) }),
+  dispute:      (escrowId, reason) => request('/api/escrow/dispute', { method: 'POST', body: JSON.stringify({ escrowId, reason }) }),
+};
+
+// ── Analytics ───────────────────────────────────────────────────────────────────
+// The stats endpoint returns aggregate counts; the revenue trend is computed
+// client-side from the orders list (see Dashboard).
+export const analytics = {
+  summary: () => request('/api/business/orders/stats'),
 };
 
 // ── KYB ───────────────────────────────────────────────────────────────────────
