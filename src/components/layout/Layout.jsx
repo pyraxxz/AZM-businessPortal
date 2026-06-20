@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, FileCheck,
   Settings, LogOut, ChevronLeft, ChevronRight,
   Store, Building2, CheckCircle2, AlertCircle, Bell,
+  Receipt, MapPin,
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
@@ -14,6 +15,8 @@ const NAV = [
   { label: 'Dashboard',  icon: LayoutDashboard, to: '/' },
   { label: 'Orders',     icon: ShoppingBag,      to: '/orders' },
   { label: 'Products',   icon: Package,          to: '/products' },
+  { label: 'Invoices',   icon: Receipt,          to: '/invoices' },
+  { label: 'Locations',  icon: MapPin,           to: '/locations' },
   { label: 'Notifications', icon: Bell,          to: '/notifications' },
   { label: 'Verification', icon: FileCheck,      to: '/kyb' },
   { label: 'Settings',   icon: Settings,         to: '/settings' },

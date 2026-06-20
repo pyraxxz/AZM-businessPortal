@@ -113,6 +113,34 @@ export const analytics = {
   summary: () => request('/api/business/orders/stats'),
 };
 
+// ── Locations ─────────────────────────────────────────────────────────────────
+export const locations = {
+  list:         ()           => request('/api/business/locations'),
+  create:       (data)       => request('/api/business/locations', { method: 'POST', body: JSON.stringify(data) }),
+  update:       (id, data)   => request(`/api/business/locations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove:       (id)         => request(`/api/business/locations/${id}`, { method: 'DELETE' }),
+  getPublic:    (bizId)      => request(`/api/business/${bizId}/locations`),
+  searchNearby: (params)     => { const qs = new URLSearchParams(params).toString(); return request(`/api/business/search/nearby?${qs}`); },
+  createTable:  (locId, lbl) => request(`/api/business/locations/${locId}/tables`, { method: 'POST', body: JSON.stringify({ label: lbl }) }),
+  listTables:   (locId)      => request(`/api/business/locations/${locId}/tables`),
+  deleteTable:  (tableId)    => request(`/api/business/tables/${tableId}`, { method: 'DELETE' }),
+};
+
+// ── Invoices (business-owner side) ────────────────────────────────────────────
+export const invoices = {
+  list:         (params = {}) => { const qs = new URLSearchParams(params).toString(); return request(`/api/business/invoices${qs ? '?' + qs : ''}`); },
+  get:          (id)          => request(`/api/business/invoices/${id}`),
+  create:       (data)        => request('/api/business/invoices', { method: 'POST', body: JSON.stringify(data) }),
+  send:         (id)          => request(`/api/business/invoices/${id}/send`, { method: 'POST' }),
+  void:         (id)          => request(`/api/business/invoices/${id}/void`, { method: 'POST' }),
+  lookupCustomer: (azamanId)  => request(`/api/business/customers/lookup?azamanId=${encodeURIComponent(azamanId)}`),
+};
+
+// ── Reviews ───────────────────────────────────────────────────────────────────
+export const reviews = {
+  list: (bizId, params = {}) => { const qs = new URLSearchParams(params).toString(); return request(`/api/business/${bizId}/reviews${qs ? '?' + qs : ''}`); },
+};
+
 // ── KYB ───────────────────────────────────────────────────────────────────────
 export const kyb = {
   status: () => request('/api/business/kyb/status'),

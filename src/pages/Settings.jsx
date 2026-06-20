@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { business as businessApi } from '@/lib/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { business as businessApi, locations as locApi } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, Button, Input, Textarea, Select, Badge } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
-import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck } from 'lucide-react';
+import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 import PublicProfilePreview from '@/components/PublicProfilePreview';
+import QrCodePanel from '@/components/QrCodePanel';
 
 const CATEGORIES = [
   { value: 'FREELANCE_SERVICES', label: 'Freelance Services' },
@@ -39,6 +40,13 @@ export default function Settings() {
   });
   const [saved, setSaved] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  const { data: locsData } = useQuery({
+    queryKey: ['biz-locations'],
+    queryFn:  () => locApi.list(),
+    enabled:  !!bizProfile,
+  });
+  const locs = locsData?.locations || [];
 
   const copyBizId = async () => {
     if (!bizProfile?.bizId) return;
@@ -159,6 +167,49 @@ export default function Settings() {
         >
           <Eye className="w-4 h-4" /> View Public Profile
         </Button>
+      </Card>
+
+      {/* QR Codes */}
+      <Card className="space-y-4">
+        <div className="flex items-center gap-2">
+          <QrCode className="w-4 h-4 text-[#00d97e]" />
+          <h3 className="text-sm font-bold text-[#e8e8f0]">QR Codes</h3>
+        </div>
+        <p className="text-xs text-[#7b7b9a]">
+          Let customers scan to open your business instantly in the Azaman app — no search needed.
+        </p>
+
+        {bizProfile?.bizId ? (
+          <div className="space-y-3">
+            {/* Business-level QR */}
+            <QrCodePanel
+              label={`${bizProfile?.businessName || 'Business'} — Main`}
+              url={`azaman://business/${bizProfile.bizId}`}
+            />
+
+            {/* Per-location QRs */}
+            {locs.filter(l => l.isActive).map(loc => (
+              <QrCodePanel
+                key={loc.id}
+                label={`${loc.label} — Branch QR`}
+                url={`azaman://business/${bizProfile.bizId}/location/${loc.id}`}
+              />
+            ))}
+
+            {/* Per-table QRs */}
+            {locs.filter(l => l.isActive).map(loc =>
+              (loc.tables || []).filter(t => t.isActive).map(tbl => (
+                <QrCodePanel
+                  key={tbl.id}
+                  label={`${loc.label} — ${tbl.label}`}
+                  url={`azaman://business/${bizProfile.bizId}/table/${tbl.id}`}
+                />
+              ))
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-[#4a4a6a]">Your BIZ ID is not ready yet. QR codes will appear here once available.</p>
+        )}
       </Card>
 
       {/* Edit form */}

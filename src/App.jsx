@@ -8,6 +8,8 @@ import Dashboard from '@/pages/Dashboard';
 import Orders from '@/pages/Orders';
 import OrderDetail from '@/pages/OrderDetail';
 import Products from '@/pages/Products';
+import Invoices from '@/pages/Invoices';
+import Locations from '@/pages/Locations';
 import KYB from '@/pages/KYB';
 import Settings from '@/pages/Settings';
 import Notifications from '@/pages/Notifications';
@@ -62,6 +64,8 @@ function AppRoutes() {
         <Route path="/orders"         element={<Orders />} />
         <Route path="/orders/:id"     element={<OrderDetail />} />
         <Route path="/products"       element={<Products />} />
+        <Route path="/invoices"       element={<Invoices />} />
+        <Route path="/locations"      element={<Locations />} />
         <Route path="/kyb"            element={<KYB />} />
         <Route path="/notifications"  element={<Notifications />} />
         <Route path="/settings"       element={<Settings />} />

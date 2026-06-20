@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { orders as ordersApi } from '@/lib/api';
+import { orders as ordersApi, invoices as invoicesApi } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { StatCard, Card, Badge, Empty, Skeleton } from '@/components/ui';
 import { fmtUSDC, fmt, relativeTime, ORDER_STATUS_META, KYB_STATUS_META } from '@/lib/utils';
@@ -9,6 +9,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import {
   ShoppingBag, TrendingUp, Clock, CheckCircle2,
   AlertTriangle, ArrowRight, Package, FileCheck,
+  Receipt, DollarSign,
 } from 'lucide-react';
 
 // Group COMPLETED order revenue by day for the last `days` days. Computed
@@ -65,6 +66,21 @@ export default function Dashboard() {
     queryFn:  () => ordersApi.list({ limit: 50 }),
     refetchInterval: 60_000,
   });
+
+  // Invoice KPIs — list + count client-side by status.
+  const { data: invoiceData } = useQuery({
+    queryKey: ['dashboard-invoices'],
+    queryFn:  () => invoicesApi.list({ limit: 50 }),
+    refetchInterval: 60_000,
+  });
+  const allInvoices = invoiceData?.invoices || [];
+  const invoiceStats = useMemo(() => ({
+    sent: allInvoices.filter(i => i.status === 'SENT').length,
+    paid: allInvoices.filter(i => i.status === 'PAID').length,
+    paidRevenue: allInvoices
+      .filter(i => i.status === 'PAID')
+      .reduce((sum, i) => sum + (Number(i.billTotalUsdc) || 0), 0),
+  }), [allInvoices]);
 
   const stats  = statsData?.stats  || {};
   const recent = recentData?.orders || [];
@@ -162,6 +178,13 @@ export default function Dashboard() {
           color="#00d97e"
           loading={statsLoading}
         />
+      </div>
+
+      {/* Invoice KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="Invoices Sent"   value={fmt(invoiceStats.sent, 0)}        icon={Receipt}      color="#4f8ef7" />
+        <StatCard label="Invoices Paid"   value={fmt(invoiceStats.paid, 0)}        icon={CheckCircle2} color="#00d97e" />
+        <StatCard label="Invoice Revenue" value={fmtUSDC(invoiceStats.paidRevenue)} icon={DollarSign}   color="#a78bfa" />
       </div>
 
       {/* Analytics — revenue trend + order funnel */}
