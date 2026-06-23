@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { notifications as notifApi } from '@/lib/api';
-import { useBizNotifications } from '@/hooks/useBizNotifications';
 import { Card, Button, Empty, Skeleton } from '@/components/ui';
 import { cn, relativeTime } from '@/lib/utils';
 import {
@@ -39,8 +38,8 @@ export default function Notifications() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('ALL');
 
-  // Live: socket events invalidate the ['biz-notifications'] queries below.
-  useBizNotifications();
+  // Live socket refresh is mounted app-wide in <Layout/> (useBizNotifications),
+  // so the ['biz-notifications'] queries below stay fresh without a local hook.
 
   const {
     data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage,

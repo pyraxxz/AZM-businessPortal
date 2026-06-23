@@ -3,6 +3,7 @@ import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { KYB_STATUS_META } from '@/lib/utils';
+import { useBizNotifications } from '@/hooks/useBizNotifications';
 import {
   LayoutDashboard, Package, ShoppingBag, FileCheck,
   Settings, LogOut, ChevronLeft, ChevronRight,
@@ -27,6 +28,12 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { bizProfile, user, logout } = useAuth();
+
+  // Live order/stats/notification refresh, app-wide. Layout wraps every
+  // authenticated route, so socket events (biz_notification /
+  // biz_notifications_updated) invalidate React Query caches no matter which
+  // page is open — not just while sitting on /notifications.
+  useBizNotifications();
 
   const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
 
