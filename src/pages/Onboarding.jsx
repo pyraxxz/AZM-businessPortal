@@ -7,16 +7,18 @@ import { Store, ArrowRight, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CATEGORIES = [
-  { value: '',                   label: 'Select your business category...' },
-  { value: 'FREELANCE_SERVICES', label: 'Freelance Services' },
+  { value: '',                   label: 'Select your business type...' },
+  // ── Primary: Transit, Restaurants, Hotels ──────────────────────────────
+  { value: 'LOGISTICS',          label: 'Transit & Transport' },
+  { value: 'FOOD_BEVERAGE',      label: 'Restaurants' },
+  { value: 'REAL_ESTATE',        label: 'Hotels & Stays' },
+  // ── Secondary ───────────────────────────────────────────────────────────
   { value: 'RETAIL',             label: 'Retail' },
-  { value: 'FOOD_BEVERAGE',      label: 'Food & Beverage' },
-  { value: 'TECHNOLOGY',         label: 'Technology' },
-  { value: 'REAL_ESTATE',        label: 'Real Estate' },
-  { value: 'EDUCATION',          label: 'Education' },
   { value: 'HEALTH_WELLNESS',    label: 'Health & Wellness' },
+  { value: 'EDUCATION',          label: 'Education' },
   { value: 'ENTERTAINMENT',      label: 'Entertainment' },
-  { value: 'LOGISTICS',          label: 'Logistics' },
+  { value: 'FREELANCE_SERVICES', label: 'Services' },
+  { value: 'TECHNOLOGY',         label: 'Technology' },
   { value: 'FINANCIAL_SERVICES', label: 'Financial Services' },
   { value: 'OTHER',              label: 'Other' },
 ];

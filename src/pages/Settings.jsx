@@ -10,15 +10,17 @@ import PublicProfilePreview from '@/components/PublicProfilePreview';
 import QrCodePanel from '@/components/QrCodePanel';
 
 const CATEGORIES = [
-  { value: 'FREELANCE_SERVICES', label: 'Freelance Services' },
+  // ── Primary: Transit, Restaurants, Hotels ──────────────────────────────
+  { value: 'LOGISTICS',          label: 'Transit & Transport' },
+  { value: 'FOOD_BEVERAGE',      label: 'Restaurants' },
+  { value: 'REAL_ESTATE',        label: 'Hotels & Stays' },
+  // ── Secondary ───────────────────────────────────────────────────────────
   { value: 'RETAIL',             label: 'Retail' },
-  { value: 'FOOD_BEVERAGE',      label: 'Food & Beverage' },
-  { value: 'TECHNOLOGY',         label: 'Technology' },
-  { value: 'REAL_ESTATE',        label: 'Real Estate' },
-  { value: 'EDUCATION',          label: 'Education' },
   { value: 'HEALTH_WELLNESS',    label: 'Health & Wellness' },
+  { value: 'EDUCATION',          label: 'Education' },
   { value: 'ENTERTAINMENT',      label: 'Entertainment' },
-  { value: 'LOGISTICS',          label: 'Logistics' },
+  { value: 'FREELANCE_SERVICES', label: 'Services' },
+  { value: 'TECHNOLOGY',         label: 'Technology' },
   { value: 'FINANCIAL_SERVICES', label: 'Financial Services' },
   { value: 'OTHER',              label: 'Other' },
 ];
