@@ -1,17 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --az-black:          #0a0a0f;
-    --az-surface:        #0f0f17;
-    --az-card:           #13131e;
-    --az-border:         #1e1e2e;
-    --az-border-bright:  #2a2a3e;
-    --az-text-primary:   #e8e8f0;
-    --az-text-secondary: #7b7b9a;
+    /* Sentry-inspired design tokens — deeper dark, richer accents */
+    --az-black:          #08080c;
+    --az-surface:        #0d0d14;
+    --az-card:           #11111a;
+    --az-card-elevated:  #161620;
+    --az-border:         #1c1c28;
+    --az-border-bright:  #28283a;
+    --az-text-primary:   #f0f0f5;
+    --az-text-secondary: #8a8aa5;
     --az-text-muted:     #4a4a6a;
     --az-emerald:        #00d97e;
     --az-emerald-dim:    #00d97e1a;
@@ -23,6 +25,10 @@
     --az-amber-dim:      #f59e0b1a;
     --az-red:            #f43f5e;
     --az-red-dim:        #f43f5e1a;
+    --az-cyan:           #00b8d9;
+    --az-cyan-dim:       #00b8d91a;
+    /* Sentry-style accent for gradients/special highlights */
+    --az-accent-grad:    linear-gradient(135deg, #00d97e 0%, #00b8d9 100%);
   }
 
   * { box-sizing: border-box; }
@@ -39,20 +45,28 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
   }
 
-  ::-webkit-scrollbar            { width: 4px; height: 4px; }
+  /* Sentry-style scrollbars — thinner, more refined */
+  ::-webkit-scrollbar            { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track      { background: transparent; }
-  ::-webkit-scrollbar-thumb      { background: #2a2a3e; border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover{ background: #3a3a5a; }
+  ::-webkit-scrollbar-thumb      { background: #1c1c28; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover{ background: #28283a; }
 
-  ::selection { background: #00d97e30; color: #e8e8f0; }
+  ::selection { background: #00d97e30; color: #f0f0f5; }
+
+  /* Focus ring — Sentry-style */
+  :focus-visible {
+    outline: 2px solid #00d97e40;
+    outline-offset: 2px;
+  }
 }
 
 @layer utilities {
   .az-mono         { font-family: 'JetBrains Mono', monospace; }
-  .az-glow-emerald { box-shadow: 0 0 16px #00d97e25; }
-  .az-glow-blue    { box-shadow: 0 0 16px #4f8ef725; }
+  .az-glow-emerald { box-shadow: 0 0 16px #00d97e20; }
+  .az-glow-blue    { box-shadow: 0 0 16px #4f8ef720; }
   .az-pulse::after {
     content: '';
     position: absolute;
@@ -65,18 +79,58 @@
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
   }
   .az-card-hover:hover {
-    border-color: #2a2a3e;
+    border-color: #28283a;
     box-shadow: 0 4px 24px #00000040;
     transform: translateY(-1px);
   }
   .az-shimmer {
-    background: linear-gradient(90deg, #13131e 25%, #1e1e2e 50%, #13131e 75%);
+    background: linear-gradient(90deg, #11111a 25%, #1c1c28 50%, #11111a 75%);
     background-size: 200% 100%;
     animation: shimmer 1.6s linear infinite;
+  }
+  /* Sentry-style gradient text */
+  .az-grad-text {
+    background: var(--az-accent-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  /* Sentry-style elevated surface */
+  .az-elevated {
+    box-shadow: 0 1px 3px #00000060, 0 0 0 1px #1c1c28;
+  }
+  /* Sentry-style focus glow */
+  .az-focus-glow:focus {
+    border-color: #00d97e60;
+    box-shadow: 0 0 0 3px #00d97e15;
   }
 }
 
 @keyframes pulse-ring {
   0%   { transform: scale(1); opacity: 0.6; }
   100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Sentry-style smooth animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in  { animation: fade-in 0.25s ease-out; }
+.animate-scale-in { animation: scale-in 0.2s ease-out; }
+
+/* Responsive breakpoints for mobile/tablet */
+@media (max-width: 768px) {
+  .max-w-7xl { max-width: 100%; }
 }

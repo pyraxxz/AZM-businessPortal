@@ -1,19 +1,34 @@
-import { useMemo } from 'react';
+/**
+ * Dashboard — Sentry-inspired widget-based dashboard.
+ * Business-type-aware: shows different widgets for transit, restaurant, hotel, retail, etc.
+ *
+ * Sentry design tenets applied:
+ * - Widget-based layout (like Sentry's dashboard widgets)
+ * - Placeholders instead of loading spinners
+ * - Data-dense, clean visual hierarchy
+ * - Global date range context
+ * - Type-specific widget sections
+ */
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { orders as ordersApi, invoices as invoicesApi } from '@/lib/api';
+import { reservations as resApi, transit as transitApi, checkIn as checkInApi, reviews as reviewsApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
-import { StatCard, Card, Badge, Empty, Skeleton } from '@/components/ui';
-import { fmtUSDC, fmt, relativeTime, ORDER_STATUS_META, KYB_STATUS_META } from '@/lib/utils';
+import { Widget, WidgetStat, WidgetRow } from '@/components/ui/Widget';
+import { Badge, Skeleton, Card } from '@/components/ui';
+import { fmtUSDC, fmt, relativeTime, ORDER_STATUS_META, KYB_STATUS_META, cn } from '@/lib/utils';
+import { getTypeConfig } from '@/lib/businessTypes';
 import { Link } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import {
   ShoppingBag, TrendingUp, Clock, CheckCircle2,
   AlertTriangle, ArrowRight, Package, FileCheck,
-  Receipt, DollarSign,
+  Receipt, DollarSign, Bus, Users, CalendarCheck,
+  QrCode, Star, UserCheck, UserX, Route, Sparkles,
+  UtensilsCrossed, Building2, Briefcase, Store,
 } from 'lucide-react';
 
-// Group COMPLETED order revenue by day for the last `days` days. Computed
-// client-side because the stats endpoint returns aggregate totals only.
+// ── Revenue computation ──────────────────────────────────────────────────────
 function computeDailyRevenue(orders, days = 30) {
   const map = {};
   const now = new Date();
@@ -32,8 +47,6 @@ function computeDailyRevenue(orders, days = 30) {
   return Object.values(map);
 }
 
-// Cumulative order funnel from the loaded orders. Each later stage counts
-// orders that reached at least that point in the lifecycle.
 function computeFunnel(orders) {
   const funded    = ['PAID', 'DELIVERED', 'COMPLETED', 'DISPUTED'];
   const delivered = ['DELIVERED', 'COMPLETED'];
@@ -45,9 +58,14 @@ function computeFunnel(orders) {
   ];
 }
 
+const TYPE_ICONS = { Bus, UtensilsCrossed, Building2, Briefcase, Store, ShoppingBag };
+
 export default function Dashboard() {
   const { bizProfile } = useAuth();
+  const typeConfig = getTypeConfig(bizProfile);
+  const TypeIcon = TYPE_ICONS[typeConfig.icon] || Store;
 
+  // ── Core queries (shared across all business types) ──────────────────────
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['biz-stats'],
     queryFn:  () => ordersApi.stats(),
@@ -60,36 +78,64 @@ export default function Dashboard() {
     refetchInterval: 30_000,
   });
 
-  // Larger window for the analytics computations (API caps at 50).
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
     queryKey: ['dashboard-analytics-orders'],
     queryFn:  () => ordersApi.list({ limit: 50 }),
     refetchInterval: 60_000,
   });
 
-  // Invoice KPIs — list + count client-side by status.
   const { data: invoiceData } = useQuery({
     queryKey: ['dashboard-invoices'],
     queryFn:  () => invoicesApi.list({ limit: 50 }),
     refetchInterval: 60_000,
   });
-  const allInvoices = invoiceData?.invoices || [];
-  const invoiceStats = useMemo(() => ({
-    sent: allInvoices.filter(i => i.status === 'SENT').length,
-    paid: allInvoices.filter(i => i.status === 'PAID').length,
-    paidRevenue: allInvoices
-      .filter(i => i.status === 'PAID')
-      .reduce((sum, i) => sum + (Number(i.billTotalUsdc) || 0), 0),
-  }), [allInvoices]);
 
+  // ── Type-specific queries ────────────────────────────────────────────────
+  const { data: resStatsData } = useQuery({
+    queryKey: ['reservation-stats'],
+    queryFn:  () => resApi.stats(),
+    enabled: typeConfig.navItems.includes('reservations'),
+  });
+
+  const { data: transitData } = useQuery({
+    queryKey: ['transit-trips-dashboard'],
+    queryFn:  () => transitApi.list(),
+    enabled: typeConfig.type === 'TRANSIT',
+  });
+
+  const { data: checkInStatsData } = useQuery({
+    queryKey: ['checkin-stats-dashboard'],
+    queryFn:  () => checkInApi.todayStats(),
+    enabled: typeConfig.navItems.includes('checkin'),
+  });
+
+  const { data: reviewStatsData } = useQuery({
+    queryKey: ['review-stats-dashboard'],
+    queryFn:  () => reviewsApi.stats(),
+    enabled: true,
+  });
+
+  // ── Computed values ──────────────────────────────────────────────────────
   const stats  = statsData?.stats  || {};
   const recent = recentData?.orders || [];
   const analyticsOrders = analyticsData?.orders || [];
+  const allInvoices = invoiceData?.invoices || [];
 
   const dailyRevenue = useMemo(() => computeDailyRevenue(analyticsOrders, 30), [analyticsOrders]);
   const funnel       = useMemo(() => computeFunnel(analyticsOrders), [analyticsOrders]);
   const hasRevenue   = dailyRevenue.some(d => d.revenue > 0);
   const funnelMax    = Math.max(funnel[0]?.count || 0, 1);
+
+  const invoiceStats = useMemo(() => ({
+    sent: allInvoices.filter(i => i.status === 'SENT').length,
+    paid: allInvoices.filter(i => i.status === 'PAID').length,
+    paidRevenue: allInvoices.filter(i => i.status === 'PAID').reduce((s, i) => s + (Number(i.billTotalUsdc) || 0), 0),
+  }), [allInvoices]);
+
+  const resStats = resStatsData?.stats || {};
+  const checkInStats = checkInStatsData?.stats || {};
+  const reviewStats = reviewStatsData?.stats || {};
+  const trips = transitData?.trips || [];
 
   const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
   const needsKyb = bizProfile?.kybStatus !== 'VERIFIED';
@@ -100,12 +146,22 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in">
-
-      {/* Header */}
+      {/* ── Header with business type badge ──────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#e8e8f0]">{greeting}, {bizName} 👋</h1>
-          <p className="text-sm text-[#7b7b9a] mt-1">Here's what's happening with your business today.</p>
+          <h1 className="text-xl font-bold text-[#e8e8f0] flex items-center gap-2">
+            {greeting}, {bizName}
+          </h1>
+          <div className="flex items-center gap-2 mt-1.5">
+            <p className="text-sm text-[#7b7b9a]">Here's what's happening today.</p>
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+              style={{ background: `${typeConfig.color}1a`, color: typeConfig.color, border: `1px solid ${typeConfig.color}30` }}
+            >
+              <TypeIcon className="w-2.5 h-2.5" />
+              {typeConfig.label}
+            </span>
+          </div>
         </div>
         <Link
           to="/orders"
@@ -115,17 +171,14 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* KYB banner */}
+      {/* ── KYB banner ────────────────────────────────────────────────────── */}
       {needsKyb && (
         <Link to="/kyb">
           <div
             className="flex items-center gap-4 p-4 rounded-2xl border cursor-pointer hover:opacity-90 transition-opacity"
             style={{ background: kybMeta.bg, borderColor: `${kybMeta.color}40` }}
           >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: `${kybMeta.color}20` }}
-            >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${kybMeta.color}20` }}>
               <FileCheck className="w-5 h-5" style={{ color: kybMeta.color }} />
             </div>
             <div className="flex-1 min-w-0">
@@ -145,63 +198,88 @@ export default function Dashboard() {
         </Link>
       )}
 
-      {/* Stats grid */}
+      {/* ── Core stats widgets (all business types) ───────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Total Orders"
-          value={statsLoading ? '...' : fmt(stats.totalOrders || 0, 0)}
-          icon={ShoppingBag}
-          color="#4f8ef7"
-          loading={statsLoading}
-        />
-        <StatCard
-          label="Revenue"
-          value={statsLoading ? '...' : fmtUSDC(stats.totalRevenue || 0)}
-          sub="Completed orders"
-          icon={TrendingUp}
-          color="#00d97e"
-          loading={statsLoading}
-        />
-        <StatCard
-          label="Pending"
-          value={statsLoading ? '...' : fmt(stats.pendingOrders || 0, 0)}
-          sub="Awaiting action"
-          icon={Clock}
-          color="#f59e0b"
-          loading={statsLoading}
-        />
-        <StatCard
-          label="Completed"
-          value={statsLoading ? '...' : fmt(stats.completedOrders || 0, 0)}
-          sub="All time"
-          icon={CheckCircle2}
-          color="#00d97e"
-          loading={statsLoading}
-        />
+        <Widget title="Total Orders" icon={ShoppingBag} iconColor="#4f8ef7" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.totalOrders || 0, 0)} label="All time" color="#4f8ef7" />
+        </Widget>
+        <Widget title="Revenue" icon={TrendingUp} iconColor="#00d97e" loading={statsLoading}>
+          <WidgetStat value={fmtUSDC(stats.totalRevenue || 0)} label="Completed orders" color="#00d97e" />
+        </Widget>
+        <Widget title="Pending" icon={Clock} iconColor="#f59e0b" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.pendingOrders || 0, 0)} label="Awaiting action" color="#f59e0b" />
+        </Widget>
+        <Widget title="Completed" icon={CheckCircle2} iconColor="#00d97e" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.completedOrders || 0, 0)} label="All time" color="#00d97e" />
+        </Widget>
       </div>
 
-      {/* Invoice KPIs */}
+      {/* ── Business-type-specific widgets ────────────────────────────────── */}
+      {typeConfig.type === 'TRANSIT' && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Widget title="Active Trips" icon={Bus} iconColor="#4f8ef7">
+            <WidgetStat
+              value={fmt(trips.filter(t => ['SCHEDULED','BOARDING'].includes(t.status)).length, 0)}
+              label="Scheduled + boarding"
+              color="#4f8ef7"
+            />
+          </Widget>
+          <Widget title="Seats Sold" icon={Users} iconColor="#a78bfa">
+            <WidgetStat
+              value={fmt(trips.reduce((s, t) => s + (t.bookedSeats || 0), 0), 0)}
+              label="All trips"
+              color="#a78bfa"
+            />
+          </Widget>
+          <Widget title="Check-Ins Today" icon={QrCode} iconColor="#00d97e">
+            <WidgetStat value={fmt(checkInStats.todayCount || 0, 0)} label="Passengers" color="#00d97e" />
+          </Widget>
+          <Widget title="Transit Revenue" icon={DollarSign} iconColor="#00d97e">
+            <WidgetStat
+              value={fmtUSDC(trips.reduce((s, t) => s + (t.bookedSeats || 0) * (Number(t.fareUsdc) || 0), 0))}
+              label="From seat bookings"
+              color="#00d97e"
+            />
+          </Widget>
+        </div>
+      )}
+
+      {['RESTAURANT', 'HOTEL', 'SERVICES'].includes(typeConfig.type) && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Widget title="Reservations" icon={CalendarCheck} iconColor="#a78bfa">
+            <WidgetStat value={fmt(resStats.total || 0, 0)} label="All bookings" color="#a78bfa" />
+          </Widget>
+          <Widget title="Pending" icon={Clock} iconColor="#f59e0b">
+            <WidgetStat value={fmt(resStats.pending || 0, 0)} label="Awaiting confirmation" color="#f59e0b" />
+          </Widget>
+          <Widget title="Checked In" icon={UserCheck} iconColor="#00d97e">
+            <WidgetStat value={fmt(checkInStats.todayCount || 0, 0)} label="Today" color="#00d97e" />
+          </Widget>
+          <Widget title="No-Shows" icon={UserX} iconColor="#f43f5e">
+            <WidgetStat value={fmt(resStats.noShows || 0, 0)} label="Penalties applied" color="#f43f5e" />
+          </Widget>
+        </div>
+      )}
+
+      {/* ── Invoice KPIs (all types) ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Invoices Sent"   value={fmt(invoiceStats.sent, 0)}        icon={Receipt}      color="#4f8ef7" />
-        <StatCard label="Invoices Paid"   value={fmt(invoiceStats.paid, 0)}        icon={CheckCircle2} color="#00d97e" />
-        <StatCard label="Invoice Revenue" value={fmtUSDC(invoiceStats.paidRevenue)} icon={DollarSign}   color="#a78bfa" />
+        <Widget title="Invoices Sent" icon={Receipt} iconColor="#4f8ef7">
+          <WidgetStat value={fmt(invoiceStats.sent, 0)} label="Awaiting payment" color="#4f8ef7" />
+        </Widget>
+        <Widget title="Invoices Paid" icon={CheckCircle2} iconColor="#00d97e">
+          <WidgetStat value={fmt(invoiceStats.paid, 0)} label="Settled" color="#00d97e" />
+        </Widget>
+        <Widget title="Invoice Revenue" icon={DollarSign} iconColor="#a78bfa">
+          <WidgetStat value={fmtUSDC(invoiceStats.paidRevenue)} label="From paid invoices" color="#a78bfa" />
+        </Widget>
       </div>
 
-      {/* Analytics — revenue trend + order funnel */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue trend */}
+      {/* ── Revenue trend + Order funnel ──────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Revenue trend — Area chart (Sentry-style) */}
         <div className="lg:col-span-2">
-          <Card className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-bold text-[#e8e8f0]">Revenue Trend</h2>
-                <p className="text-xs text-[#4a4a6a] mt-0.5">Completed orders · last 30 days</p>
-              </div>
-              <TrendingUp className="w-4 h-4 text-[#00d97e]" />
-            </div>
-            {analyticsLoading ? (
-              <Skeleton className="h-[200px]" />
-            ) : !hasRevenue ? (
+          <Widget title="Revenue Trend" subtitle="Completed orders · last 30 days" icon={TrendingUp} iconColor="#00d97e" loading={analyticsLoading}>
+            {!hasRevenue ? (
               <div className="h-[200px] flex flex-col items-center justify-center text-center">
                 <div className="w-12 h-12 rounded-2xl bg-[#00d97e1a] border border-[#00d97e30] flex items-center justify-center mb-3">
                   <TrendingUp className="w-6 h-6 text-[#00d97e]" />
@@ -210,143 +288,150 @@ export default function Dashboard() {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={dailyRevenue} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                <AreaChart data={dailyRevenue} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#00d97e" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#00d97e" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <XAxis dataKey="label" tick={{ fill: '#4a4a6a', fontSize: 10 }} tickLine={false} axisLine={false} interval={4} />
                   <YAxis tick={{ fill: '#4a4a6a', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v.toFixed(0)}`} />
                   <Tooltip
-                    cursor={{ fill: '#ffffff08' }}
+                    cursor={{ stroke: '#2a2a3e', strokeDasharray: '4 4' }}
                     contentStyle={{ background: '#13131e', border: '1px solid #2a2a3e', borderRadius: 12 }}
                     labelStyle={{ color: '#e8e8f0', fontSize: 12 }}
-                    formatter={(v) => [`$${Number(v).toFixed(2)} USDC`, 'Revenue']}
+                    formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
                   />
-                  <Bar dataKey="revenue" fill="#00d97e" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                  <Area type="monotone" dataKey="revenue" stroke="#00d97e" strokeWidth={2} fill="url(#revGrad)" />
+                </AreaChart>
               </ResponsiveContainer>
             )}
-          </Card>
+          </Widget>
         </div>
 
         {/* Order funnel */}
-        <Card className="space-y-4">
-          <div>
-            <h2 className="text-sm font-bold text-[#e8e8f0]">Order Funnel</h2>
-            <p className="text-xs text-[#4a4a6a] mt-0.5">Where orders are in their lifecycle</p>
-          </div>
-          {analyticsLoading ? (
-            <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-9" />)}</div>
-          ) : funnel[0].count === 0 ? (
-            <div className="py-8 text-center text-sm text-[#7b7b9a]">No orders to chart yet.</div>
-          ) : (
-            <div className="space-y-3">
-              {funnel.map(({ label, count, color }) => (
-                <div key={label} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#7b7b9a]">{label}</span>
-                    <span className="font-bold text-[#e8e8f0] az-mono">{fmt(count, 0)}</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-[#0f0f17] overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all"
-                      style={{ width: `${Math.max((count / funnelMax) * 100, count > 0 ? 4 : 0)}%`, background: color }}
-                    />
-                  </div>
+        <Widget title="Order Funnel" subtitle="Lifecycle progression" icon={Package} iconColor="#4f8ef7" loading={analyticsLoading}>
+          <div className="space-y-3 pt-2">
+            {funnel.map(stage => (
+              <div key={stage.label}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-[#7b7b9a]">{stage.label}</span>
+                  <span className="text-xs font-bold text-[#e8e8f0] az-mono">{stage.count}</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </Card>
+                <div className="h-2 rounded-full bg-[#1e1e2e] overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${(stage.count / funnelMax) * 100}%`, background: stage.color }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Widget>
       </div>
 
-      {/* Recent orders + quick links */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Recent orders */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-[#e8e8f0]">Recent Orders</h2>
-            <Link to="/orders" className="text-xs text-[#00d97e] hover:underline">See all</Link>
-          </div>
-
-          <Card className="p-0 overflow-hidden">
-            {recentLoading ? (
-              <div className="p-5 space-y-3">
-                {[1,2,3].map(i => <Skeleton key={i} className="h-14" />)}
-              </div>
-            ) : recent.length === 0 ? (
-              <Empty
-                icon={ShoppingBag}
-                title="No orders yet"
-                description="When customers place orders with your business, they'll appear here."
-              />
-            ) : (
-              <div className="divide-y divide-[#1e1e2e]">
-                {recent.map(order => {
-                  const meta = ORDER_STATUS_META[order.status] || ORDER_STATUS_META.AWAITING_PAYMENT;
+      {/* ── Transit-specific: upcoming trips widget ────────────────────────── */}
+      {typeConfig.type === 'TRANSIT' && trips.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Widget title="Upcoming Trips" subtitle="Next departures" icon={Route} iconColor="#4f8ef7">
+            <div className="space-y-0 max-h-[240px] overflow-y-auto">
+              {trips
+                .filter(t => ['SCHEDULED', 'BOARDING'].includes(t.status))
+                .sort((a, b) => new Date(a.departureTime) - new Date(b.departureTime))
+                .slice(0, 5)
+                .map(trip => {
+                  const booked = trip.bookedSeats || 0;
+                  const total = trip.totalSeats || 0;
+                  const pct = total > 0 ? (booked / total) * 100 : 0;
                   return (
-                    <Link
-                      key={order.id}
-                      to={`/orders/${order.id}`}
-                      className="flex items-center gap-4 px-5 py-4 hover:bg-[#0f0f17] transition-colors"
-                    >
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                        style={{ background: meta.bg, color: meta.color }}
-                      >
-                        {order.orderRef?.slice(-4) || '#'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-[#e8e8f0] truncate">{order.title}</p>
-                        <p className="text-xs text-[#4a4a6a] mt-0.5">
-                          {order.customer?.username || 'Customer'} · {relativeTime(order.createdAt)}
-                        </p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-bold text-[#e8e8f0] az-mono">{fmtUSDC(order.amountUsdc)}</p>
-                        <Badge color={meta.color} bg={meta.bg} className="mt-1">{meta.label}</Badge>
-                      </div>
-                    </Link>
+                    <WidgetRow
+                      key={trip.id}
+                      label={trip.routeName}
+                      value={`${booked}/${total}`}
+                      badge={<Badge color={pct > 80 ? '#f59e0b' : '#00d97e'}>{pct > 80 ? 'Filling Up' : 'Available'}</Badge>}
+                      onClick={() => window.location.href = '/transit'}
+                    />
                   );
                 })}
-              </div>
-            )}
-          </Card>
+            </div>
+          </Widget>
+
+          {/* Recent check-ins for transit */}
+          <Widget title="Recent Check-Ins" subtitle="Passenger activity" icon={QrCode} iconColor="#00d97e">
+            <div className="space-y-0">
+              <WidgetRow label="Checked in today" value={fmt(checkInStats.todayCount || 0, 0)} badge={<Badge color="#00d97e">Today</Badge>} />
+              <WidgetRow label="Pending" value={fmt(checkInStats.pending || 0, 0)} badge={<Badge color="#f59e0b">Waiting</Badge>} />
+              <WidgetRow label="No-shows" value={fmt(checkInStats.noShows || 0, 0)} badge={<Badge color="#f43f5e">Today</Badge>} />
+              <WidgetRow label="Total guests" value={fmt(checkInStats.totalGuests || 0, 0)} badge={<Badge color="#4f8ef7">All time</Badge>} />
+            </div>
+          </Widget>
         </div>
+      )}
 
-        {/* Quick actions */}
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold text-[#e8e8f0]">Quick Actions</h2>
-          {[
-            { icon: Package,   label: 'Add a Product',     sub: 'List something new',           to: '/products', color: '#4f8ef7' },
-            { icon: ShoppingBag, label: 'View Orders',     sub: 'Track incoming deals',         to: '/orders',   color: '#00d97e' },
-            { icon: FileCheck, label: 'Business Verification', sub: `Status: ${kybMeta.label}`, to: '/kyb',      color: kybMeta.color },
-          ].map(({ icon: Icon, label, sub, to, color }) => (
-            <Link key={to} to={to}>
-              <Card hover className="flex items-center gap-4 !p-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}1a`, border: `1px solid ${color}30` }}>
-                  <Icon className="w-5 h-5" style={{ color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#e8e8f0]">{label}</p>
-                  <p className="text-xs text-[#4a4a6a]">{sub}</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-[#4a4a6a] flex-shrink-0" />
-              </Card>
-            </Link>
-          ))}
+      {/* ── Reservation-specific widgets ──────────────────────────────────── */}
+      {['RESTAURANT', 'HOTEL', 'SERVICES'].includes(typeConfig.type) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Widget title="Reservation Summary" subtitle="By status" icon={CalendarCheck} iconColor="#a78bfa">
+            <div className="space-y-0">
+              <WidgetRow label="Pending" value={fmt(resStats.pending || 0, 0)} badge={<Badge color="#f59e0b">Action needed</Badge>} />
+              <WidgetRow label="Confirmed" value={fmt(resStats.confirmed || 0, 0)} badge={<Badge color="#4f8ef7">Upcoming</Badge>} />
+              <WidgetRow label="Checked In" value={fmt(resStats.checkedIn || 0, 0)} badge={<Badge color="#00d97e">Today</Badge>} />
+              <WidgetRow label="No-Shows" value={fmt(resStats.noShows || 0, 0)} badge={<Badge color="#f43f5e">Penalized</Badge>} />
+            </div>
+          </Widget>
 
-          {/* Disputed orders warning */}
-          {stats.disputedOrders > 0 && (
-            <Link to="/orders?status=DISPUTED">
-              <div className="flex items-center gap-3 p-4 rounded-2xl border border-[#f43f5e40] bg-[#f43f5e1a] hover:bg-[#f43f5e25] transition-colors">
-                <AlertTriangle className="w-5 h-5 text-[#f43f5e] flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-[#f43f5e]">{stats.disputedOrders} Disputed Order{stats.disputedOrders > 1 ? 's' : ''}</p>
-                  <p className="text-xs text-[#7b7b9a]">Requires your attention</p>
-                </div>
-              </div>
-            </Link>
+          <Widget title="Check-In Activity" subtitle="Today" icon={QrCode} iconColor="#00d97e">
+            <div className="space-y-0">
+              <WidgetRow label="Checked in" value={fmt(checkInStats.todayCount || 0, 0)} badge={<Badge color="#00d97e">Today</Badge>} />
+              <WidgetRow label="Pending" value={fmt(checkInStats.pending || 0, 0)} badge={<Badge color="#f59e0b">Waiting</Badge>} />
+              <WidgetRow label="No-shows" value={fmt(checkInStats.noShows || 0, 0)} badge={<Badge color="#f43f5e">Today</Badge>} />
+              <WidgetRow label="Total guests" value={fmt(checkInStats.totalGuests || 0, 0)} badge={<Badge color="#4f8ef7">All time</Badge>} />
+            </div>
+          </Widget>
+        </div>
+      )}
+
+      {/* ── Reviews widget (all types) ────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Widget title="Customer Rating" icon={Star} iconColor="#f59e0b">
+          <div className="flex items-center gap-3">
+            <WidgetStat value={fmt(reviewStats.avgRating || 0, 1)} color="#f59e0b" />
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map(s => (
+                <Star key={s} className={cn('w-4 h-4', s <= Math.round(reviewStats.avgRating || 0) ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-[#2a2a3e]')} />
+              ))}
+            </div>
+          </div>
+          <p className="text-[11px] text-[#4a4a6a] mt-2">{reviewStats.total || 0} reviews</p>
+        </Widget>
+
+        <Widget title="Stories Promoted" icon={Sparkles} iconColor="#a78bfa">
+          <WidgetStat value={fmt(reviewStats.storiesPromoted || 0, 0)} label="From reviews" color="#a78bfa" />
+        </Widget>
+
+        {/* Recent orders widget */}
+        <Widget title="Recent Orders" subtitle="Latest activity" icon={ShoppingBag} iconColor="#4f8ef7" loading={recentLoading}>
+          {recent.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full min-h-[80px] text-center">
+              <p className="text-xs text-[#7b7b9a]">No orders yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-0 max-h-[160px] overflow-y-auto">
+              {recent.map(o => {
+                const meta = ORDER_STATUS_META[o.status] || {};
+                return (
+                  <WidgetRow
+                    key={o.id}
+                    label={o.azamanId || o.reference || `#${o.id.slice(-6)}`}
+                    value={o.amountUsdc ? fmtUSDC(o.amountUsdc) : '—'}
+                    badge={<Badge color={meta.color}>{meta.label}</Badge>}
+                  />
+                );
+              })}
+            </div>
           )}
-        </div>
+        </Widget>
       </div>
     </div>
   );

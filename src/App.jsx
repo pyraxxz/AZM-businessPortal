@@ -14,6 +14,10 @@ import KYB from '@/pages/KYB';
 import Settings from '@/pages/Settings';
 import Notifications from '@/pages/Notifications';
 import Onboarding from '@/pages/Onboarding';
+import TransitTrips from '@/pages/TransitTrips';
+import Reservations from '@/pages/Reservations';
+import CheckIn from '@/pages/CheckIn';
+import Reviews from '@/pages/Reviews';
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -69,6 +73,12 @@ function AppRoutes() {
         <Route path="/kyb"            element={<KYB />} />
         <Route path="/notifications"  element={<Notifications />} />
         <Route path="/settings"       element={<Settings />} />
+        
+        {/* Marketplace Routes */}
+        <Route path="/transit"        element={<TransitTrips />} />
+        <Route path="/reservations"   element={<Reservations />} />
+        <Route path="/checkin"        element={<CheckIn />} />
+        <Route path="/reviews"        element={<Reviews />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
