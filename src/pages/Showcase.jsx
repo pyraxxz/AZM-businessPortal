@@ -1,10 +1,22 @@
+import { useAuth } from '@/lib/AuthContext';
 // src/pages/Showcase.jsx
 import { useState, useEffect } from 'react';
 import { Image as ImageIcon, Upload, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { marketplaceApi } from '../lib/marketplaceApi';
 import { uploadImageToCloudinary } from '../lib/cloudinary';
 
-export default function Showcase({ businessId }) {
+export default function Showcase() {
+  const { bizProfile, isAdmin, selectedBusinessId } = useAuth();
+  const businessId = bizProfile?.id;
+
+  if (!businessId) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
+        {isAdmin ? "Select a business from the sidebar dropdown to view." : "No business profile found."}
+      </div>
+    );
+  }
+
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);

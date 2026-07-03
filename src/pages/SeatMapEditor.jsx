@@ -1,3 +1,4 @@
+import { useAuth } from '@/lib/AuthContext';
 // src/pages/SeatMapEditor.jsx
 // =============================================================================
 // Visual seat map editor — click grid cells to toggle: SEAT, AISLE, DRIVER, EMPTY
@@ -18,7 +19,18 @@ const CELL_TYPES = {
 const MAX_ROWS = 15;
 const MAX_COLS = 8;
 
-export default function SeatMapEditor({ businessId, tripId }) {
+export default function SeatMapEditor({ tripId }) {
+  const { bizProfile, isAdmin, selectedBusinessId } = useAuth();
+  const businessId = bizProfile?.id;
+
+  if (!businessId) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
+        {isAdmin ? "Select a business from the sidebar dropdown to view." : "No business profile found."}
+      </div>
+    );
+  }
+
   const [rows, setRows] = useState(5);
   const [cols, setCols] = useState(4);
   const [grid, setGrid] = useState([]);

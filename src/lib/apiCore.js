@@ -7,12 +7,14 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export async function request(path, options = {}) {
   const token = localStorage.getItem('biz_token');
+  const adminBizId = localStorage.getItem('admin_selected_biz');
   const isLoginCall = path.startsWith('/api/auth/login');
 
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(adminBizId ? { 'x-admin-business-id': adminBizId } : {}),
       ...options.headers,
     },
     ...options,

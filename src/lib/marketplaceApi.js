@@ -1,11 +1,5 @@
-/**
- * Azaman Business Portal — Marketplace API layer
- * Extends the core API with transit, reservation, check-in, and review endpoints.
- * All calls go through the same authenticated request() as the core api.js.
- */
 import { request } from './apiCore';
 
-// ── Transit Trips ───────────────────────────────────────────────────────────
 export const transit = {
   list: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
@@ -15,16 +9,11 @@ export const transit = {
   create: (data) => request('/api/business/transit/trips', { method: 'POST', body: JSON.stringify(data) }),
   update: (id, data) => request(`/api/business/transit/trips/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   remove: (id) => request(`/api/business/transit/trips/${id}`, { method: 'DELETE' }),
-  // Seat map
   getSeatMap: (tripId) => request(`/api/business/transit/trips/${tripId}/seats`),
   updateSeatMap: (tripId, seats) => request(`/api/business/transit/trips/${tripId}/seats`, { method: 'PUT', body: JSON.stringify({ seats }) }),
-  // Bookings for a trip
   bookings: (tripId) => request(`/api/business/transit/trips/${tripId}/bookings`),
-
 };
 
-
-// ── Reservations ────────────────────────────────────────────────────────────
 export const reservations = {
   list: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
@@ -35,11 +24,8 @@ export const reservations = {
   cancel: (id, reason) => request(`/api/business/reservations/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) }),
   markNoShow: (id) => request(`/api/business/reservations/${id}/no-show`, { method: 'POST' }),
   stats: () => request('/api/business/reservations/stats'),
-
 };
 
-
-// ── Check-In ────────────────────────────────────────────────────────────────
 export const checkIn = {
   verifyToken: (token) => request('/api/marketplace/checkin/verify', { method: 'POST', body: JSON.stringify({ token }) }),
   searchByAzamanId: (azamanId) => request(`/api/marketplace/checkin/search?azamanId=${encodeURIComponent(azamanId)}`),
@@ -49,11 +35,8 @@ export const checkIn = {
     const qs = new URLSearchParams(params).toString();
     return request(`/api/business/checkin/recent${qs ? `?${qs}` : ''}`);
   },
-
 };
 
-
-// ── Reviews & Stories ───────────────────────────────────────────────────────
 export const reviews = {
   list: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
@@ -65,38 +48,70 @@ export const reviews = {
     const qs = new URLSearchParams(params).toString();
     return request(`/api/business/stories${qs ? `?${qs}` : ''}`);
   },
-
 };
 
-
-// ── Marketplace Stats (aggregate dashboard) ─────────────────────────────────
 export const marketplaceStats = {
   overview: () => request('/api/business/marketplace/stats'),
-
 };
 
-
-
 export const marketplaceApi = {
-  openDineInTab: (bizId, azmId) => request(`/api/business-market/${bizId}/dine-in/open`, { method: "POST", body: JSON.stringify({ azmId }) }),
-  finalizeDineInTab: (tabId, items) => request(`/api/business-market/dine-in/${tabId}/finalize`, { method: "POST", body: JSON.stringify({ items }) }),
-  getGuests: (bizId) => request(`/api/business-market/${bizId}/guests`),
-  searchGuest: (bizId, query) => request(`/api/business-market/${bizId}/guests/search?q=${query}`),
-  getFollowerStats: (bizId) => request(`/api/business-market/${bizId}/followers/stats`),
-  getAdPosts: (bizId) => request(`/api/business-market/${bizId}/ads`),
-  createAdPost: (bizId, data) => request(`/api/business-market/${bizId}/ads`, { method: "POST", body: JSON.stringify(data) }),
-  getFinanceStats: (bizId) => request(`/api/business-market/${bizId}/finance/stats`),
-  getFinanceTransactions: (bizId) => request(`/api/business-market/${bizId}/finance/transactions`),
-  getShowcase: (bizId) => request(`/api/business-market/${bizId}/showcase`),
-  addShowcaseSlide: (bizId, data) => request(`/api/business-market/${bizId}/showcase`, { method: "POST", body: JSON.stringify(data) }),
-  removeShowcaseSlide: (bizId, slideId) => request(`/api/business-market/${bizId}/showcase/${slideId}`, { method: "DELETE" }),
-  reorderShowcase: (bizId, slides) => request(`/api/business-market/${bizId}/showcase/reorder`, { method: "PATCH", body: JSON.stringify({ slides }) }),
-  getSeatMap: (bizId, tripId) => request(`/api/business-market/${bizId}/transit/trips/${tripId}/seatmap`),
-  saveSeatMap: (bizId, tripId, layout) => request(`/api/business-market/${bizId}/transit/trips/${tripId}/seatmap`, { method: "PUT", body: JSON.stringify({ layout }) }),
-  getPenaltyPolicy: (bizId) => request(`/api/business-market/${bizId}/penalty-policy`),
-  updatePenaltyPolicy: (bizId, data) => request(`/api/business-market/${bizId}/penalty-policy`, { method: "PUT", body: JSON.stringify(data) }),
-  counterProposeReservation: (bizId, resId, data) => request(`/api/business-market/${bizId}/reservations/${resId}/counter-propose`, { method: "POST", body: JSON.stringify(data) }),
-  acceptCounterProposal: (bizId, resId) => request(`/api/business-market/${bizId}/reservations/${resId}/accept-counter`, { method: "POST" }),
-  getKybStatus: (bizId) => request(`/api/business-market/${bizId}/kyb`),
-  submitKyb: (bizId, docs) => request(`/api/business-market/${bizId}/kyb/submit`, { method: "POST", body: JSON.stringify({ documents: docs }) })
+  // ── Dine-In (uses /api/dine-in/tabs) ─────────────────────────────────────
+  openDineInTab: (businessProfileId, customerAzamanId) =>
+    request('/api/dine-in/tabs', { method: "POST", body: JSON.stringify({ businessProfileId, customerAzamanId }) }),
+
+  addDineInItem: (tabId, { productId, name, unitPriceUsdc, quantity }) =>
+    request(`/api/dine-in/tabs/${tabId}/items`, { method: "POST", body: JSON.stringify({ productId, name, unitPriceUsdc, quantity }) }),
+
+  finalizeDineInTab: (tabId, { taxRatePct, tipUsdc }) =>
+    request(`/api/dine-in/tabs/${tabId}/finalize`, { method: "POST", body: JSON.stringify({ taxRatePct, tipUsdc }) }),
+
+  getDineInTab: (tabId) => request(`/api/dine-in/tabs/${tabId}`),
+  getOpenTabs: () => request('/api/dine-in/tabs'),
+  confirmDineInTab: (tabId) => request(`/api/dine-in/tabs/${tabId}/pay`, { method: "POST", body: JSON.stringify({}) }),
+  reportDineInDefault: (tabId, reason) => request(`/api/dine-in/tabs/${tabId}/default`, { method: "POST", body: JSON.stringify({ reason }) }),
+
+  // ── Guests (uses /api/dine-in/guests) ────────────────────────────────────
+  getGuests: () => request('/api/dine-in/guests'),
+  searchGuest: (query) => request(`/api/dine-in/guests/search?q=${encodeURIComponent(query)}`),
+
+  // ── Ad Posts (uses /api/ad-posts) ─────────────────────────────────────────
+  getAdPosts: (businessProfileId) => request(`/api/ad-posts/active/${businessProfileId}`),
+  createAdPost: (data) => request('/api/ad-posts', { method: "POST", body: JSON.stringify(data) }),
+  deleteAdPost: (adPostId) => request(`/api/ad-posts/${adPostId}`, { method: "DELETE" }),
+  getAdFeed: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/ad-posts/feed${qs ? `?${qs}` : ''}`);
+  },
+
+  // ── Showcase (uses /api/showcases) ────────────────────────────────────────
+  getShowcase: (businessProfileId) => request(`/api/showcases/${businessProfileId}`),
+  addShowcaseSlide: (data) => request('/api/showcases', { method: "POST", body: JSON.stringify(data) }),
+  updateShowcaseSlide: (slideId, data) => request(`/api/showcases/${slideId}`, { method: "PATCH", body: JSON.stringify(data) }),
+  removeShowcaseSlide: (slideId) => request(`/api/showcases/${slideId}`, { method: "DELETE" }),
+  reorderShowcase: (slides) => request('/api/showcases/reorder', { method: "POST", body: JSON.stringify({ slides }) }),
+
+  // ── Follows (uses /api/follows) ───────────────────────────────────────────
+  followBusiness: (businessProfileId) => request('/api/follows', { method: "POST", body: JSON.stringify({ businessProfileId }) }),
+  unfollowBusiness: (businessProfileId) => request(`/api/follows/${businessProfileId}`, { method: "DELETE" }),
+  checkFollowing: (businessProfileId) => request(`/api/follows/check/${businessProfileId}`),
+  getMyFollowing: () => request('/api/follows/following'),
+  getMyFollowers: () => request('/api/follows/followers'),
+
+  // ── Finance (uses /api/marketplace-finance) ──────────────────────────────
+  getFinanceStats: () => request('/api/marketplace-finance/stats'),
+  getFinanceTransactions: () => request('/api/marketplace-finance/transactions'),
+
+  // ── Seat Map (uses /api/marketplace-seat-map) ─────────────────────────────
+  getSeatMap: (tripId) => request(`/api/marketplace-seat-map/${tripId}`),
+  saveSeatMap: (tripId, layout) => request(`/api/marketplace-seat-map/${tripId}`, { method: "PUT", body: JSON.stringify({ layout }) }),
+
+  // ── Penalty Policy (uses /api/marketplace-penalty) ────────────────────────
+  getPenaltyPolicy: () => request('/api/marketplace-penalty'),
+  updatePenaltyPolicy: (data) => request('/api/marketplace-penalty', { method: "PUT", body: JSON.stringify(data) }),
+
+  // ── Reservations: counter-propose (uses existing reservation routes) ──────
+  counterProposeReservation: (resId, data) =>
+    request(`/api/business/reservations/${resId}/counter-propose`, { method: "POST", body: JSON.stringify(data) }),
+  acceptCounterProposal: (resId) =>
+    request(`/api/business/reservations/${resId}/accept-counter`, { method: "POST" }),
 };
