@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { business as businessApi, locations as locApi } from '@/lib/api';
+import { marketplaceApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, Button, Input, Textarea, Select, Badge } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
@@ -42,6 +43,17 @@ export default function Settings() {
   });
   const [saved, setSaved] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  const [penaltyPolicy, setPenaltyPolicy] = useState(null);
+  const [penaltyLoading, setPenaltyLoading] = useState(false);
+
+  useEffect(() => {
+      if (bizProfile?.id) {
+          marketplaceApi.getPenaltyPolicy(bizProfile.id)
+              .then(data => setPenaltyPolicy(data.policy))
+              .catch(() => {});
+      }
+  }, [bizProfile?.id]);
 
   const { data: locsData } = useQuery({
     queryKey: ['biz-locations'],
@@ -267,6 +279,78 @@ export default function Settings() {
         </div>
       </Card>
 
+      <Card className="space-y-4">
+        <div>
+            <h3 className="text-sm font-bold text-[#e8e8f0]">Penalty Policy</h3>
+            <p className="text-xs text-[#7b7b9a] mt-1">
+                Configure how no-shows are penalized for your business.
+            </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">Customer Penalty %</label>
+                <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    step="1"
+                    value={penaltyPolicy?.customerPenaltyPct ? Number(penaltyPolicy.customerPenaltyPct) * 100 : 10}
+                    onChange={(e) => setPenaltyPolicy({
+                        ...penaltyPolicy,
+                        customerPenaltyPct: Number(e.target.value) / 100,
+                    })}
+                    className="w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2 text-sm text-[#e8e8f0] focus:border-[#00d97e] outline-none"
+                />
+            </div>
+            <div>
+                <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">Business Penalty %</label>
+                <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    step="1"
+                    value={penaltyPolicy?.businessPenaltyPct ? Number(penaltyPolicy.businessPenaltyPct) * 100 : 10}
+                    onChange={(e) => setPenaltyPolicy({
+                        ...penaltyPolicy,
+                        businessPenaltyPct: Number(e.target.value) / 100,
+                    })}
+                    className="w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2 text-sm text-[#e8e8f0] focus:border-[#00d97e] outline-none"
+                />
+            </div>
+            <div>
+                <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">Grace Period (mins)</label>
+                <input
+                    type="number"
+                    min="0"
+                    step="5"
+                    value={penaltyPolicy?.gracePeriodMins || 30}
+                    onChange={(e) => setPenaltyPolicy({
+                        ...penaltyPolicy,
+                        gracePeriodMins: Number(e.target.value),
+                    })}
+                    className="w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2 text-sm text-[#e8e8f0] focus:border-[#00d97e] outline-none"
+                />
+            </div>
+        </div>
+        <Button
+            onClick={async () => {
+                setPenaltyLoading(true);
+                try {
+                    await marketplaceApi.updatePenaltyPolicy(bizProfile.id, penaltyPolicy);
+                    toast.success('Penalty policy updated.');
+                } catch (e) {
+                    toast.error(e.message);
+                } finally {
+                    setPenaltyLoading(false);
+                }
+            }}
+            loading={penaltyLoading}
+            variant="outline"
+        >
+            Save Penalty Policy
+        </Button>
+      </Card>
+
       <PublicProfilePreview
         open={showPreview}
         onClose={() => setShowPreview(false)}
@@ -275,5 +359,3 @@ export default function Settings() {
     </div>
   );
 }
-
-// Penalty Policy settings logic applied via standalone section... (skipping complex JSX manipulation for brevity as UI might differ)

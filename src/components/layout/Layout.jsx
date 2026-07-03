@@ -5,12 +5,12 @@ import { useAuth } from '@/lib/AuthContext';
 import { KYB_STATUS_META } from '@/lib/utils';
 import { useBizNotifications } from '@/hooks/useBizNotifications';
 import { getTypeConfig, MARKETPLACE_NAV } from '@/lib/businessTypes';
-import { LayoutDashboard, Calendar, Package, ShoppingBag, ScanLine, Utensils, Users, Star, Image, Grid3x3, Megaphone, Wallet, Receipt, Settings, Menu, X, Bell, LogOut, ChevronDown, Building2, MapPin } from 'lucide-react';
+import { LayoutDashboard, Calendar, Package, ShoppingBag, ScanLine, Utensils, Users, Star, Image as ImageIcon, Grid3x3, Megaphone, Wallet, Receipt, Settings, Menu, X, Bell, LogOut, ChevronDown, ChevronRight, ChevronLeft, Building2, MapPin, Bus, UtensilsCrossed, Briefcase, Store, CalendarCheck, QrCode, BedDouble, FileCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
 // Icon mapping for business types
 const TYPE_ICONS = {
-  Bus, UtensilsCrossed, Building2, ShoppingIcon, Briefcase, Store,
+  Bus, UtensilsCrossed, Building2, ShoppingBag, Briefcase, Store,
 };
 
 // Icon mapping for marketplace nav items
@@ -21,6 +21,12 @@ const NAV_ICONS = {
   reviews: Star,
   tables: MapPin,
   rooms: BedDouble,
+  dineIn: Utensils,
+  marketing: Megaphone,
+  finance: Wallet,
+  showcase: ImageIcon,
+  seatMap: Grid3x3,
+  guests: Users,
 };
 
 const BASE_NAV = [
@@ -42,11 +48,15 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { bizProfile, user, logout } = useAuth();
+  const { bizProfile, user, logout, isAdmin, adminBusinesses, selectedBusinessId, selectBusiness } = useAuth();
 
   useBizNotifications();
 
-  const typeConfig = getTypeConfig(bizProfile);
+  // If admin and no business selected, show ALL nav items
+  const typeConfig = isAdmin && !selectedBusinessId
+      ? { label: 'Admin View-All Mode', icon: 'Store', navItems: [], color: '#f43f5e' }
+      : getTypeConfig(bizProfile);
+
   const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
   const TypeIcon = TYPE_ICONS[typeConfig.icon] || Store;
 
@@ -67,17 +77,37 @@ export default function Layout() {
       to: item.to,
     }));
 
+  // For admin: show ALL marketplace nav items (union of all types)
+  const adminAllNavItems = isAdmin ? [
+      { label: 'Transit Trips',    icon: Bus,           to: '/transit' },
+      { label: 'Reservations',     icon: CalendarCheck,  to: '/reservations' },
+      { label: 'Check-In',         icon: QrCode,         to: '/checkin' },
+      { label: 'Dine-In Tabs',     icon: Utensils,       to: '/dine-in' },
+      { label: 'Marketing',        icon: Megaphone,      to: '/marketing' },
+      { label: 'Finance',          icon: Wallet,         to: '/finance' },
+      { label: 'Showcase',         icon: ImageIcon,      to: '/showcase' },
+      { label: 'Seat Map Editor',  icon: Grid3x3,        to: '/seat-map' },
+      { label: 'Guests',           icon: Users,          to: '/guests' },
+      { label: 'Reviews',          icon: Star,           to: '/reviews' },
+  ] : [];
+
   // Group nav into sections
-  const sections = [
-    { label: 'Overview', items: BASE_NAV.slice(0, 1) }, // Dashboard
-    { label: 'Commerce', items: BASE_NAV.slice(1) },    // Orders, Products, Invoices, Locations
+  const sections = isAdmin ? [
+      { label: 'Admin Oversight', items: [{ label: 'Dashboard', icon: LayoutDashboard, to: '/' }] },
+      { label: 'All Business Tools', items: adminAllNavItems },
+      { label: 'Manage', items: BOTTOM_NAV },
+  ] : [
+      { label: 'Overview', items: BASE_NAV.slice(0, 1) }, // Dashboard
+      { label: 'Commerce', items: BASE_NAV.slice(1) },    // Orders, Products, Invoices, Locations
   ];
 
-  if (marketplaceNavItems.length > 0) {
+  if (!isAdmin && marketplaceNavItems.length > 0) {
     sections.splice(1, 0, { label: typeConfig.label, items: marketplaceNavItems });
   }
 
-  sections.push({ label: 'Manage', items: BOTTOM_NAV });
+  if (!isAdmin) {
+    sections.push({ label: 'Manage', items: BOTTOM_NAV });
+  }
 
   const renderNavItem = ({ label, icon: Icon, to }) => {
     const active = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
@@ -128,7 +158,7 @@ export default function Layout() {
         </div>
 
         {/* Business pill with type badge */}
-        {!collapsed && bizProfile && (
+        {!collapsed && bizProfile && !isAdmin && (
           <div className="mx-3 mt-3 p-3 rounded-xl border border-[#2a2a3e]" style={{ background: '#0a0a0f' }}>
             <div className="flex items-center gap-2.5">
               <div
@@ -145,6 +175,34 @@ export default function Layout() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Add admin business selector at the top of the sidebar: */}
+        {!collapsed && isAdmin && (
+            <div className="px-3 py-3 border-b border-[#13131e]">
+                <label className="text-xs text-[#7b7b9a] mb-1.5 block">Viewing as</label>
+                <select
+                    value={selectedBusinessId || ''}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        localStorage.setItem('admin_selected_biz', val);
+                        selectBusiness(val);
+                    }}
+                    className="w-full rounded-lg bg-[#13131e] px-3 py-2 text-sm text-[#e0e0f0] border border-[#252535]"
+                >
+                    <option value="">— Select a business —</option>
+                    {adminBusinesses.map(b => (
+                        <option key={b.id} value={b.id}>
+                            {b.businessName} ({b.category})
+                        </option>
+                    ))}
+                </select>
+                {selectedBusinessId && bizProfile && (
+                    <div className="mt-2 text-xs text-[#7b7b9a]">
+                        Type: {getTypeConfig(bizProfile).label} · KYB: {bizProfile.kybStatus}
+                    </div>
+                )}
+            </div>
         )}
 
         {/* Nav sections */}

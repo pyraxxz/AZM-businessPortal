@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { auth, business } from './api';
+import { auth, business, request } from './api';
 import { connectSocket, joinUserRoom, disconnectSocket } from './socket';
 
 /** Open the live socket and join the user's room. Safe to call repeatedly. */
@@ -19,6 +19,26 @@ export function AuthProvider({ children }) {
   const [bizProfile, setBizProfile] = useState(null);
   const [loading, setLoading]       = useState(true);
   const [authed, setAuthed]         = useState(false);
+
+  // Admin state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminBusinesses, setAdminBusinesses] = useState([]);
+  const [selectedBusinessId, setSelectedBusinessId] = useState(null);
+
+  const selectBusiness = useCallback(async (bizId) => {
+      if (!bizId) {
+          setSelectedBusinessId(null);
+          setBizProfile(null);
+          return;
+      }
+      try {
+          const data = await request(`/api/admin/marketplace-businesses/${bizId}`);
+          setBizProfile(data.business);
+          setSelectedBusinessId(bizId);
+      } catch (e) {
+          console.error('Failed to load business:', e);
+      }
+  }, []);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -45,6 +65,12 @@ export function AuthProvider({ children }) {
         const u = JSON.parse(cached);
         setUser(u); setAuthed(true);
         wireSocket(token, u?.id);
+        if (u.role === 'admin') {
+            setIsAdmin(true);
+            request('/api/admin/marketplace-businesses').then(data => {
+                setAdminBusinesses(data.businesses || []);
+            }).catch(() => {});
+        }
       } catch { /* ignore */ }
     }
 
@@ -84,7 +110,17 @@ export function AuthProvider({ children }) {
     // Go live: open the socket and join the owner's room.
     wireSocket(token, me?.id);
 
-    await loadProfile();
+    if (me.role === 'admin') {
+        setIsAdmin(true);
+        try {
+            const adminData = await request('/api/admin/marketplace-businesses');
+            setAdminBusinesses(adminData.businesses || []);
+        } catch (e) {
+            console.error('Failed to load admin businesses:', e);
+        }
+    } else {
+        await loadProfile();
+    }
     return me;
   }, [loadProfile]);
 
@@ -95,12 +131,18 @@ export function AuthProvider({ children }) {
     setUser(null);
     setBizProfile(null);
     setAuthed(false);
+    setIsAdmin(false);
+    setAdminBusinesses([]);
+    setSelectedBusinessId(null);
   }, []);
 
   const refreshProfile = useCallback(() => loadProfile(), [loadProfile]);
 
   return (
-    <AuthContext.Provider value={{ user, bizProfile, loading, authed, login, logout, refreshProfile }}>
+    <AuthContext.Provider value={{
+        user, bizProfile, loading, authed, login, logout, refreshProfile,
+        isAdmin, adminBusinesses, selectedBusinessId, selectBusiness
+    }}>
       {children}
     </AuthContext.Provider>
   );

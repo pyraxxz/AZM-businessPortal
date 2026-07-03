@@ -37,7 +37,7 @@ const qc = new QueryClient({
 });
 
 function AppRoutes() {
-  const { authed, loading, bizProfile } = useAuth();
+  const { authed, loading, bizProfile, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -60,7 +60,7 @@ function AppRoutes() {
   }
 
   // Authenticated but no business profile yet → onboarding
-  if (!bizProfile) {
+  if (!isAdmin && !bizProfile) {
     return (
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
@@ -87,6 +87,13 @@ function AppRoutes() {
         <Route path="/reservations"   element={<Reservations />} />
         <Route path="/checkin"        element={<CheckIn />} />
         <Route path="/reviews"        element={<Reviews />} />
+        
+        <Route path="/dine-in"        element={<DineIn />} />
+        <Route path="/guests"         element={<Guests />} />
+        <Route path="/marketing"      element={<Marketing />} />
+        <Route path="/finance"        element={<Finance />} />
+        <Route path="/seat-map"       element={<SeatMapEditor />} />
+        <Route path="/showcase"       element={<Showcase />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />

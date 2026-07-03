@@ -61,7 +61,70 @@ function computeFunnel(orders) {
 const TYPE_ICONS = { Bus, UtensilsCrossed, Building2, Briefcase, Store, ShoppingBag };
 
 export default function Dashboard() {
-  const { bizProfile } = useAuth();
+  const { isAdmin, adminBusinesses, bizProfile, selectedBusinessId, selectBusiness } = useAuth();
+
+  if (isAdmin && !selectedBusinessId) {
+      const grouped = adminBusinesses.reduce((acc, b) => {
+          (acc[b.category] = acc[b.category] || []).push(b);
+          return acc;
+      }, {});
+
+      return (
+          <div className="p-6 space-y-6 max-w-7xl mx-auto">
+              <header>
+                  <h1 className="text-2xl font-bold text-[#e8e8f0]">Marketplace Overview</h1>
+                  <p className="text-sm text-[#7b7b9a] mt-1">Select a business from the sidebar to manage their portal.</p>
+              </header>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Widget className="p-4">
+                      <p className="text-xs text-[#7b7b9a] font-semibold uppercase">Total</p>
+                      <p className="text-2xl font-bold text-[#e8e8f0] mt-1">{adminBusinesses.length}</p>
+                  </Widget>
+                  <Widget className="p-4">
+                      <p className="text-xs text-[#7b7b9a] font-semibold uppercase">Restaurants</p>
+                      <p className="text-2xl font-bold text-[#e8e8f0] mt-1">{grouped['FOOD_BEVERAGE']?.length || 0}</p>
+                  </Widget>
+                  <Widget className="p-4">
+                      <p className="text-xs text-[#7b7b9a] font-semibold uppercase">Hotels</p>
+                      <p className="text-2xl font-bold text-[#e8e8f0] mt-1">{grouped['REAL_ESTATE']?.length || 0}</p>
+                  </Widget>
+                  <Widget className="p-4">
+                      <p className="text-xs text-[#7b7b9a] font-semibold uppercase">Transit</p>
+                      <p className="text-2xl font-bold text-[#e8e8f0] mt-1">{grouped['LOGISTICS']?.length || 0}</p>
+                  </Widget>
+              </div>
+
+              {Object.entries(grouped).map(([category, businesses]) => (
+                  <div key={category} className="space-y-3">
+                      <h2 className="text-sm font-bold text-[#e8e8f0] uppercase tracking-wider">{category}</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {businesses.map(b => (
+                              <button
+                                  key={b.id}
+                                  onClick={() => {
+                                      localStorage.setItem('admin_selected_biz', b.id);
+                                      selectBusiness(b.id);
+                                  }}
+                                  className="text-left rounded-xl border border-[#252535] bg-[#13131e] hover:bg-[#1a1a2e] hover:border-[#00d97e50] p-4 transition-all"
+                              >
+                                  <p className="text-sm font-bold text-[#e8e8f0] truncate">{b.businessName}</p>
+                                  <p className="text-xs text-[#7b7b9a] mt-1 truncate">ID: {b.azamanId || b.bizId}</p>
+                                  <div className="flex gap-2 mt-3">
+                                      <Badge variant={b.kybStatus === 'VERIFIED' ? 'success' : 'secondary'}>{b.kybStatus}</Badge>
+                                      {b._count && (
+                                          <Badge variant="outline">{b._count.orders || 0} orders</Badge>
+                                      )}
+                                  </div>
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+              ))}
+          </div>
+      );
+  }
+
   const typeConfig = getTypeConfig(bizProfile);
   const TypeIcon = TYPE_ICONS[typeConfig.icon] || Store;
 

@@ -37,6 +37,11 @@ export default function Reservations() {
   const [cancelFor, setCancelFor] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
 
+  // Counter-propose state
+  const [showCounterModal, setShowCounterModal] = useState(null);
+  const [proposedTime, setProposedTime] = useState('');
+  const [counterNote, setCounterNote] = useState('');
+
   const { data: resData, isLoading } = useQuery({
     queryKey: ['reservations', statusFilter],
     queryFn: () => resApi.list({ status: statusFilter !== 'all' ? statusFilter : undefined }),
@@ -131,14 +136,22 @@ export default function Reservations() {
       render: (r) => (
         <div className="flex items-center gap-1">
           {r.status === 'PENDING' && (
-            <button
-              onClick={(e) => { e.stopPropagation(); confirmMut.mutate(r.id); }}
-              disabled={confirmMut.isPending}
-              className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#00d97e] transition-colors"
-              title="Confirm"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-            </button>
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); confirmMut.mutate(r.id); }}
+                disabled={confirmMut.isPending}
+                className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#00d97e] transition-colors"
+                title="Confirm"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowCounterModal(r.id); }}
+                className="rounded-md bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-600 hover:bg-amber-500/20"
+              >
+                Counter-Propose
+              </button>
+            </>
           )}
           {r.status === 'CONFIRMED' && (
             <button
@@ -251,6 +264,56 @@ export default function Reservations() {
           </div>
         </div>
       </Modal>
+
+      {/* Counter-Propose Modal */}
+      {showCounterModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-[400px] rounded-xl bg-white p-6 dark:bg-[#13131e] border border-[#252535] shadow-2xl">
+            <h2 className="mb-4 text-xl font-bold text-[#e8e8f0]">Propose Alternative Time</h2>
+            <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">New Date & Time</label>
+            <input
+              type="datetime-local"
+              value={proposedTime}
+              onChange={(e) => setProposedTime(e.target.value)}
+              className="mb-4 w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2.5 text-[#e8e8f0] focus:border-[#00d97e] outline-none"
+            />
+            <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">Note to customer (optional)</label>
+            <textarea
+              value={counterNote}
+              onChange={(e) => setCounterNote(e.target.value)}
+              className="mb-6 w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2.5 text-[#e8e8f0] focus:border-[#00d97e] outline-none resize-none"
+              rows={3}
+              placeholder="e.g. We are fully booked at that time, but can accommodate you earlier."
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  try {
+                    await resApi.counterPropose(showCounterModal, {
+                      proposedStartDatetime: new Date(proposedTime).toISOString(),
+                      businessNotes: counterNote,
+                    });
+                    setShowCounterModal(null);
+                    qc.invalidateQueries(['reservations']);
+                    toast.success('Counter proposal sent!');
+                  } catch (e) {
+                    toast.error(e.message);
+                  }
+                }}
+                className="flex-1 rounded-xl bg-[#00d97e] py-2.5 font-bold text-[#0a0a0f] hover:bg-[#00c572] transition-colors"
+              >
+                Send Proposal
+              </button>
+              <button
+                onClick={() => setShowCounterModal(null)}
+                className="flex-1 rounded-xl border border-[#252535] bg-transparent py-2.5 font-bold text-[#e8e8f0] hover:bg-[#1e1e2e] transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
