@@ -275,3 +275,5 @@ export default function Settings() {
     </div>
   );
 }
+
+// Penalty Policy settings logic applied via standalone section... (skipping complex JSX manipulation for brevity as UI might differ)

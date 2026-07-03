@@ -11,6 +11,11 @@ import {
   Store, Building2, CheckCircle2, AlertCircle, Bell,
   Receipt, MapPin, Star, Bus, CalendarCheck, QrCode,
   Users, UtensilsCrossed, BedDouble, Briefcase, ShoppingBag as ShoppingIcon,
+  ScanLine,
+  Image,
+  Grid3x3,
+  Megaphone,
+  Wallet,
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
