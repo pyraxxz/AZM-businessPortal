@@ -1,4 +1,3 @@
-Waiter/management tool for the dine-in flow: search by AZM-ID to open a tab, add items from the menu, build the bill, finalize and send to customer phone for confirmation.
 // src/pages/DineIn.jsx
 // =============================================================================
 // DINE-IN MANAGEMENT — Waiter takes AZM-ID, opens tab, adds items, finalizes
@@ -184,3 +183,5 @@ export default function DineIn({ businessId, products }) {
     </div>
   );
 }
+
+

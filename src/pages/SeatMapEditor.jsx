@@ -1,4 +1,3 @@
-Visual grid-based seat map editor for transit businesses. Click cells to toggle seats/aisles/driver. Simple enough for non-technical operators. Replaces raw JSON editing.
 // src/pages/SeatMapEditor.jsx
 // =============================================================================
 // Visual seat map editor — click grid cells to toggle: SEAT, AISLE, DRIVER, EMPTY
@@ -169,3 +168,5 @@ export default function SeatMapEditor({ businessId, tripId }) {
     </div>
   );
 }
+
+

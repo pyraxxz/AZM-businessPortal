@@ -5,18 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { KYB_STATUS_META } from '@/lib/utils';
 import { useBizNotifications } from '@/hooks/useBizNotifications';
 import { getTypeConfig, MARKETPLACE_NAV } from '@/lib/businessTypes';
-import {
-  LayoutDashboard, Package, ShoppingBag, FileCheck,
-  Settings, LogOut, ChevronLeft, ChevronRight,
-  Store, Building2, CheckCircle2, AlertCircle, Bell,
-  Receipt, MapPin, Star, Bus, CalendarCheck, QrCode,
-  Users, UtensilsCrossed, BedDouble, Briefcase, ShoppingBag as ShoppingIcon,
-  ScanLine,
-  Image,
-  Grid3x3,
-  Megaphone,
-  Wallet,
-} from 'lucide-react';
+import { LayoutDashboard, Calendar, Package, ShoppingBag, ScanLine, Utensils, Users, Star, Image, Grid3x3, Megaphone, Wallet, Receipt, Settings, Menu, X, Bell, LogOut, ChevronDown, Building2, MapPin } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
 // Icon mapping for business types

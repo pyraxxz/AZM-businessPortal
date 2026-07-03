@@ -1,4 +1,3 @@
-Structured ad composer with 4 templates (PROMO, NEW_ITEM, EVENT, FLASH_SALE). NOT free-text — the business picks a template and fills structured fields. The backend creates a Story from this and pushes to all followers.
 // src/pages/Marketing.jsx
 import { useState, useEffect } from 'react';
 import { Megaphone, Image as ImageIcon, Send, TrendingUp } from 'lucide-react';
@@ -165,3 +164,5 @@ export default function Marketing({ businessId }) {
     </div>
   );
 }
+
+

@@ -21,30 +21,8 @@ export const transit = {
   // Bookings for a trip
   bookings: (tripId) => request(`/api/business/transit/trips/${tripId}/bookings`),
 
-// === DINE-IN ===
-openDineInTab: (bizId, azmId) => api.post(`/business-market/${bizId}/dine-in/open`, { azmId }),
-finalizeDineInTab: (tabId, items) => api.post(`/business-market/dine-in/${tabId}/finalize`, { items }),
-getGuests: (bizId) => api.get(`/business-market/${bizId}/guests`),
-searchGuest: (bizId, query) => api.get(`/business-market/${bizId}/guests/search`, { params: { q: query } }),
-getFollowerStats: (bizId) => api.get(`/business-market/${bizId}/followers/stats`),
-getAdPosts: (bizId) => api.get(`/business-market/${bizId}/ads`),
-createAdPost: (bizId, data) => api.post(`/business-market/${bizId}/ads`, data),
-getFinanceStats: (bizId) => api.get(`/business-market/${bizId}/finance/stats`),
-getFinanceTransactions: (bizId) => api.get(`/business-market/${bizId}/finance/transactions`),
-getShowcase: (bizId) => api.get(`/business-market/${bizId}/showcase`),
-addShowcaseSlide: (bizId, data) => api.post(`/business-market/${bizId}/showcase`, data),
-removeShowcaseSlide: (bizId, slideId) => api.delete(`/business-market/${bizId}/showcase/${slideId}`),
-reorderShowcase: (bizId, slides) => api.patch(`/business-market/${bizId}/showcase/reorder`, { slides }),
-getSeatMap: (bizId, tripId) => api.get(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`),
-saveSeatMap: (bizId, tripId, layout) => api.put(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`, { layout }),
-getPenaltyPolicy: (bizId) => api.get(`/business-market/${bizId}/penalty-policy`),
-updatePenaltyPolicy: (bizId, data) => api.put(`/business-market/${bizId}/penalty-policy`, data),
-counterProposeReservation: (bizId, resId, data) => api.post(`/business-market/${bizId}/reservations/${resId}/counter-propose`, data),
-acceptCounterProposal: (bizId, resId) => api.post(`/business-market/${bizId}/reservations/${resId}/accept-counter`),
-getKybStatus: (bizId) => api.get(`/business-market/${bizId}/kyb`),
-submitKyb: (bizId, docs) => api.post(`/business-market/${bizId}/kyb/submit`, { documents: docs }),
-
 };
+
 
 // ── Reservations ────────────────────────────────────────────────────────────
 export const reservations = {
@@ -58,30 +36,8 @@ export const reservations = {
   markNoShow: (id) => request(`/api/business/reservations/${id}/no-show`, { method: 'POST' }),
   stats: () => request('/api/business/reservations/stats'),
 
-// === DINE-IN ===
-openDineInTab: (bizId, azmId) => api.post(`/business-market/${bizId}/dine-in/open`, { azmId }),
-finalizeDineInTab: (tabId, items) => api.post(`/business-market/dine-in/${tabId}/finalize`, { items }),
-getGuests: (bizId) => api.get(`/business-market/${bizId}/guests`),
-searchGuest: (bizId, query) => api.get(`/business-market/${bizId}/guests/search`, { params: { q: query } }),
-getFollowerStats: (bizId) => api.get(`/business-market/${bizId}/followers/stats`),
-getAdPosts: (bizId) => api.get(`/business-market/${bizId}/ads`),
-createAdPost: (bizId, data) => api.post(`/business-market/${bizId}/ads`, data),
-getFinanceStats: (bizId) => api.get(`/business-market/${bizId}/finance/stats`),
-getFinanceTransactions: (bizId) => api.get(`/business-market/${bizId}/finance/transactions`),
-getShowcase: (bizId) => api.get(`/business-market/${bizId}/showcase`),
-addShowcaseSlide: (bizId, data) => api.post(`/business-market/${bizId}/showcase`, data),
-removeShowcaseSlide: (bizId, slideId) => api.delete(`/business-market/${bizId}/showcase/${slideId}`),
-reorderShowcase: (bizId, slides) => api.patch(`/business-market/${bizId}/showcase/reorder`, { slides }),
-getSeatMap: (bizId, tripId) => api.get(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`),
-saveSeatMap: (bizId, tripId, layout) => api.put(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`, { layout }),
-getPenaltyPolicy: (bizId) => api.get(`/business-market/${bizId}/penalty-policy`),
-updatePenaltyPolicy: (bizId, data) => api.put(`/business-market/${bizId}/penalty-policy`, data),
-counterProposeReservation: (bizId, resId, data) => api.post(`/business-market/${bizId}/reservations/${resId}/counter-propose`, data),
-acceptCounterProposal: (bizId, resId) => api.post(`/business-market/${bizId}/reservations/${resId}/accept-counter`),
-getKybStatus: (bizId) => api.get(`/business-market/${bizId}/kyb`),
-submitKyb: (bizId, docs) => api.post(`/business-market/${bizId}/kyb/submit`, { documents: docs }),
-
 };
+
 
 // ── Check-In ────────────────────────────────────────────────────────────────
 export const checkIn = {
@@ -94,30 +50,8 @@ export const checkIn = {
     return request(`/api/business/checkin/recent${qs ? `?${qs}` : ''}`);
   },
 
-// === DINE-IN ===
-openDineInTab: (bizId, azmId) => api.post(`/business-market/${bizId}/dine-in/open`, { azmId }),
-finalizeDineInTab: (tabId, items) => api.post(`/business-market/dine-in/${tabId}/finalize`, { items }),
-getGuests: (bizId) => api.get(`/business-market/${bizId}/guests`),
-searchGuest: (bizId, query) => api.get(`/business-market/${bizId}/guests/search`, { params: { q: query } }),
-getFollowerStats: (bizId) => api.get(`/business-market/${bizId}/followers/stats`),
-getAdPosts: (bizId) => api.get(`/business-market/${bizId}/ads`),
-createAdPost: (bizId, data) => api.post(`/business-market/${bizId}/ads`, data),
-getFinanceStats: (bizId) => api.get(`/business-market/${bizId}/finance/stats`),
-getFinanceTransactions: (bizId) => api.get(`/business-market/${bizId}/finance/transactions`),
-getShowcase: (bizId) => api.get(`/business-market/${bizId}/showcase`),
-addShowcaseSlide: (bizId, data) => api.post(`/business-market/${bizId}/showcase`, data),
-removeShowcaseSlide: (bizId, slideId) => api.delete(`/business-market/${bizId}/showcase/${slideId}`),
-reorderShowcase: (bizId, slides) => api.patch(`/business-market/${bizId}/showcase/reorder`, { slides }),
-getSeatMap: (bizId, tripId) => api.get(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`),
-saveSeatMap: (bizId, tripId, layout) => api.put(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`, { layout }),
-getPenaltyPolicy: (bizId) => api.get(`/business-market/${bizId}/penalty-policy`),
-updatePenaltyPolicy: (bizId, data) => api.put(`/business-market/${bizId}/penalty-policy`, data),
-counterProposeReservation: (bizId, resId, data) => api.post(`/business-market/${bizId}/reservations/${resId}/counter-propose`, data),
-acceptCounterProposal: (bizId, resId) => api.post(`/business-market/${bizId}/reservations/${resId}/accept-counter`),
-getKybStatus: (bizId) => api.get(`/business-market/${bizId}/kyb`),
-submitKyb: (bizId, docs) => api.post(`/business-market/${bizId}/kyb/submit`, { documents: docs }),
-
 };
+
 
 // ── Reviews & Stories ───────────────────────────────────────────────────────
 export const reviews = {
@@ -132,56 +66,37 @@ export const reviews = {
     return request(`/api/business/stories${qs ? `?${qs}` : ''}`);
   },
 
-// === DINE-IN ===
-openDineInTab: (bizId, azmId) => api.post(`/business-market/${bizId}/dine-in/open`, { azmId }),
-finalizeDineInTab: (tabId, items) => api.post(`/business-market/dine-in/${tabId}/finalize`, { items }),
-getGuests: (bizId) => api.get(`/business-market/${bizId}/guests`),
-searchGuest: (bizId, query) => api.get(`/business-market/${bizId}/guests/search`, { params: { q: query } }),
-getFollowerStats: (bizId) => api.get(`/business-market/${bizId}/followers/stats`),
-getAdPosts: (bizId) => api.get(`/business-market/${bizId}/ads`),
-createAdPost: (bizId, data) => api.post(`/business-market/${bizId}/ads`, data),
-getFinanceStats: (bizId) => api.get(`/business-market/${bizId}/finance/stats`),
-getFinanceTransactions: (bizId) => api.get(`/business-market/${bizId}/finance/transactions`),
-getShowcase: (bizId) => api.get(`/business-market/${bizId}/showcase`),
-addShowcaseSlide: (bizId, data) => api.post(`/business-market/${bizId}/showcase`, data),
-removeShowcaseSlide: (bizId, slideId) => api.delete(`/business-market/${bizId}/showcase/${slideId}`),
-reorderShowcase: (bizId, slides) => api.patch(`/business-market/${bizId}/showcase/reorder`, { slides }),
-getSeatMap: (bizId, tripId) => api.get(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`),
-saveSeatMap: (bizId, tripId, layout) => api.put(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`, { layout }),
-getPenaltyPolicy: (bizId) => api.get(`/business-market/${bizId}/penalty-policy`),
-updatePenaltyPolicy: (bizId, data) => api.put(`/business-market/${bizId}/penalty-policy`, data),
-counterProposeReservation: (bizId, resId, data) => api.post(`/business-market/${bizId}/reservations/${resId}/counter-propose`, data),
-acceptCounterProposal: (bizId, resId) => api.post(`/business-market/${bizId}/reservations/${resId}/accept-counter`),
-getKybStatus: (bizId) => api.get(`/business-market/${bizId}/kyb`),
-submitKyb: (bizId, docs) => api.post(`/business-market/${bizId}/kyb/submit`, { documents: docs }),
-
 };
+
 
 // ── Marketplace Stats (aggregate dashboard) ─────────────────────────────────
 export const marketplaceStats = {
   overview: () => request('/api/business/marketplace/stats'),
 
-// === DINE-IN ===
-openDineInTab: (bizId, azmId) => api.post(`/business-market/${bizId}/dine-in/open`, { azmId }),
-finalizeDineInTab: (tabId, items) => api.post(`/business-market/dine-in/${tabId}/finalize`, { items }),
-getGuests: (bizId) => api.get(`/business-market/${bizId}/guests`),
-searchGuest: (bizId, query) => api.get(`/business-market/${bizId}/guests/search`, { params: { q: query } }),
-getFollowerStats: (bizId) => api.get(`/business-market/${bizId}/followers/stats`),
-getAdPosts: (bizId) => api.get(`/business-market/${bizId}/ads`),
-createAdPost: (bizId, data) => api.post(`/business-market/${bizId}/ads`, data),
-getFinanceStats: (bizId) => api.get(`/business-market/${bizId}/finance/stats`),
-getFinanceTransactions: (bizId) => api.get(`/business-market/${bizId}/finance/transactions`),
-getShowcase: (bizId) => api.get(`/business-market/${bizId}/showcase`),
-addShowcaseSlide: (bizId, data) => api.post(`/business-market/${bizId}/showcase`, data),
-removeShowcaseSlide: (bizId, slideId) => api.delete(`/business-market/${bizId}/showcase/${slideId}`),
-reorderShowcase: (bizId, slides) => api.patch(`/business-market/${bizId}/showcase/reorder`, { slides }),
-getSeatMap: (bizId, tripId) => api.get(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`),
-saveSeatMap: (bizId, tripId, layout) => api.put(`/business-market/${bizId}/transit/trips/${tripId}/seatmap`, { layout }),
-getPenaltyPolicy: (bizId) => api.get(`/business-market/${bizId}/penalty-policy`),
-updatePenaltyPolicy: (bizId, data) => api.put(`/business-market/${bizId}/penalty-policy`, data),
-counterProposeReservation: (bizId, resId, data) => api.post(`/business-market/${bizId}/reservations/${resId}/counter-propose`, data),
-acceptCounterProposal: (bizId, resId) => api.post(`/business-market/${bizId}/reservations/${resId}/accept-counter`),
-getKybStatus: (bizId) => api.get(`/business-market/${bizId}/kyb`),
-submitKyb: (bizId, docs) => api.post(`/business-market/${bizId}/kyb/submit`, { documents: docs }),
+};
 
+
+
+export const marketplaceApi = {
+  openDineInTab: (bizId, azmId) => request(`/api/business-market/${bizId}/dine-in/open`, { method: "POST", body: JSON.stringify({ azmId }) }),
+  finalizeDineInTab: (tabId, items) => request(`/api/business-market/dine-in/${tabId}/finalize`, { method: "POST", body: JSON.stringify({ items }) }),
+  getGuests: (bizId) => request(`/api/business-market/${bizId}/guests`),
+  searchGuest: (bizId, query) => request(`/api/business-market/${bizId}/guests/search?q=${query}`),
+  getFollowerStats: (bizId) => request(`/api/business-market/${bizId}/followers/stats`),
+  getAdPosts: (bizId) => request(`/api/business-market/${bizId}/ads`),
+  createAdPost: (bizId, data) => request(`/api/business-market/${bizId}/ads`, { method: "POST", body: JSON.stringify(data) }),
+  getFinanceStats: (bizId) => request(`/api/business-market/${bizId}/finance/stats`),
+  getFinanceTransactions: (bizId) => request(`/api/business-market/${bizId}/finance/transactions`),
+  getShowcase: (bizId) => request(`/api/business-market/${bizId}/showcase`),
+  addShowcaseSlide: (bizId, data) => request(`/api/business-market/${bizId}/showcase`, { method: "POST", body: JSON.stringify(data) }),
+  removeShowcaseSlide: (bizId, slideId) => request(`/api/business-market/${bizId}/showcase/${slideId}`, { method: "DELETE" }),
+  reorderShowcase: (bizId, slides) => request(`/api/business-market/${bizId}/showcase/reorder`, { method: "PATCH", body: JSON.stringify({ slides }) }),
+  getSeatMap: (bizId, tripId) => request(`/api/business-market/${bizId}/transit/trips/${tripId}/seatmap`),
+  saveSeatMap: (bizId, tripId, layout) => request(`/api/business-market/${bizId}/transit/trips/${tripId}/seatmap`, { method: "PUT", body: JSON.stringify({ layout }) }),
+  getPenaltyPolicy: (bizId) => request(`/api/business-market/${bizId}/penalty-policy`),
+  updatePenaltyPolicy: (bizId, data) => request(`/api/business-market/${bizId}/penalty-policy`, { method: "PUT", body: JSON.stringify(data) }),
+  counterProposeReservation: (bizId, resId, data) => request(`/api/business-market/${bizId}/reservations/${resId}/counter-propose`, { method: "POST", body: JSON.stringify(data) }),
+  acceptCounterProposal: (bizId, resId) => request(`/api/business-market/${bizId}/reservations/${resId}/accept-counter`, { method: "POST" }),
+  getKybStatus: (bizId) => request(`/api/business-market/${bizId}/kyb`),
+  submitKyb: (bizId, docs) => request(`/api/business-market/${bizId}/kyb/submit`, { method: "POST", body: JSON.stringify({ documents: docs }) })
 };

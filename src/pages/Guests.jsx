@@ -1,4 +1,3 @@
-Aggregates customer history: past orders, reservations, transit bookings, reviews, trust score, no-show count.
 // src/pages/Guests.jsx
 import { useState, useEffect } from 'react';
 import { Search, Star, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
@@ -120,3 +119,5 @@ export default function Guests({ businessId }) {
     </div>
   );
 }
+
+

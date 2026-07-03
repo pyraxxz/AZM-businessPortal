@@ -1,4 +1,3 @@
-Escrow and payment dashboard: total escrow held, settled, refunded, penalty revenue, transaction history, and payout requests.
 // src/pages/Finance.jsx
 import { useState, useEffect } from 'react';
 import { Wallet, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
@@ -105,3 +104,5 @@ export default function Finance({ businessId }) {
     </div>
   );
 }
+
+

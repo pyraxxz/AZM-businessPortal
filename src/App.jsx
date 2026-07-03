@@ -19,6 +19,14 @@ import Reservations from '@/pages/Reservations';
 import CheckIn from '@/pages/CheckIn';
 import Reviews from '@/pages/Reviews';
 
+import DineIn from '@/pages/DineIn';
+import Guests from '@/pages/Guests';
+import Marketing from '@/pages/Marketing';
+import Finance from '@/pages/Finance';
+import Showcase from '@/pages/Showcase';
+import SeatMapEditor from '@/pages/SeatMapEditor';
+
+
 const qc = new QueryClient({
   defaultOptions: {
     queries: {
