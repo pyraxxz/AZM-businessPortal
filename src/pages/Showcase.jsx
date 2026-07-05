@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Image as ImageIcon, Upload, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { marketplaceApi } from '../lib/marketplaceApi';
-import { uploadToCloudinary } from '../lib/cloudinary';
+import { uploadImageToCloudinary } from '../lib/cloudinary';
 
 export default function Showcase({ businessId }) {
   const [slides, setSlides] = useState([]);
@@ -22,7 +22,7 @@ export default function Showcase({ businessId }) {
   const upload = async (file) => {
     setUploading(true);
     try {
-      const url = await uploadToCloudinary(file, 'showcase');
+      const url = await uploadImageToCloudinary(file, 'showcase');
       await marketplaceApi.addShowcaseSlide(businessId, { mediaUrl: url });
       load();
     } catch (e) { alert('Upload failed'); }
