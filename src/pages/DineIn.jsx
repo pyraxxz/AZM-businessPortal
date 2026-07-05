@@ -1,4 +1,3 @@
-import { useAuth } from '@/lib/AuthContext';
 // src/pages/DineIn.jsx
 // =============================================================================
 // DINE-IN MANAGEMENT — Waiter takes AZM-ID, opens tab, adds items, finalizes
@@ -8,29 +7,11 @@ import { useState, useEffect } from 'react';
 import { Search, Plus, Minus, Receipt, User } from 'lucide-react';
 import { marketplaceApi } from '../lib/marketplaceApi';
 
-export default function DineIn() {
-  const { bizProfile, isAdmin, selectedBusinessId } = useAuth();
-  const businessId = bizProfile?.id;
-
-  if (!businessId) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
-        {isAdmin ? "Select a business from the sidebar dropdown to view." : "No business profile found."}
-      </div>
-    );
-  }
-
+export default function DineIn({ businessId, products }) {
   const [azmId, setAzmId] = useState('');
   const [tab, setTab] = useState(null);
   const [tabItems, setTabItems] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // Mock products since they aren't passed by the router
-  const products = [
-    { id: '1', name: 'Burger', priceUsdc: 5.00 },
-    { id: '2', name: 'Fries', priceUsdc: 2.50 },
-    { id: '3', name: 'Soda', priceUsdc: 1.50 },
-  ];
 
   // Open tab via AZM-ID search
   const openTab = async () => {
@@ -47,34 +28,22 @@ export default function DineIn() {
   };
 
   // Add item to tab
-  const addItem = async (product) => {
-    try {
-      if (tab) {
-        await marketplaceApi.addDineInItem(tab.id, { 
-          productId: product.id, 
-          name: product.name, 
-          unitPriceUsdc: parseFloat(product.priceUsdc), 
-          quantity: 1 
-        });
+  const addItem = (product) => {
+    setTabItems(prev => {
+      const existing = prev.find(i => i.productId === product.id);
+      if (existing) {
+        return prev.map(i => i.productId === product.id
+          ? { ...i, quantity: i.quantity + 1, totalUsdc: (i.quantity + 1) * i.unitPriceUsdc }
+          : i);
       }
-      setTabItems(prev => {
-        const existing = prev.find(i => i.productId === product.id);
-        if (existing) {
-          return prev.map(i => i.productId === product.id
-            ? { ...i, quantity: i.quantity + 1, totalUsdc: (i.quantity + 1) * i.unitPriceUsdc }
-            : i);
-        }
-        return [...prev, {
-          productId: product.id,
-          name: product.name,
-          quantity: 1,
-          unitPriceUsdc: parseFloat(product.priceUsdc),
-          totalUsdc: parseFloat(product.priceUsdc),
-        }];
-      });
-    } catch (e) {
-      alert(e.response?.data?.message || 'Failed to add item');
-    }
+      return [...prev, {
+        productId: product.id,
+        name: product.name,
+        quantity: 1,
+        unitPriceUsdc: parseFloat(product.priceUsdc),
+        totalUsdc: parseFloat(product.priceUsdc),
+      }];
+    });
   };
 
   // Remove item
@@ -93,7 +62,7 @@ export default function DineIn() {
     if (tabItems.length === 0) return;
     setLoading(true);
     try {
-      await marketplaceApi.finalizeDineInTab(tab.id, { taxRatePct: 0, tipUsdc: 0 });
+      await marketplaceApi.finalizeDineInTab(tab.id, tabItems);
       alert('Tab sent to customer for confirmation');
       setTab(null); setTabItems([]); setAzmId('');
     } catch (e) {
@@ -214,5 +183,3 @@ export default function DineIn() {
     </div>
   );
 }
-
-

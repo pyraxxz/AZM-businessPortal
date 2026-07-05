@@ -1,22 +1,10 @@
-import { useAuth } from '@/lib/AuthContext';
 // src/pages/Showcase.jsx
 import { useState, useEffect } from 'react';
 import { Image as ImageIcon, Upload, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { marketplaceApi } from '../lib/marketplaceApi';
-import { uploadImageToCloudinary } from '../lib/cloudinary';
+import { uploadToCloudinary } from '../lib/cloudinary';
 
-export default function Showcase() {
-  const { bizProfile, isAdmin, selectedBusinessId } = useAuth();
-  const businessId = bizProfile?.id;
-
-  if (!businessId) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
-        {isAdmin ? "Select a business from the sidebar dropdown to view." : "No business profile found."}
-      </div>
-    );
-  }
-
+export default function Showcase({ businessId }) {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -34,7 +22,7 @@ export default function Showcase() {
   const upload = async (file) => {
     setUploading(true);
     try {
-      const url = await uploadImageToCloudinary(file, 'showcase');
+      const url = await uploadToCloudinary(file, 'showcase');
       await marketplaceApi.addShowcaseSlide(businessId, { mediaUrl: url });
       load();
     } catch (e) { alert('Upload failed'); }
@@ -118,5 +106,3 @@ export default function Showcase() {
     </div>
   );
 }
-
-

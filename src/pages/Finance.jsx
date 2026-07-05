@@ -1,21 +1,9 @@
-import { useAuth } from '@/lib/AuthContext';
 // src/pages/Finance.jsx
 import { useState, useEffect } from 'react';
 import { Wallet, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { marketplaceApi } from '../lib/marketplaceApi';
 
-export default function Finance() {
-  const { bizProfile, isAdmin, selectedBusinessId } = useAuth();
-  const businessId = bizProfile?.id;
-
-  if (!businessId) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
-        {isAdmin ? "Select a business from the sidebar dropdown to view." : "No business profile found."}
-      </div>
-    );
-  }
-
+export default function Finance({ businessId }) {
   const [stats, setStats] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,5 +104,3 @@ export default function Finance() {
     </div>
   );
 }
-
-

@@ -1,4 +1,3 @@
-import { useAuth } from '@/lib/AuthContext';
 // src/pages/Marketing.jsx
 import { useState, useEffect } from 'react';
 import { Megaphone, Image as ImageIcon, Send, TrendingUp } from 'lucide-react';
@@ -19,18 +18,7 @@ const TEMPLATES = [
              { name: 'durationHours', label: 'Duration (hours)', type: 'number' }] },
 ];
 
-export default function Marketing() {
-  const { bizProfile, isAdmin, selectedBusinessId } = useAuth();
-  const businessId = bizProfile?.id;
-
-  if (!businessId) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
-        {isAdmin ? "Select a business from the sidebar dropdown to view." : "No business profile found."}
-      </div>
-    );
-  }
-
+export default function Marketing({ businessId }) {
   const [template, setTemplate] = useState('PROMO');
   const [fields, setFields] = useState({});
   const [caption, setCaption] = useState('');
@@ -176,5 +164,3 @@ export default function Marketing() {
     </div>
   );
 }
-
-

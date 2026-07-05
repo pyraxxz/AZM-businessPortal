@@ -1,4 +1,3 @@
-import { useAuth } from '@/lib/AuthContext';
 // src/pages/Guests.jsx
 import { useState, useEffect } from 'react';
 import { Search, Star, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
@@ -11,18 +10,7 @@ const TRUST_COLORS = {
   RISK: 'text-red-600 bg-red-50',
 };
 
-export default function Guests() {
-  const { bizProfile, isAdmin, selectedBusinessId } = useAuth();
-  const businessId = bizProfile?.id;
-
-  if (!businessId) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
-        {isAdmin ? "Select a business from the sidebar dropdown to view." : "No business profile found."}
-      </div>
-    );
-  }
-
+export default function Guests({ businessId }) {
   const [query, setQuery] = useState('');
   const [guests, setGuests] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -131,5 +119,3 @@ export default function Guests() {
     </div>
   );
 }
-
-
