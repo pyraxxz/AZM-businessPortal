@@ -15,6 +15,7 @@ import { orders as ordersApi, invoices as invoicesApi } from '@/lib/api';
 import { reservations as resApi, transit as transitApi, checkIn as checkInApi, reviews as reviewsApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
 import { Widget, WidgetStat, WidgetRow } from '@/components/ui/Widget';
+import { KpiCard } from '@/components/charts/KpiCard';
 import { Badge, Skeleton, Card } from '@/components/ui';
 import { fmtUSDC, fmt, relativeTime, ORDER_STATUS_META, KYB_STATUS_META, cn } from '@/lib/utils';
 import { getTypeConfig } from '@/lib/businessTypes';
@@ -211,10 +212,10 @@ export default function Dashboard() {
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in">
       {/* Employee Summary Widget */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard title="Total Employees" value="42" change="+2 this month" trend="up" />
-        <KpiCard title="Active Shifts" value="12" subtitle="Right now" />
-        <KpiCard title="Time Off Requests" value="3" subtitle="Pending approval" />
-        <KpiCard title="Monthly Payroll" value="24,500 USDC" change="+5% vs last" trend="up" />
+        <KpiCard label="Total Employees" value="42" delta="+2 this month" deltaType="positive" />
+        <KpiCard label="Active Shifts" value="12" delta="Right now" deltaType="positive" />
+        <KpiCard label="Time Off Requests" value="3" delta="Pending approval" deltaType="positive" />
+        <KpiCard label="Monthly Payroll" value="24,500 USDC" delta="+5% vs last" deltaType="positive" />
       </div>
 
       {/* ── Header with business type badge ──────────────────────────────── */}
