@@ -137,23 +137,98 @@ export const financeApi = {
 };
 
 export const hotelOpsApi = {
-  getRooms: () => request('/api/business-os/hotel/rooms'),
-  updateRoomStatus: (id, status) => request(`/api/business-os/hotel/rooms/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
-  getHousekeepingTasks: () => request('/api/business-os/hotel/housekeeping'),
-  assignTask: (id, employeeId) => request(`/api/business-os/hotel/housekeeping/${id}/assign`, { method: 'PUT', body: JSON.stringify({ employeeId }) }),
+  // Rooms
+  getRooms: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/hotel/rooms${qs ? `?${qs}` : ''}`);
+  },
+  rooms: (params = {}) => hotelOpsApi.getRooms(params),  // alias
+  createRoom: (data) => request('/api/business-os/hotel/rooms', { method: 'POST', body: JSON.stringify(data) }),
+  updateRoomStatus: (id, status) => request(`/api/business-os/hotel/rooms/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  getRoomRack: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/hotel/room-rack${qs ? `?${qs}` : ''}`);
+  },
+
+  // Housekeeping
+  getHousekeepingTasks: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/hotel/housekeeping${qs ? `?${qs}` : ''}`);
+  },
+  housekeeping: (params = {}) => hotelOpsApi.getHousekeepingTasks(params),  // alias
+  assignTask: (id, employeeId) => request(`/api/business-os/hotel/housekeeping/${id}/assign`, { method: 'POST', body: JSON.stringify({ employeeId }) }),
+  updateChecklist: (id, checklist) => request(`/api/business-os/hotel/housekeeping/${id}/checklist`, { method: 'PATCH', body: JSON.stringify({ checklist }) }),
+  completeTask: (id) => request(`/api/business-os/hotel/housekeeping/${id}/complete`, { method: 'POST' }),
+  inspectTask: (id, data) => request(`/api/business-os/hotel/housekeeping/${id}/inspect`, { method: 'POST', body: JSON.stringify(data) }),
+  updateHousekeepingStatus: (id, status) => {
+    // Map simple status to appropriate backend action
+    if (status === 'COMPLETED' || status === 'DONE') return hotelOpsApi.completeTask(id);
+    return hotelOpsApi.updateChecklist(id, { status });
+  },
+
+  // Front Desk
+  getFrontDesk: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/hotel/front-desk${qs ? `?${qs}` : ''}`);
+  },
+  arrivals: (date) => hotelOpsApi.getFrontDesk({ type: 'arrivals', date }),
+  departures: (date) => hotelOpsApi.getFrontDesk({ type: 'departures', date }),
+  inHouse: () => hotelOpsApi.getFrontDesk({ type: 'inhouse' }),
 };
 
 export const restaurantOpsApi = {
-  getKitchenOrders: () => request('/api/business-os/restaurant/kitchen'),
-  updateOrderStatus: (id, status) => request(`/api/business-os/restaurant/kitchen/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  // Kitchen Display System
+  getKitchenOrders: () => request('/api/business-os/restaurant/kds'),
+  kitchenOrders: () => restaurantOpsApi.getKitchenOrders(),  // alias
+  createKitchenOrder: (data) => request('/api/business-os/restaurant/kds', { method: 'POST', body: JSON.stringify(data) }),
+  updateOrderStatus: (id, status) => request(`/api/business-os/restaurant/kds/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  bumpKitchenOrder: (id) => request(`/api/business-os/restaurant/kds/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'BUMPED' }) }),
+  updateItemStatus: (orderId, itemId, status) => request(`/api/business-os/restaurant/kds/${orderId}/item-status`, { method: 'PATCH', body: JSON.stringify({ itemId, status }) }),
+  assignChef: (orderId, chefId) => request(`/api/business-os/restaurant/kds/${orderId}/assign-chef`, { method: 'POST', body: JSON.stringify({ chefId }) }),
+  getKitchenStats: () => request('/api/business-os/restaurant/kds/stats'),
+
+  // Tables
   getTables: () => request('/api/business-os/restaurant/tables'),
-  updateTableStatus: (id, status) => request(`/api/business-os/restaurant/tables/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  tables: () => restaurantOpsApi.getTables(),  // alias
+  updateTableStatus: (id, status) => request(`/api/business-os/restaurant/tables/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+
+  // 86'd Items
+  get86edItems: () => request('/api/business-os/restaurant/86ed-items'),
+  toggle86: (data) => request('/api/business-os/restaurant/toggle-86', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export const transitOpsApi = {
-  getVehicles: () => request('/api/business-os/transit/vehicles'),
-  updateVehicleStatus: (id, status) => request(`/api/business-os/transit/vehicles/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
-  getManifests: (date) => request(`/api/business-os/transit/manifests?date=${date}`),
+  // Fleet
+  getVehicles: () => request('/api/business-os/transit/fleet'),
+  fleet: () => transitOpsApi.getVehicles(),  // alias
+  updateVehicleStatus: (id, status) => request(`/api/business-os/transit/vehicles/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  createVehicle: (data) => request('/api/business-os/transit/fleet', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Maintenance
+  maintenance: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/transit/fleet/maintenance${qs ? `?${qs}` : ''}`);
+  },
+  createMaintenance: (data) => request('/api/business-os/transit/fleet/maintenance', { method: 'POST', body: JSON.stringify(data) }),
+  updateMaintenance: (id, data) => request(`/api/business-os/transit/fleet/maintenance/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+
+  // Drivers
+  drivers: () => request('/api/business-os/transit/drivers'),
+  assignDriver: (data) => request('/api/business-os/transit/drivers/assign', { method: 'POST', body: JSON.stringify(data) }),
+  updateDriverStatus: (id, status) => request(`/api/business-os/transit/drivers/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  driverSchedule: () => request('/api/business-os/transit/drivers/my-schedule'),
+  driverCalendar: (month) => request(`/api/business-os/transit/drivers?month=${month}`),
+
+  // Manifests
+  getManifests: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/transit/manifests${qs ? `?${qs}` : ''}`);
+  },
+  liveManifest: (tripId) => request(`/api/business-os/transit/manifests/${tripId}`),
+  boardPassenger: (data) => request('/api/business-os/transit/manifests/board', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Routes — use transit trips endpoint
+  routes: () => request('/api/business/transit/trips'),
 };
 
 export default marketplaceApi;
