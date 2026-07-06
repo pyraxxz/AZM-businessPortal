@@ -224,6 +224,12 @@ export const transitOpsApi = {
   driverSchedule: () => request('/api/business-os/transit/drivers/my-schedule'),
   driverCalendar: (month) => request(`/api/business-os/transit/drivers?month=${month}`),
 
+  // Cargo & IROPS
+  cargo: (params = {}) => cargoApi.list(params),
+  createCargo: (data) => cargoApi.create(data),
+  updateCargoStatus: (id, status) => cargoApi.updateStatus(id, status),
+  iropsReassign: (data) => cargoApi.reassign(data),
+
   // Manifests
   getManifests: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
@@ -234,6 +240,31 @@ export const transitOpsApi = {
 
   // Routes — use transit trips endpoint
   routes: () => request('/api/business/transit/trips'),
+};
+
+
+// ── Transit: Cargo & IROPS ─────────────────────────────────────────────────────
+export const cargoApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/transit/cargo${qs ? `?${qs}` : ''}`);
+  },
+  create: (data) => request('/api/business-os/transit/cargo', { method: 'POST', body: JSON.stringify(data) }),
+  updateStatus: (id, status) => request(`/api/business-os/transit/cargo/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  remove: (id) => request(`/api/business-os/transit/cargo/${id}`, { method: 'DELETE' }),
+  reassign: (data) => request('/api/business-os/transit/irops/reassign', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// ── Restaurant: Inventory & Recipes ────────────────────────────────────────────
+export const inventoryApi = {
+  list: () => request('/api/business-os/restaurant/inventory'),
+  create: (data) => request('/api/business-os/restaurant/inventory', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => request(`/api/business-os/restaurant/inventory/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  restock: (id, quantity) => request(`/api/business-os/restaurant/inventory/${id}/restock`, { method: 'POST', body: JSON.stringify({ quantity }) }),
+  recipes: () => request('/api/business-os/restaurant/recipes'),
+  linkIngredient: (productId, data) => request(`/api/business-os/restaurant/recipes/${productId}/link`, { method: 'POST', body: JSON.stringify(data) }),
+  unlinkIngredient: (productId, itemId) => request(`/api/business-os/restaurant/recipes/${productId}/link/${itemId}`, { method: 'DELETE' }),
+  deductForOrder: (orderId) => request(`/api/business-os/restaurant/inventory/deduct/${orderId}`, { method: 'POST' }),
 };
 
 export default marketplaceApi;

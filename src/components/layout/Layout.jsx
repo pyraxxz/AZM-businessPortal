@@ -23,7 +23,7 @@ const TYPE_ICONS = { Bus, UtensilsCrossed, Building2, ShoppingBag, Briefcase, St
 const NAV_ICONS = {
   transit: Bus, reservations: CalendarCheck, checkin: QrCode, reviews: Star,
   rooms: BedDouble, dineIn: Utensils, marketing: Megaphone,
-  finance: Wallet, showcase: ImageIcon, seatMap: Grid3x3, guests: Users,
+  finance: Wallet, showcase: ImageIcon, seatMap: Grid3x3, guests: Users, inventory: Package,
   housekeeping: Sparkles, frontdesk: ConciergeBell, kitchen: ChefHat,
   tables: TableIcon, fleet: CarFront, drivers: ShipWheel, manifests: FileSpreadsheet,
 };

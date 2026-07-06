@@ -21,7 +21,7 @@ export const BUSINESS_TYPES = {
     icon: 'UtensilsCrossed',
     color: '#f59e0b',
     category: 'FOOD_BEVERAGE',
-    navItems: ['reservations', 'dineIn', 'kitchen', 'tables', 'guests', 'marketing', 'finance'],
+    navItems: ['reservations', 'dineIn', 'kitchen', 'tables', 'inventory', 'employees', 'guests', 'marketing', 'finance'],
     description: 'Manage reservations, table availability, dine-in tabs, and guest check-ins',
   },
   HOTEL: {
@@ -99,6 +99,7 @@ export const MARKETPLACE_NAV = {
   finance: { label: 'Finance', icon: 'Wallet', to: '/finance' },
   showcase: { label: 'Showcase', icon: 'showcase', to: '/showcase' },
   seatMap: { label: 'Seat Map Editor', icon: 'seatMap', to: '/seat-map' },
+  inventory: { label: 'Inventory', icon: 'Package', to: '/restaurant-inventory' },
   guests: { label: 'Guests', icon: 'guests', to: '/guests' },
   
   // Hotel Ops

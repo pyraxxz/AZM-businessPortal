@@ -109,6 +109,7 @@ function AppRoutes() {
         <Route path="/transit-fleet"        element={<TransitFleet />} />
         <Route path="/transit-drivers"      element={<TransitDrivers />} />
         <Route path="/transit-manifests"    element={<TransitManifests />} />
+        <Route path="/restaurant-inventory" element={<RestaurantInventory />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
