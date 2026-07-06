@@ -179,10 +179,15 @@ export const hotelOpsApi = {
 export const restaurantOpsApi = {
   // Kitchen Display System
   getKitchenOrders: () => request('/api/business-os/restaurant/kds'),
-  kitchenOrders: () => restaurantOpsApi.getKitchenOrders(),  // alias
+  kitchenOrders: (params = {}) => {
+    // Don't send 'ACTIVE' status — backend defaults to NEW+PREPARING
+    const { status, ...rest } = params;
+    const qs = new URLSearchParams(rest).toString();
+    return request(`/api/business-os/restaurant/kds${qs ? `?${qs}` : ''}`);
+  },
   createKitchenOrder: (data) => request('/api/business-os/restaurant/kds', { method: 'POST', body: JSON.stringify(data) }),
   updateOrderStatus: (id, status) => request(`/api/business-os/restaurant/kds/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-  bumpKitchenOrder: (id) => request(`/api/business-os/restaurant/kds/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'BUMPED' }) }),
+  bumpKitchenOrder: (id) => request(`/api/business-os/restaurant/kds/${id}/bump`, { method: 'POST' }),
   updateItemStatus: (orderId, itemId, status) => request(`/api/business-os/restaurant/kds/${orderId}/item-status`, { method: 'PATCH', body: JSON.stringify({ itemId, status }) }),
   assignChef: (orderId, chefId) => request(`/api/business-os/restaurant/kds/${orderId}/assign-chef`, { method: 'POST', body: JSON.stringify({ chefId }) }),
   getKitchenStats: () => request('/api/business-os/restaurant/kds/stats'),
