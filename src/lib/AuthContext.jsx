@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
         const u = JSON.parse(cached);
         setUser(u); setAuthed(true);
         wireSocket(token, u?.id);
-        if (u.role === 'admin') {
+        if (u.role?.toUpperCase() === 'ADMIN') {
             setIsAdmin(true);
             request('/api/admin/marketplace-businesses').then(data => {
                 setAdminBusinesses(data.businesses || []);
@@ -112,7 +112,7 @@ export function AuthProvider({ children }) {
     // Go live: open the socket and join the owner's room.
     wireSocket(token, me?.id);
 
-    if (me.role === 'admin') {
+    if (me.role?.toUpperCase() === 'ADMIN') {
         setIsAdmin(true);
         try {
             const adminData = await request('/api/admin/marketplace-businesses');
