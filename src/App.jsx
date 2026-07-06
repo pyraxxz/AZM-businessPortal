@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import Layout from '@/components/layout/Layout';
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
@@ -18,14 +19,22 @@ import TransitTrips from '@/pages/TransitTrips';
 import Reservations from '@/pages/Reservations';
 import CheckIn from '@/pages/CheckIn';
 import Reviews from '@/pages/Reviews';
-
 import DineIn from '@/pages/DineIn';
 import Guests from '@/pages/Guests';
 import Marketing from '@/pages/Marketing';
 import Finance from '@/pages/Finance';
+import FinanceV2 from '@/pages/FinanceV2';
 import Showcase from '@/pages/Showcase';
 import SeatMapEditor from '@/pages/SeatMapEditor';
-
+import Employees from '@/pages/employees/Employees';
+import HotelRooms from '@/pages/HotelRooms';
+import HotelHousekeeping from '@/pages/HotelHousekeeping';
+import HotelFrontDesk from '@/pages/HotelFrontDesk';
+import RestaurantKitchen from '@/pages/RestaurantKitchen';
+import RestaurantTables from '@/pages/RestaurantTables';
+import TransitFleet from '@/pages/TransitFleet';
+import TransitDrivers from '@/pages/TransitDrivers';
+import TransitManifests from '@/pages/TransitManifests';
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -35,8 +44,6 @@ const qc = new QueryClient({
     },
   },
 });
-
-import { ToastProvider } from '@/components/ui/Toast';
 
 function AppRoutes() {
   const { authed, loading, bizProfile, isAdmin } = useAuth();
@@ -123,27 +130,29 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={qc}>
-        <Router>
-          <AppRoutes />
-        </Router>
-        <Toaster 
-          richColors 
-          position="top-center" 
-          expand={true}
-          toastOptions={{
-            className: 'sentry-toast',
-            style: {
-              background: 'var(--sn-card)',
-              border: '1px solid var(--sn-border)',
-              color: 'var(--sn-text-primary)',
-              backdropFilter: 'blur(12px)',
-              boxShadow: 'var(--sn-shadow)',
-            },
-          }}
-        />
-      </QueryClientProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <QueryClientProvider client={qc}>
+          <Router>
+            <AppRoutes />
+          </Router>
+          <Toaster 
+            richColors 
+            position="top-center" 
+            expand={true}
+            toastOptions={{
+              className: 'sentry-toast',
+              style: {
+                background: 'var(--sn-card)',
+                border: '1px solid var(--sn-border)',
+                color: 'var(--sn-text-primary)',
+                backdropFilter: 'blur(12px)',
+                boxShadow: 'var(--sn-shadow)',
+              },
+            }}
+          />
+        </QueryClientProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

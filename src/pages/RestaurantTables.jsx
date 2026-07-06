@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { restaurantApi } from '@/lib/marketplaceApi';
+import { restaurantOpsApi as restaurantApi } from '@/lib/marketplaceApi';
 import { Card, Button, Badge, Skeleton, Empty, Avatar } from '@/components/ui';
 import { useToast } from '@/components/ui/Toast';
 import { Grid3x3, Clock, Users } from 'lucide-react';

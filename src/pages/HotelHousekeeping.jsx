@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { hotelApi } from '@/lib/marketplaceApi';
+import { hotelOpsApi as hotelApi } from '@/lib/marketplaceApi';
 import { Card, Button, Badge, Skeleton, Empty, Avatar } from '@/components/ui';
 import { useToast } from '@/components/ui/Toast';
 import { Sparkles, Bath, CheckCircle2, Search, Camera } from 'lucide-react';
