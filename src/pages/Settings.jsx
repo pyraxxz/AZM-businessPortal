@@ -5,7 +5,8 @@ import { marketplaceApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, Button, Input, Textarea, Select, Badge, Switch } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
-import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode, Wallet } from 'lucide-react';
+import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode, Wallet, ImagePlus } from 'lucide-react';
+import { uploadImageToCloudinary, isCloudinaryConfigured, validateImageFile } from '@/lib/cloudinary';
 import { toast } from 'sonner';
 import PublicProfilePreview from '@/components/PublicProfilePreview';
 import QrCodePanel from '@/components/QrCodePanel';
@@ -40,6 +41,7 @@ export default function Settings() {
     country:      '',
     category:     '',
     logoUrl:      '',
+    coverPhotoUrl: '',
   });
   const [saved, setSaved] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -84,6 +86,7 @@ export default function Settings() {
         country:      bizProfile.country       || '',
         category:     bizProfile.category      || '',
         logoUrl:      bizProfile.logoUrl        || '',
+        coverPhotoUrl: bizProfile.coverPhotoUrl   || '',
       });
     }
   }, [bizProfile]);
@@ -262,6 +265,38 @@ export default function Settings() {
 
         <Input label="Address" value={form.address} onChange={set('address')} placeholder="Business address" />
         <Input label="Logo URL (Cloudinary)" value={form.logoUrl} onChange={set('logoUrl')} placeholder="https://res.cloudinary.com/..." />
+
+            {/* Cover Photo */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-[var(--sn-text-muted)]">Cover Photo</label>
+              {form.coverPhotoUrl && (
+                <img src={form.coverPhotoUrl} alt="Cover" className="w-full h-32 object-cover rounded-lg border border-[var(--sn-border)]" />
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.onchange = async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (!validateImageFile(file)) return;
+                    try {
+                      const url = await uploadImageToCloudinary(file);
+                      set({ coverPhotoUrl: url });
+                    } catch (err) {
+                      alert('Upload failed: ' + err.message);
+                    }
+                  };
+                  input.click();
+                }}
+              >
+                <ImagePlus className="w-4 h-4 mr-2" /> Upload Cover
+              </Button>
+              <Input label="" value={form.coverPhotoUrl} onChange={set('coverPhotoUrl')} placeholder="https://res.cloudinary.com/..." />
+            </div>
 
         <div className="flex items-center gap-3 pt-2">
           {saved && (
