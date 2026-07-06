@@ -5,7 +5,7 @@ import { marketplaceApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, Button, Input, Textarea, Select, Badge, Switch } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
-import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode, Wallet, ImagePlus } from 'lucide-react';
+import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode, Wallet, ImagePlus, Palette, RotateCcw } from 'lucide-react';
 import { uploadImageToCloudinary, isCloudinaryConfigured, validateImageFile } from '@/lib/cloudinary';
 import { toast } from 'sonner';
 import PublicProfilePreview from '@/components/PublicProfilePreview';
@@ -42,6 +42,7 @@ export default function Settings() {
     category:     '',
     logoUrl:      '',
     coverPhotoUrl: '',
+    adAccentColor: '',
   });
   const [saved, setSaved] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -87,6 +88,7 @@ export default function Settings() {
         category:     bizProfile.category      || '',
         logoUrl:      bizProfile.logoUrl        || '',
         coverPhotoUrl: bizProfile.coverPhotoUrl   || '',
+        adAccentColor: bizProfile.adAccentColor   || '',
       });
     }
   }, [bizProfile]);
@@ -103,6 +105,9 @@ export default function Settings() {
   });
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
+
+  const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
+  const isValidHex = (v) => v === '' || HEX_RE.test(v);
 
   const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
 
@@ -298,6 +303,53 @@ export default function Settings() {
               <Input label="" value={form.coverPhotoUrl} onChange={set('coverPhotoUrl')} placeholder="https://res.cloudinary.com/..." />
             </div>
 
+            {/* Ad Appearance */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-[var(--sn-text-muted)] flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5" /> Ad Appearance
+              </label>
+              <p className="text-xs text-[var(--sn-text-muted)] -mt-1">
+                Pick an accent color for your collapsed marketplace card. Leave blank to use the default color for your category.
+              </p>
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-lg border border-[var(--sn-border)] flex-shrink-0 overflow-hidden relative"
+                  style={{ background: isValidHex(form.adAccentColor) && form.adAccentColor ? form.adAccentColor : 'var(--az-black)' }}
+                >
+                  <input
+                    type="color"
+                    value={isValidHex(form.adAccentColor) && form.adAccentColor ? form.adAccentColor : '#6C4CE0'}
+                    onChange={(e) => setForm(f => ({ ...f, adAccentColor: e.target.value.toUpperCase() }))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    aria-label="Pick ad accent color"
+                  />
+                </div>
+                <Input
+                  label=""
+                  value={form.adAccentColor}
+                  onChange={(e) => setForm(f => ({ ...f, adAccentColor: e.target.value }))}
+                  placeholder="#FFAA00"
+                  maxLength={7}
+                  className="flex-1"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, adAccentColor: '' }))}
+                  disabled={!form.adAccentColor}
+                  className="flex-shrink-0"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset
+                </Button>
+              </div>
+              {!isValidHex(form.adAccentColor) && (
+                <p className="text-xs text-[var(--sn-destructive,#e05555)]">
+                  Enter a 6-digit hex color like #FFAA00, or leave it blank.
+                </p>
+              )}
+            </div>
+
         <div className="flex items-center gap-3 pt-2">
           {saved && (
             <div className="flex items-center gap-2 text-xs text-[var(--sn-purple)]">
@@ -307,6 +359,7 @@ export default function Settings() {
           <Button
             onClick={() => updateMutation.mutate(form)}
             loading={updateMutation.isPending}
+            disabled={!isValidHex(form.adAccentColor)}
             className="ml-auto"
           >
             <Save className="w-4 h-4" /> Save Changes
