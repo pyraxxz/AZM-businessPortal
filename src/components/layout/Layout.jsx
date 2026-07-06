@@ -15,14 +15,17 @@ import {
   Building2, Briefcase, Store, CalendarCheck, QrCode, BedDouble, FileCheck,
   AlertCircle, CheckCircle2, Users, Wallet, Megaphone, Image as ImageIcon,
   Grid3x3, Star, Utensils, Smartphone, Search, LayoutGrid, Wrench, LineChart,
+  Sparkles, ConciergeBell, ChefHat, LayoutDashboard as TableIcon, CarFront, ShipWheel, FileSpreadsheet,
 } from 'lucide-react';
 
 const TYPE_ICONS = { Bus, UtensilsCrossed, Building2, ShoppingBag, Briefcase, Store };
 
 const NAV_ICONS = {
   transit: Bus, reservations: CalendarCheck, checkin: QrCode, reviews: Star,
-  tables: MapPin, rooms: BedDouble, dineIn: Utensils, marketing: Megaphone,
+  rooms: BedDouble, dineIn: Utensils, marketing: Megaphone,
   finance: Wallet, showcase: ImageIcon, seatMap: Grid3x3, guests: Users,
+  housekeeping: Sparkles, frontdesk: ConciergeBell, kitchen: ChefHat,
+  tables: TableIcon, fleet: CarFront, drivers: ShipWheel, manifests: FileSpreadsheet,
 };
 
 const COMMERCE_NAV = [
@@ -42,6 +45,7 @@ const MANAGE_NAV = [
 ];
 
 const ADMIN_ALL_NAV = [
+  // General marketplace
   { label: 'Transit Trips',   icon: Bus,           to: '/transit' },
   { label: 'Reservations',    icon: CalendarCheck, to: '/reservations' },
   { label: 'Check-In',        icon: QrCode,        to: '/checkin' },
@@ -52,6 +56,17 @@ const ADMIN_ALL_NAV = [
   { label: 'Seat Map Editor', icon: Grid3x3,       to: '/seat-map' },
   { label: 'Guests',          icon: Users,         to: '/guests' },
   { label: 'Reviews',         icon: Star,          to: '/reviews' },
+  // Hotel operations
+  { label: 'Room Status',     icon: BedDouble,     to: '/hotel-rooms' },
+  { label: 'Housekeeping',    icon: Sparkles,      to: '/hotel-housekeeping' },
+  { label: 'Front Desk',      icon: ConciergeBell, to: '/hotel-front-desk' },
+  // Restaurant operations
+  { label: 'Kitchen (KDS)',   icon: ChefHat,       to: '/restaurant-kitchen' },
+  { label: 'Table Map',       icon: TableIcon,     to: '/restaurant-tables' },
+  // Transit operations
+  { label: 'Fleet Status',    icon: CarFront,      to: '/transit-fleet' },
+  { label: 'Drivers',         icon: ShipWheel, to: '/transit-drivers' },
+  { label: 'Manifests',       icon: FileSpreadsheet, to: '/transit-manifests' },
 ];
 
 export default function Layout() {
