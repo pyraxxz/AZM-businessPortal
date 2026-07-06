@@ -114,10 +114,16 @@ export default function Layout() {
     .map(item => ({ label: item.label, icon: NAV_ICONS[item.icon] || Star, to: item.to }));
 
   // ── Rail sections ──
+  // Admin always gets "All Business Tools" for testing, plus a type-specific
+  // section when a business is selected so they can see both views.
   const railSections = isAdmin
     ? [
         { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, direct: '/' },
+        { key: 'commerce',  label: 'Commerce', icon: ShoppingBag, items: COMMERCE_NAV },
         { key: 'tools',     label: 'All Business Tools', icon: LayoutGrid, items: ADMIN_ALL_NAV },
+        ...(marketplaceNavItems.length > 0
+          ? [{ key: 'type', label: typeConfig.label, icon: TypeIcon, items: marketplaceNavItems }]
+          : []),
         { key: 'manage',    label: 'Manage', icon: Wrench, items: MANAGE_NAV },
       ]
     : [
