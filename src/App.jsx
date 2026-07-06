@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { ToastProvider } from '@/components/ui/Toast';
 import Layout from '@/components/layout/Layout';
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
@@ -68,7 +69,6 @@ function AppRoutes() {
     );
   }
 
-  // Authenticated but no business profile yet → onboarding
   if (!isAdmin && !bizProfile) {
     return (
       <Routes>
@@ -90,33 +90,22 @@ function AppRoutes() {
         <Route path="/kyb"            element={<KYB />} />
         <Route path="/notifications"  element={<Notifications />} />
         <Route path="/settings"       element={<Settings />} />
-        
-        {/* Marketplace Routes */}
         <Route path="/transit"              element={<TransitTrips />} />
         <Route path="/reservations"         element={<Reservations />} />
         <Route path="/checkin"              element={<CheckIn />} />
         <Route path="/reviews"              element={<Reviews />} />
-        
         <Route path="/dine-in"              element={<DineIn />} />
         <Route path="/guests"               element={<Guests />} />
         <Route path="/marketing"            element={<Marketing />} />
         <Route path="/finance"              element={<FinanceV2 />} />
         <Route path="/seat-map"             element={<SeatMapEditor />} />
         <Route path="/showcase"             element={<Showcase />} />
-        
-        {/* Employee Management */}
         <Route path="/employees"            element={<Employees />} />
-        
-        {/* Hotel Operations */}
         <Route path="/hotel-rooms"          element={<HotelRooms />} />
         <Route path="/hotel-housekeeping"   element={<HotelHousekeeping />} />
         <Route path="/hotel-front-desk"     element={<HotelFrontDesk />} />
-        
-        {/* Restaurant Operations */}
         <Route path="/restaurant-kitchen"   element={<RestaurantKitchen />} />
         <Route path="/restaurant-tables"    element={<RestaurantTables />} />
-        
-        {/* Transit Operations */}
         <Route path="/transit-fleet"        element={<TransitFleet />} />
         <Route path="/transit-drivers"      element={<TransitDrivers />} />
         <Route path="/transit-manifests"    element={<TransitManifests />} />
@@ -133,24 +122,26 @@ export default function App() {
     <ErrorBoundary>
       <AuthProvider>
         <QueryClientProvider client={qc}>
-          <Router>
-            <AppRoutes />
-          </Router>
-          <Toaster 
-            richColors 
-            position="top-center" 
-            expand={true}
-            toastOptions={{
-              className: 'sentry-toast',
-              style: {
-                background: 'var(--sn-card)',
-                border: '1px solid var(--sn-border)',
-                color: 'var(--sn-text-primary)',
-                backdropFilter: 'blur(12px)',
-                boxShadow: 'var(--sn-shadow)',
-              },
-            }}
-          />
+          <ToastProvider>
+            <Router>
+              <AppRoutes />
+            </Router>
+            <Toaster 
+              richColors 
+              position="top-center" 
+              expand={true}
+              toastOptions={{
+                className: 'sentry-toast',
+                style: {
+                  background: 'var(--sn-card)',
+                  border: '1px solid var(--sn-border)',
+                  color: 'var(--sn-text-primary)',
+                  backdropFilter: 'blur(12px)',
+                  boxShadow: 'var(--sn-shadow)',
+                },
+              }}
+            />
+          </ToastProvider>
         </QueryClientProvider>
       </AuthProvider>
     </ErrorBoundary>
