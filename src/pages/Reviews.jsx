@@ -62,58 +62,58 @@ export default function Reviews() {
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-[#e8e8f0] flex items-center gap-2">
-          <Star className="w-5 h-5 text-[#f59e0b]" />
+        <h1 className="text-xl font-bold text-[var(--sn-text)] flex items-center gap-2">
+          <Star className="w-5 h-5 text-[var(--sn-amber)]" />
           Reviews
         </h1>
-        <p className="text-sm text-[#7b7b9a] mt-1">Monitor customer feedback and promote great reviews to Stories.</p>
+        <p className="text-sm text-[var(--sn-text-muted)] mt-1">Monitor customer feedback and promote great reviews to Stories.</p>
       </div>
 
       {/* Stats + Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Average rating */}
-        <Widget title="Average Rating" icon={Star} iconColor="#f59e0b" loading={statsLoading}>
+        <Widget title="Average Rating" icon={Star} iconColor="var(--sn-amber)" loading={statsLoading}>
           <div className="flex items-center gap-3">
-            <WidgetStat value={fmt(avgRating, 1)} color="#f59e0b" />
+            <WidgetStat value={fmt(avgRating, 1)} color="var(--sn-amber)" />
             <div className="flex items-center gap-0.5">
               {[1, 2, 3, 4, 5].map(s => (
                 <Star
                   key={s}
-                  className={cn('w-4 h-4', s <= Math.round(avgRating) ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-[#2a2a3e]')}
+                  className={cn('w-4 h-4', s <= Math.round(avgRating) ? 'text-[var(--sn-amber)] fill-[var(--sn-amber)]' : 'text-[var(--sn-border)]')}
                 />
               ))}
             </div>
           </div>
-          <p className="text-[11px] text-[#4a4a6a] mt-2">{totalReviews} total reviews</p>
+          <p className="text-[11px] text-[var(--sn-text-muted)] mt-2">{totalReviews} total reviews</p>
         </Widget>
 
         {/* Total reviews */}
-        <Widget title="Total Reviews" icon={MessageSquare} iconColor="#4f8ef7" loading={statsLoading}>
-          <WidgetStat value={fmt(totalReviews, 0)} label="All time" color="#4f8ef7" />
+        <Widget title="Total Reviews" icon={MessageSquare} iconColor="var(--sn-blue)" loading={statsLoading}>
+          <WidgetStat value={fmt(totalReviews, 0)} label="All time" color="var(--sn-blue)" />
         </Widget>
 
         {/* Stories promoted */}
-        <Widget title="Stories Promoted" icon={Sparkles} iconColor="#a78bfa" loading={statsLoading}>
-          <WidgetStat value={fmt(stats.storiesPromoted || 0, 0)} label="From reviews" color="#a78bfa" />
+        <Widget title="Stories Promoted" icon={Sparkles} iconColor="var(--sn-purple)" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.storiesPromoted || 0, 0)} label="From reviews" color="var(--sn-purple)" />
         </Widget>
       </div>
 
       {/* Rating distribution */}
-      <Widget title="Rating Distribution" icon={TrendingUp} iconColor="#00d97e">
+      <Widget title="Rating Distribution" icon={TrendingUp} iconColor="var(--sn-purple)">
         <div className="space-y-2">
           {distribution.map(d => (
             <div key={d.stars} className="flex items-center gap-3">
               <div className="flex items-center gap-1 w-16">
-                <span className="text-xs font-bold text-[#e8e8f0]">{d.stars}</span>
-                <Star className="w-3 h-3 text-[#f59e0b] fill-[#f59e0b]" />
+                <span className="text-xs font-bold text-[var(--sn-text)]">{d.stars}</span>
+                <Star className="w-3 h-3 text-[var(--sn-amber)] fill-[var(--sn-amber)]" />
               </div>
-              <div className="flex-1 h-2 rounded-full bg-[#1e1e2e] overflow-hidden">
+              <div className="flex-1 h-2 rounded-full bg-[var(--sn-border)] overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-[#f59e0b] transition-all duration-500"
+                  className="h-full rounded-full bg-[var(--sn-amber)] transition-all duration-500"
                   style={{ width: `${d.pct}%` }}
                 />
               </div>
-              <span className="text-xs text-[#7b7b9a] font-medium w-12 text-right">{d.count}</span>
+              <span className="text-xs text-[var(--sn-text-muted)] font-medium w-12 text-right">{d.count}</span>
             </div>
           ))}
         </div>
@@ -125,7 +125,7 @@ export default function Reviews() {
           onClick={() => setRatingFilter('all')}
           className={cn(
             'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
-            ratingFilter === 'all' ? 'bg-[#f59e0b1a] text-[#f59e0b] border border-[#f59e0b30]' : 'text-[#7b7b9a] hover:bg-[#13131e] border border-transparent'
+            ratingFilter === 'all' ? 'bg-[var(--sn-amber)] text-[var(--sn-amber)] border border-[#f59e0b30]' : 'text-[var(--sn-text-muted)] hover:bg-[var(--sn-card)] border border-transparent'
           )}
         >
           All
@@ -136,7 +136,7 @@ export default function Reviews() {
             onClick={() => setRatingFilter(String(r))}
             className={cn(
               'flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
-              ratingFilter === String(r) ? 'bg-[#f59e0b1a] text-[#f59e0b] border border-[#f59e0b30]' : 'text-[#7b7b9a] hover:bg-[#13131e] border border-transparent'
+              ratingFilter === String(r) ? 'bg-[var(--sn-amber)] text-[var(--sn-amber)] border border-[#f59e0b30]' : 'text-[var(--sn-text-muted)] hover:bg-[var(--sn-card)] border border-transparent'
             )}
           >
             {r} <Star className="w-3 h-3" />
@@ -150,7 +150,7 @@ export default function Reviews() {
           {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
       ) : reviews.length === 0 ? (
-        <Widget title="Reviews" icon={MessageSquare} iconColor="#4f8ef7">
+        <Widget title="Reviews" icon={MessageSquare} iconColor="var(--sn-blue)">
           <Empty
             icon={Star}
             title="No reviews yet"
@@ -168,15 +168,15 @@ export default function Reviews() {
             <button
               disabled={page === 0}
               onClick={() => setPage(p => p - 1)}
-              className="p-2 rounded-lg text-[#4a4a6a] hover:bg-[#13131e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg text-[var(--sn-text-muted)] hover:bg-[var(--sn-card)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-xs text-[#7b7b9a] font-medium">Page {page + 1}</span>
+            <span className="text-xs text-[var(--sn-text-muted)] font-medium">Page {page + 1}</span>
             <button
               disabled={reviews.length < 10}
               onClick={() => setPage(p => p + 1)}
-              className="p-2 rounded-lg text-[#4a4a6a] hover:bg-[#13131e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg text-[var(--sn-text-muted)] hover:bg-[var(--sn-card)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -189,37 +189,37 @@ export default function Reviews() {
 
 function ReviewCard({ review, onPromote, promoting }) {
   return (
-    <div className="rounded-2xl border border-[#1e1e2e] p-5 hover:border-[#2a2a3e] transition-colors" style={{ background: 'var(--az-card)' }}>
+    <div className="rounded-2xl border border-[var(--sn-border)] p-5 hover:border-[var(--sn-border)] transition-colors" style={{ background: 'var(--az-card)' }}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          <div className="w-10 h-10 rounded-full bg-[#f59e0b1a] border border-[#f59e0b30] flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-bold text-[#f59e0b]">
+          <div className="w-10 h-10 rounded-full bg-[var(--sn-amber)] border border-[#f59e0b30] flex items-center justify-center flex-shrink-0">
+            <span className="text-xs font-bold text-[var(--sn-amber)]">
               {(review.customerName || review.azamanId || '?').charAt(0).toUpperCase()}
             </span>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-bold text-[#e8e8f0] truncate">{review.customerName || 'Anonymous'}</p>
-              <span className="text-[10px] text-[#4a4a6a]">{review.azamanId}</span>
+              <p className="text-sm font-bold text-[var(--sn-text)] truncate">{review.customerName || 'Anonymous'}</p>
+              <span className="text-[10px] text-[var(--sn-text-muted)]">{review.azamanId}</span>
             </div>
             <div className="flex items-center gap-2 mt-0.5">
               <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map(s => (
                   <Star
                     key={s}
-                    className={cn('w-3 h-3', s <= review.rating ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-[#2a2a3e]')}
+                    className={cn('w-3 h-3', s <= review.rating ? 'text-[var(--sn-amber)] fill-[var(--sn-amber)]' : 'text-[var(--sn-border)]')}
                   />
                 ))}
               </div>
-              <span className="text-[11px] text-[#4a4a6a]">{relativeTime(review.createdAt)}</span>
+              <span className="text-[11px] text-[var(--sn-text-muted)]">{relativeTime(review.createdAt)}</span>
             </div>
             {review.comment && (
-              <p className="text-sm text-[#7b7b9a] mt-2 leading-relaxed">{review.comment}</p>
+              <p className="text-sm text-[var(--sn-text-muted)] mt-2 leading-relaxed">{review.comment}</p>
             )}
           </div>
         </div>
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
-          {review.hasOrderRef && <Badge color="#4f8ef7">Verified</Badge>}
+          {review.hasOrderRef && <Badge color="var(--sn-blue)">Verified</Badge>}
           <Button
             size="sm"
             variant="outline"

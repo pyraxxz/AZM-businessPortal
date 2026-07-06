@@ -106,33 +106,33 @@ export default function Settings() {
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-xl font-bold text-[#e8e8f0]">Business Settings</h1>
-        <p className="text-sm text-[#7b7b9a] mt-1">Update your business profile and contact information.</p>
+        <h1 className="text-xl font-bold text-[var(--sn-text)]">Business Settings</h1>
+        <p className="text-sm text-[var(--sn-text-muted)] mt-1">Update your business profile and contact information.</p>
       </div>
 
       {/* Account info */}
       <Card className="space-y-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#00d97e1a] border border-[#00d97e35] flex items-center justify-center flex-shrink-0">
-            <Building2 className="w-6 h-6 text-[#00d97e]" />
+          <div className="w-12 h-12 rounded-2xl bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple)] flex items-center justify-center flex-shrink-0">
+            <Building2 className="w-6 h-6 text-[var(--sn-purple)]" />
           </div>
           <div>
-            <p className="text-base font-bold text-[#e8e8f0]">{bizProfile?.businessName || 'Your Business'}</p>
+            <p className="text-base font-bold text-[var(--sn-text)]">{bizProfile?.businessName || 'Your Business'}</p>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs text-[#4a4a6a] az-mono">{bizProfile?.bizId}</span>
+              <span className="text-xs text-[var(--sn-text-muted)] az-mono">{bizProfile?.bizId}</span>
               <Badge color={kybMeta.color} bg={kybMeta.bg}>{kybMeta.label}</Badge>
             </div>
           </div>
         </div>
-        <div className="pt-2 border-t border-[#1e1e2e]">
+        <div className="pt-2 border-t border-[var(--sn-border)]">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-[#4a4a6a] mb-1">Signed in as</p>
-              <p className="text-sm text-[#e8e8f0]">{user?.username}</p>
+              <p className="text-xs text-[var(--sn-text-muted)] mb-1">Signed in as</p>
+              <p className="text-sm text-[var(--sn-text)]">{user?.username}</p>
             </div>
             <div>
-              <p className="text-xs text-[#4a4a6a] mb-1">Email</p>
-              <p className="text-sm text-[#e8e8f0]">{user?.email}</p>
+              <p className="text-xs text-[var(--sn-text-muted)] mb-1">Email</p>
+              <p className="text-sm text-[var(--sn-text)]">{user?.email}</p>
             </div>
           </div>
         </div>
@@ -142,20 +142,20 @@ export default function Settings() {
       <Card className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-bold text-[#e8e8f0]">Public Profile</p>
-            <p className="text-xs text-[#7b7b9a] mt-1">This is how customers find you in the Azaman app.</p>
+            <p className="text-sm font-bold text-[var(--sn-text)]">Public Profile</p>
+            <p className="text-xs text-[var(--sn-text-muted)] mt-1">This is how customers find you in the Azaman app.</p>
           </div>
           {bizProfile?.isVerified && (
-            <span className="flex items-center gap-1 text-xs font-semibold text-[#00d97e]">
+            <span className="flex items-center gap-1 text-xs font-semibold text-[var(--sn-purple)]">
               <BadgeCheck className="w-4 h-4" /> Verified
             </span>
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
+        <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
           <div className="min-w-0">
-            <p className="text-xs text-[#4a4a6a] mb-0.5">Your BIZ ID</p>
-            <p className="text-sm font-bold text-[#e8e8f0] az-mono truncate">{bizProfile?.bizId || '—'}</p>
+            <p className="text-xs text-[var(--sn-text-muted)] mb-0.5">Your BIZ ID</p>
+            <p className="text-sm font-bold text-[var(--sn-text)] az-mono truncate">{bizProfile?.bizId || '—'}</p>
           </div>
           <Button variant="secondary" size="sm" onClick={copyBizId} className="flex-shrink-0">
             <Copy className="w-3.5 h-3.5" /> Copy
@@ -163,13 +163,13 @@ export default function Settings() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
-            <p className="text-xs text-[#4a4a6a] mb-0.5">Category</p>
-            <p className="text-sm text-[#e8e8f0]">{(bizProfile?.category || 'OTHER').replace(/_/g, ' ')}</p>
+          <div className="p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+            <p className="text-xs text-[var(--sn-text-muted)] mb-0.5">Category</p>
+            <p className="text-sm text-[var(--sn-text)]">{(bizProfile?.category || 'OTHER').replace(/_/g, ' ')}</p>
           </div>
-          <div className="p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
-            <p className="text-xs text-[#4a4a6a] mb-0.5">Lifetime Orders</p>
-            <p className="text-sm text-[#e8e8f0] az-mono">{bizProfile?.totalEscrows ?? 0}</p>
+          <div className="p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+            <p className="text-xs text-[var(--sn-text-muted)] mb-0.5">Lifetime Orders</p>
+            <p className="text-sm text-[var(--sn-text)] az-mono">{bizProfile?.totalEscrows ?? 0}</p>
           </div>
         </div>
 
@@ -186,10 +186,10 @@ export default function Settings() {
       {/* QR Codes */}
       <Card className="space-y-4">
         <div className="flex items-center gap-2">
-          <QrCode className="w-4 h-4 text-[#00d97e]" />
-          <h3 className="text-sm font-bold text-[#e8e8f0]">QR Codes</h3>
+          <QrCode className="w-4 h-4 text-[var(--sn-purple)]" />
+          <h3 className="text-sm font-bold text-[var(--sn-text)]">QR Codes</h3>
         </div>
-        <p className="text-xs text-[#7b7b9a]">
+        <p className="text-xs text-[var(--sn-text-muted)]">
           Let customers scan to open your business instantly in the Azaman app — no search needed.
         </p>
 
@@ -222,13 +222,13 @@ export default function Settings() {
             )}
           </div>
         ) : (
-          <p className="text-xs text-[#4a4a6a]">Your BIZ ID is not ready yet. QR codes will appear here once available.</p>
+          <p className="text-xs text-[var(--sn-text-muted)]">Your BIZ ID is not ready yet. QR codes will appear here once available.</p>
         )}
       </Card>
 
       {/* Edit form */}
       <Card className="space-y-5">
-        <p className="text-sm font-bold text-[#e8e8f0]">Business Information</p>
+        <p className="text-sm font-bold text-[var(--sn-text)]">Business Information</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
@@ -265,7 +265,7 @@ export default function Settings() {
 
         <div className="flex items-center gap-3 pt-2">
           {saved && (
-            <div className="flex items-center gap-2 text-xs text-[#00d97e]">
+            <div className="flex items-center gap-2 text-xs text-[var(--sn-purple)]">
               <CheckCircle2 className="w-4 h-4" /> Saved
             </div>
           )}
@@ -281,14 +281,14 @@ export default function Settings() {
 
       <Card className="space-y-4">
         <div>
-            <h3 className="text-sm font-bold text-[#e8e8f0]">Penalty Policy</h3>
-            <p className="text-xs text-[#7b7b9a] mt-1">
+            <h3 className="text-sm font-bold text-[var(--sn-text)]">Penalty Policy</h3>
+            <p className="text-xs text-[var(--sn-text-muted)] mt-1">
                 Configure how no-shows are penalized for your business.
             </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">Customer Penalty %</label>
+                <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Customer Penalty %</label>
                 <input
                     type="number"
                     min="0"
@@ -299,11 +299,11 @@ export default function Settings() {
                         ...penaltyPolicy,
                         customerPenaltyPct: Number(e.target.value) / 100,
                     })}
-                    className="w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2 text-sm text-[#e8e8f0] focus:border-[#00d97e] outline-none"
+                    className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
                 />
             </div>
             <div>
-                <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">Business Penalty %</label>
+                <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Business Penalty %</label>
                 <input
                     type="number"
                     min="0"
@@ -314,11 +314,11 @@ export default function Settings() {
                         ...penaltyPolicy,
                         businessPenaltyPct: Number(e.target.value) / 100,
                     })}
-                    className="w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2 text-sm text-[#e8e8f0] focus:border-[#00d97e] outline-none"
+                    className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
                 />
             </div>
             <div>
-                <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">Grace Period (mins)</label>
+                <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Grace Period (mins)</label>
                 <input
                     type="number"
                     min="0"
@@ -328,7 +328,7 @@ export default function Settings() {
                         ...penaltyPolicy,
                         gracePeriodMins: Number(e.target.value),
                     })}
-                    className="w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2 text-sm text-[#e8e8f0] focus:border-[#00d97e] outline-none"
+                    className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
                 />
             </div>
         </div>
@@ -353,28 +353,28 @@ export default function Settings() {
 
       <Card className="space-y-4">
         <div>
-          <h3 className="text-sm font-bold text-[#e8e8f0] flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-[#00d97e]" />
+          <h3 className="text-sm font-bold text-[var(--sn-text)] flex items-center gap-2">
+            <Wallet className="w-4 h-4 text-[var(--sn-purple)]" />
             Payroll & Smart Routing
           </h3>
-          <p className="text-xs text-[#7b7b9a] mt-1">
+          <p className="text-xs text-[var(--sn-text-muted)] mt-1">
             Configure how payroll is disbursed to employees. Smart Routing allows employees to auto-split their salaries into USDC savings.
           </p>
         </div>
         
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
             <div>
-              <p className="text-sm font-semibold text-[#e8e8f0]">Allow Employee Smart Routing</p>
-              <p className="text-xs text-[#7b7b9a]">Employees can define percentage splits (e.g. 80% checking, 20% savings)</p>
+              <p className="text-sm font-semibold text-[var(--sn-text)]">Allow Employee Smart Routing</p>
+              <p className="text-xs text-[var(--sn-text-muted)]">Employees can define percentage splits (e.g. 80% checking, 20% savings)</p>
             </div>
             <Switch defaultChecked />
           </div>
           
-          <div className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
             <div>
-              <p className="text-sm font-semibold text-[#e8e8f0]">Auto-Approve Time Off</p>
-              <p className="text-xs text-[#7b7b9a]">Automatically approve requests &lt; 2 days</p>
+              <p className="text-sm font-semibold text-[var(--sn-text)]">Auto-Approve Time Off</p>
+              <p className="text-xs text-[var(--sn-text-muted)]">Automatically approve requests &lt; 2 days</p>
             </div>
             <Switch />
           </div>

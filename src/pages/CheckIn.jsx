@@ -86,40 +86,40 @@ export default function CheckIn() {
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-[#e8e8f0] flex items-center gap-2">
-          <QrCode className="w-5 h-5 text-[#00d97e]" />
+        <h1 className="text-xl font-bold text-[var(--sn-text)] flex items-center gap-2">
+          <QrCode className="w-5 h-5 text-[var(--sn-purple)]" />
           Check-In Dashboard
         </h1>
-        <p className="text-sm text-[#7b7b9a] mt-1">Verify customer QR codes or search by AZM-ID to check in reservations.</p>
+        <p className="text-sm text-[var(--sn-text-muted)] mt-1">Verify customer QR codes or search by AZM-ID to check in reservations.</p>
       </div>
 
       {/* Today's stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Widget title="Checked In Today" icon={UserCheck} iconColor="#00d97e" loading={statsLoading}>
-          <WidgetStat value={fmt(stats.todayCount || 0, 0)} label="Guests" color="#00d97e" />
+        <Widget title="Checked In Today" icon={UserCheck} iconColor="var(--sn-purple)" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.todayCount || 0, 0)} label="Guests" color="var(--sn-purple)" />
         </Widget>
-        <Widget title="Pending" icon={Clock} iconColor="#f59e0b" loading={statsLoading}>
-          <WidgetStat value={fmt(stats.pending || 0, 0)} label="Awaiting check-in" color="#f59e0b" />
+        <Widget title="Pending" icon={Clock} iconColor="var(--sn-amber)" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.pending || 0, 0)} label="Awaiting check-in" color="var(--sn-amber)" />
         </Widget>
-        <Widget title="No-Shows" icon={AlertCircle} iconColor="#f43f5e" loading={statsLoading}>
-          <WidgetStat value={fmt(stats.noShows || 0, 0)} label="Today" color="#f43f5e" />
+        <Widget title="No-Shows" icon={AlertCircle} iconColor="var(--sn-red)" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.noShows || 0, 0)} label="Today" color="var(--sn-red)" />
         </Widget>
-        <Widget title="Total Guests" icon={Users} iconColor="#4f8ef7" loading={statsLoading}>
-          <WidgetStat value={fmt(stats.totalGuests || 0, 0)} label="All time" color="#4f8ef7" />
+        <Widget title="Total Guests" icon={Users} iconColor="var(--sn-blue)" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.totalGuests || 0, 0)} label="All time" color="var(--sn-blue)" />
         </Widget>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Check-in panel */}
-        <Widget title="Check In" icon={Zap} iconColor="#00d97e" height="300px">
+        <Widget title="Check In" icon={Zap} iconColor="var(--sn-purple)" height="300px">
           <div className="space-y-4">
             {/* Mode toggle */}
-            <div className="flex gap-2 p-1 rounded-xl bg-[#0f0f17] border border-[#1e1e2e]">
+            <div className="flex gap-2 p-1 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
               <button
                 onClick={() => setMode('scan')}
                 className={cn(
                   'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all',
-                  mode === 'scan' ? 'bg-[#00d97e1a] text-[#00d97e]' : 'text-[#4a4a6a] hover:text-[#7b7b9a]'
+                  mode === 'scan' ? 'bg-[var(--sn-purple-subtle)] text-[var(--sn-purple)]' : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text-muted)]'
                 )}
               >
                 <QrCode className="w-3.5 h-3.5" /> QR Token
@@ -128,7 +128,7 @@ export default function CheckIn() {
                 onClick={() => setMode('search')}
                 className={cn(
                   'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all',
-                  mode === 'search' ? 'bg-[#00d97e1a] text-[#00d97e]' : 'text-[#4a4a6a] hover:text-[#7b7b9a]'
+                  mode === 'search' ? 'bg-[var(--sn-purple-subtle)] text-[var(--sn-purple)]' : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text-muted)]'
                 )}
               >
                 <Search className="w-3.5 h-3.5" /> AZM-ID
@@ -148,7 +148,7 @@ export default function CheckIn() {
                 <Button onClick={handleVerify} loading={verifyMut.isPending} className="w-full">
                   <CheckCircle2 className="w-4 h-4" /> Verify & Check In
                 </Button>
-                <p className="text-[11px] text-[#4a4a6a] text-center">
+                <p className="text-[11px] text-[var(--sn-text-muted)] text-center">
                   Ask the customer to show their QR code in the app, then enter the token above.
                 </p>
               </div>
@@ -167,7 +167,7 @@ export default function CheckIn() {
                 <Button onClick={handleSearch} loading={searchMut.isPending} className="w-full">
                   <Search className="w-4 h-4" /> Search Customer
                 </Button>
-                <p className="text-[11px] text-[#4a4a6a] text-center">
+                <p className="text-[11px] text-[var(--sn-text-muted)] text-center">
                   Search by AZM-ID to find the customer and their active reservations.
                 </p>
               </div>
@@ -176,15 +176,15 @@ export default function CheckIn() {
         </Widget>
 
         {/* Recent check-ins */}
-        <Widget title="Recent Check-Ins" icon={Clock} iconColor="#4f8ef7" height="300px">
+        <Widget title="Recent Check-Ins" icon={Clock} iconColor="var(--sn-blue)" height="300px">
           {recentLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10" />)}
             </div>
           ) : recent.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
-              <Clock className="w-8 h-8 text-[#4a4a6a] mb-2" />
-              <p className="text-xs text-[#7b7b9a]">No check-ins yet today.</p>
+              <Clock className="w-8 h-8 text-[var(--sn-text-muted)] mb-2" />
+              <p className="text-xs text-[var(--sn-text-muted)]">No check-ins yet today.</p>
             </div>
           ) : (
             <div className="space-y-0 max-h-[220px] overflow-y-auto">
@@ -193,7 +193,7 @@ export default function CheckIn() {
                   key={ci.id}
                   label={ci.customerName || ci.azamanId}
                   value={relativeTime(ci.checkedInAt)}
-                  badge={<Badge color="#00d97e">{ci.reference}</Badge>}
+                  badge={<Badge color="var(--sn-purple)">{ci.reference}</Badge>}
                 />
               ))}
             </div>
@@ -206,30 +206,30 @@ export default function CheckIn() {
         {searchResults && (
           <div className="space-y-4">
             {/* Customer info */}
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0f0f17] border border-[#1e1e2e]">
-              <div className="w-12 h-12 rounded-full bg-[#4f8ef71a] border border-[#4f8ef730] flex items-center justify-center">
-                <span className="text-sm font-bold text-[#4f8ef7]">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+              <div className="w-12 h-12 rounded-full bg-[var(--sn-blue)] border border-[#4f8ef730] flex items-center justify-center">
+                <span className="text-sm font-bold text-[var(--sn-blue)]">
                   {(searchResults.customerName || searchResults.azamanId || '?').charAt(0).toUpperCase()}
                 </span>
               </div>
               <div>
-                <p className="text-sm font-bold text-[#e8e8f0]">{searchResults.customerName || 'Unknown'}</p>
-                <p className="text-xs text-[#4a4a6a]">{searchResults.azamanId} · {searchResults.email || ''}</p>
+                <p className="text-sm font-bold text-[var(--sn-text)]">{searchResults.customerName || 'Unknown'}</p>
+                <p className="text-xs text-[var(--sn-text-muted)]">{searchResults.azamanId} · {searchResults.email || ''}</p>
               </div>
             </div>
 
             {/* Active reservations */}
             <div>
-              <p className="text-xs font-bold text-[#4a4a6a] uppercase tracking-wider mb-2">Active Reservations</p>
+              <p className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider mb-2">Active Reservations</p>
               {(searchResults.reservations || []).length === 0 ? (
-                <p className="text-sm text-[#7b7b9a] py-4 text-center">No active reservations found.</p>
+                <p className="text-sm text-[var(--sn-text-muted)] py-4 text-center">No active reservations found.</p>
               ) : (
                 <div className="space-y-2">
                   {searchResults.reservations.map((r) => (
-                    <div key={r.id} className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f17] border border-[#1e1e2e]">
+                    <div key={r.id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-[#e8e8f0] truncate">{r.reference || r.tripRoute || 'Reservation'}</p>
-                        <p className="text-[11px] text-[#4a4a6a]">{formatDateTime(r.scheduledFor || r.createdAt)}</p>
+                        <p className="text-sm font-semibold text-[var(--sn-text)] truncate">{r.reference || r.tripRoute || 'Reservation'}</p>
+                        <p className="text-[11px] text-[var(--sn-text-muted)]">{formatDateTime(r.scheduledFor || r.createdAt)}</p>
                       </div>
                       {r.status === 'CONFIRMED' ? (
                         <Button
@@ -240,7 +240,7 @@ export default function CheckIn() {
                           Check In <ArrowRight className="w-3 h-3" />
                         </Button>
                       ) : (
-                        <Badge color={r.status === 'CHECKED_IN' ? '#00d97e' : '#f43f5e'}>
+                        <Badge color={r.status === 'CHECKED_IN' ? 'var(--sn-purple)' : 'var(--sn-red)'}>
                           {r.status === 'CHECKED_IN' ? 'Checked In' : r.status}
                         </Badge>
                       )}
@@ -257,14 +257,14 @@ export default function CheckIn() {
       <Modal open={checkInResult !== null} onClose={() => setCheckInResult(null)} title="Check-In Successful" className="max-w-md">
         {checkInResult && (
           <div className="flex flex-col items-center text-center py-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#00d97e1a] border border-[#00d97e40] flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-8 h-8 text-[#00d97e]" />
+            <div className="w-16 h-16 rounded-2xl bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple)] flex items-center justify-center mb-4">
+              <CheckCircle2 className="w-8 h-8 text-[var(--sn-purple)]" />
             </div>
-            <p className="text-lg font-bold text-[#e8e8f0]">{checkInResult.customerName || checkInResult.azamanId}</p>
-            <p className="text-sm text-[#7b7b9a] mt-1">{checkInResult.azamanId}</p>
-            <div className="mt-4 px-4 py-2 rounded-xl bg-[#0f0f17] border border-[#1e1e2e]">
-              <p className="text-xs text-[#4a4a6a]">Reservation</p>
-              <p className="text-sm font-bold text-[#e8e8f0] az-mono">{checkInResult.reservationRef || checkInResult.reference}</p>
+            <p className="text-lg font-bold text-[var(--sn-text)]">{checkInResult.customerName || checkInResult.azamanId}</p>
+            <p className="text-sm text-[var(--sn-text-muted)] mt-1">{checkInResult.azamanId}</p>
+            <div className="mt-4 px-4 py-2 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+              <p className="text-xs text-[var(--sn-text-muted)]">Reservation</p>
+              <p className="text-sm font-bold text-[var(--sn-text)] az-mono">{checkInResult.reservationRef || checkInResult.reference}</p>
             </div>
             <Button onClick={() => setCheckInResult(null)} className="mt-6 w-full">
               Done

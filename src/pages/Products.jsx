@@ -124,8 +124,8 @@ export default function Products() {
     <div className="p-6 max-w-6xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#e8e8f0]">Products</h1>
-          <p className="text-sm text-[#7b7b9a] mt-1">Manage your product catalogue.</p>
+          <h1 className="text-xl font-bold text-[var(--sn-text)]">Products</h1>
+          <p className="text-sm text-[var(--sn-text-muted)] mt-1">Manage your product catalogue.</p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="w-4 h-4" /> Add Product
@@ -147,7 +147,7 @@ export default function Products() {
         <>
           {active.length > 0 && (
             <section>
-              <p className="text-xs font-semibold text-[#4a4a6a] uppercase tracking-wider mb-3">
+              <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider mb-3">
                 Active — {active.length}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -157,7 +157,7 @@ export default function Products() {
           )}
           {inactive.length > 0 && (
             <section>
-              <p className="text-xs font-semibold text-[#4a4a6a] uppercase tracking-wider mb-3">
+              <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider mb-3">
                 Inactive — {inactive.length}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
@@ -205,25 +205,25 @@ export default function Products() {
           />
           {/* Product images */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-[#7b7b9a] uppercase tracking-wider">Product Images</p>
+            <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Product Images</p>
             <div className="grid grid-cols-3 gap-2">
               {form.imageUrls.map((url, idx) => (
-                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-[#0a0a12] border border-[#2a2a3e] group">
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-[var(--az-black)] border border-[var(--sn-border)] group">
                   <img src={url} alt="" className="w-full h-full object-cover" />
                   {idx === 0 && (
-                    <span className="absolute bottom-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#00d97e] text-[#0a0a0f]">COVER</span>
+                    <span className="absolute bottom-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--sn-purple)] text-[var(--az-black)]">COVER</span>
                   )}
                   <button
                     type="button"
                     onClick={() => removeImage(idx)}
-                    className="absolute top-1 right-1 w-5 h-5 bg-[#f43f5e] rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
+                    className="absolute top-1 right-1 w-5 h-5 bg-[var(--sn-red)] rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
                   >
                     <X className="w-3 h-3" />
                   </button>
                 </div>
               ))}
               {form.imageUrls.length < MAX_IMAGES && (
-                <label className={`aspect-square rounded-xl border-2 border-dashed border-[#2a2a3e] flex flex-col items-center justify-center transition-colors ${uploading ? 'opacity-60' : 'cursor-pointer hover:border-[#00d97e40]'}`}>
+                <label className={`aspect-square rounded-xl border-2 border-dashed border-[var(--sn-border)] flex flex-col items-center justify-center transition-colors ${uploading ? 'opacity-60' : 'cursor-pointer hover:border-[var(--sn-purple)]'}`}>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -232,13 +232,13 @@ export default function Products() {
                     className="hidden"
                   />
                   {uploading
-                    ? <Loader2 className="w-5 h-5 text-[#00d97e] animate-spin" />
-                    : <><Plus className="w-5 h-5 text-[#4a4a6a]" /><span className="text-xs text-[#4a4a6a] mt-1">Add Image</span></>
+                    ? <Loader2 className="w-5 h-5 text-[var(--sn-purple)] animate-spin" />
+                    : <><Plus className="w-5 h-5 text-[var(--sn-text-muted)]" /><span className="text-xs text-[var(--sn-text-muted)] mt-1">Add Image</span></>
                   }
                 </label>
               )}
             </div>
-            <p className="text-xs text-[#4a4a6a]">
+            <p className="text-xs text-[var(--sn-text-muted)]">
               {isCloudinaryConfigured()
                 ? 'Up to 5 images, 5MB each (JPEG/PNG/WebP). The first image is the cover.'
                 : 'Image upload is not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to enable uploads.'}
@@ -246,9 +246,9 @@ export default function Products() {
           </div>
 
           {formError && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-[#f43f5e1a] border border-[#f43f5e30]">
-              <AlertCircle className="w-4 h-4 text-[#f43f5e] flex-shrink-0" />
-              <p className="text-xs text-[#f43f5e]">{formError}</p>
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--sn-red)] border border-[var(--sn-red)]">
+              <AlertCircle className="w-4 h-4 text-[var(--sn-red)] flex-shrink-0" />
+              <p className="text-xs text-[var(--sn-red)]">{formError}</p>
             </div>
           )}
 
@@ -277,22 +277,22 @@ function ProductCard({ product: p, onEdit, onToggle }) {
           <img src={p.imageUrls[0]} alt={p.name} className="w-full h-full object-cover" />
         </div>
       ) : (
-        <div className="w-full h-24 rounded-xl bg-[#0f0f17] border border-[#2a2a3e] flex items-center justify-center">
-          <Package className="w-8 h-8 text-[#2a2a3e]" />
+        <div className="w-full h-24 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] flex items-center justify-center">
+          <Package className="w-8 h-8 text-[var(--sn-border)]" />
         </div>
       )}
 
       <div className="flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-semibold text-[#e8e8f0] leading-snug">{p.name}</p>
-          <span className="text-sm font-bold text-[#00d97e] az-mono flex-shrink-0">{fmtUSDC(p.priceUsdc)}</span>
+          <p className="text-sm font-semibold text-[var(--sn-text)] leading-snug">{p.name}</p>
+          <span className="text-sm font-bold text-[var(--sn-purple)] az-mono flex-shrink-0">{fmtUSDC(p.priceUsdc)}</span>
         </div>
         {p.description && (
-          <p className="text-xs text-[#4a4a6a] mt-1 line-clamp-2">{p.description}</p>
+          <p className="text-xs text-[var(--sn-text-muted)] mt-1 line-clamp-2">{p.description}</p>
         )}
         <div className="flex items-center gap-2 mt-2">
-          {p.category && <Badge color="#a78bfa" bg="#a78bfa1a">{p.category.replace(/_/g, ' ')}</Badge>}
-          <span className="text-xs text-[#4a4a6a]">{fmt(p.totalOrders, 0)} orders</span>
+          {p.category && <Badge color="var(--sn-purple)" bg="#a78bfa1a">{p.category.replace(/_/g, ' ')}</Badge>}
+          <span className="text-xs text-[var(--sn-text-muted)]">{fmt(p.totalOrders, 0)} orders</span>
         </div>
       </div>
 
@@ -303,11 +303,11 @@ function ProductCard({ product: p, onEdit, onToggle }) {
         <button
           onClick={() => onToggle.mutate({ id: p.id, isActive: !p.isActive })}
           title={p.isActive ? 'Deactivate' : 'Activate'}
-          className="p-2 rounded-xl border border-[#2a2a3e] hover:bg-[#1e1e2e] transition-colors"
+          className="p-2 rounded-xl border border-[var(--sn-border)] hover:bg-[var(--sn-border)] transition-colors"
         >
           {p.isActive
-            ? <ToggleRight className="w-4 h-4 text-[#00d97e]" />
-            : <ToggleLeft className="w-4 h-4 text-[#4a4a6a]" />
+            ? <ToggleRight className="w-4 h-4 text-[var(--sn-purple)]" />
+            : <ToggleLeft className="w-4 h-4 text-[var(--sn-text-muted)]" />
           }
         </button>
       </div>

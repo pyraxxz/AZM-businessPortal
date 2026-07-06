@@ -36,7 +36,7 @@ export default function PublicProfilePreview({ open, onClose, bizId }) {
           <div className="grid grid-cols-3 gap-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-20" />)}</div>
         </div>
       ) : isError || !biz ? (
-        <div className="py-10 text-center text-sm text-[#7b7b9a]">
+        <div className="py-10 text-center text-sm text-[var(--sn-text-muted)]">
           Could not load the public profile. Make sure your business is published.
         </div>
       ) : (
@@ -46,17 +46,17 @@ export default function PublicProfilePreview({ open, onClose, bizId }) {
             <Logo url={biz.logoUrl} name={biz.businessName} />
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <h3 className="text-base font-bold text-[#e8e8f0] truncate">{biz.businessName}</h3>
-                {biz.isVerified && <BadgeCheck className="w-4 h-4 text-[#00d97e] flex-shrink-0" />}
+                <h3 className="text-base font-bold text-[var(--sn-text)] truncate">{biz.businessName}</h3>
+                {biz.isVerified && <BadgeCheck className="w-4 h-4 text-[var(--sn-purple)] flex-shrink-0" />}
               </div>
               {biz.category && (
-                <Badge color="#a78bfa" bg="#a78bfa1a" className="mt-1">{biz.category.replace(/_/g, ' ')}</Badge>
+                <Badge color="var(--sn-purple)" bg="var(--sn-purple-subtle)" className="mt-1">{biz.category.replace(/_/g, ' ')}</Badge>
               )}
             </div>
           </div>
 
           {/* Description */}
-          {biz.description && <p className="text-sm text-[#7b7b9a] leading-relaxed">{biz.description}</p>}
+          {biz.description && <p className="text-sm text-[var(--sn-text-muted)] leading-relaxed">{biz.description}</p>}
 
           {/* Website */}
           {biz.website && (
@@ -64,7 +64,7 @@ export default function PublicProfilePreview({ open, onClose, bizId }) {
               href={biz.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xs text-[#4f8ef7] hover:underline"
+              className="inline-flex items-center gap-2 text-xs text-[var(--sn-blue)] hover:underline"
             >
               <Globe className="w-3.5 h-3.5" /> {biz.website}
             </a>
@@ -79,25 +79,25 @@ export default function PublicProfilePreview({ open, onClose, bizId }) {
 
           {/* Product mini-grid */}
           <div>
-            <p className="text-xs font-semibold text-[#4a4a6a] uppercase tracking-wider mb-2">Products</p>
+            <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider mb-2">Products</p>
             {products.length === 0 ? (
-              <p className="text-xs text-[#4a4a6a]">No active products listed yet.</p>
+              <p className="text-xs text-[var(--sn-text-muted)]">No active products listed yet.</p>
             ) : (
               <div className="grid grid-cols-3 gap-2">
                 {products.map(p => (
-                  <div key={p.id} className="rounded-xl overflow-hidden bg-[#0a0a12] border border-[#2a2a3e]">
+                  <div key={p.id} className="rounded-xl overflow-hidden bg-[var(--az-black)] border border-[var(--sn-border)]">
                     <div className="aspect-square">
                       {Array.isArray(p.imageUrls) && p.imageUrls[0] ? (
                         <img src={p.imageUrls[0]} alt={p.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Package className="w-6 h-6 text-[#2a2a3e]" />
+                          <Package className="w-6 h-6 text-[var(--sn-border)]" />
                         </div>
                       )}
                     </div>
                     <div className="p-2">
-                      <p className="text-[11px] font-semibold text-[#e8e8f0] truncate">{p.name}</p>
-                      <p className="text-[11px] font-bold text-[#00d97e] az-mono">{fmtUSDC(p.priceUsdc)}</p>
+                      <p className="text-[11px] font-semibold text-[var(--sn-text)] truncate">{p.name}</p>
+                      <p className="text-[11px] font-bold text-[var(--sn-purple)] az-mono">{fmtUSDC(p.priceUsdc)}</p>
                     </div>
                   </div>
                 ))}
@@ -122,7 +122,7 @@ function Logo({ url, name }) {
           onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
         />
       ) : null}
-      <span className="w-full h-full items-center justify-center text-lg font-bold text-[#00d97e]" style={{ display: url ? 'none' : 'flex' }}>
+      <span className="w-full h-full items-center justify-center text-lg font-bold text-[var(--sn-purple)]" style={{ display: url ? 'none' : 'flex' }}>
         {initials}
       </span>
     </div>
@@ -131,10 +131,10 @@ function Logo({ url, name }) {
 
 function Stat({ icon: Icon, label, value }) {
   return (
-    <div className="bg-[#0a0a12] rounded-xl p-3 text-center border border-[#1e1e2e]">
-      <Icon className="w-4 h-4 text-[#4a4a6a] mx-auto mb-1" />
-      <p className="text-sm font-bold text-[#e8e8f0] az-mono leading-tight">{value}</p>
-      <p className="text-[10px] text-[#4a4a6a] mt-0.5">{label}</p>
+    <div className="bg-[var(--az-black)] rounded-xl p-3 text-center border border-[#1e1e2e]">
+      <Icon className="w-4 h-4 text-[var(--sn-text-muted)] mx-auto mb-1" />
+      <p className="text-sm font-bold text-[var(--sn-text)] az-mono leading-tight">{value}</p>
+      <p className="text-[10px] text-[var(--sn-text-muted)] mt-0.5">{label}</p>
     </div>
   );
 }

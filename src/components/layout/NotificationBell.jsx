@@ -11,14 +11,14 @@ const POLL_MS = 30_000;
 
 // Visual treatment per BizNotifType.
 const TYPE_META = {
-  NEW_ORDER:          { icon: ShoppingBag,  color: '#00d97e' },
-  ORDER_FUNDED:       { icon: Wallet,       color: '#4f8ef7' },
-  ORDER_SATISFIED:    { icon: CheckCircle2, color: '#00d97e' },
-  ORDER_DISPUTED:     { icon: AlertTriangle,color: '#f59e0b' },
-  ORDER_SETTLED:      { icon: CheckCircle2, color: '#00d97e' },
-  ORDER_REFUNDED:     { icon: RotateCcw,    color: '#a78bfa' },
-  ORDER_CANCELLED:    { icon: XCircle,      color: '#f43f5e' },
-  KYB_STATUS_CHANGED: { icon: ShieldCheck,  color: '#4f8ef7' },
+  NEW_ORDER:          { icon: ShoppingBag,  color: 'var(--sn-purple)' },
+  ORDER_FUNDED:       { icon: Wallet,       color: 'var(--sn-blue)' },
+  ORDER_SATISFIED:    { icon: CheckCircle2, color: 'var(--sn-purple)' },
+  ORDER_DISPUTED:     { icon: AlertTriangle,color: 'var(--sn-amber)' },
+  ORDER_SETTLED:      { icon: CheckCircle2, color: 'var(--sn-purple)' },
+  ORDER_REFUNDED:     { icon: RotateCcw,    color: 'var(--sn-purple)' },
+  ORDER_CANCELLED:    { icon: XCircle,      color: 'var(--sn-red)' },
+  KYB_STATUS_CHANGED: { icon: ShieldCheck,  color: 'var(--sn-blue)' },
 };
 
 const ORDER_TYPES = new Set([
@@ -120,26 +120,26 @@ export default function NotificationBell() {
     <div className="relative" ref={wrapRef}>
       <button
         onClick={toggle}
-        className="relative p-2 rounded-xl hover:bg-[#13131e] transition-colors"
+        className="relative p-2 rounded-xl hover:bg-[var(--sn-card)] transition-colors"
         title="Notifications"
       >
-        <Bell className="w-4 h-4 text-[#4a4a6a]" />
+        <Bell className="w-4 h-4 text-[var(--sn-text-muted)]" />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[#f43f5e] text-[10px] font-bold text-white flex items-center justify-center leading-none">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[var(--sn-red)] text-[10px] font-bold text-white flex items-center justify-center leading-none">
             {unread > 99 ? '99+' : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 max-h-[28rem] flex flex-col rounded-2xl border border-[#2a2a3e] shadow-2xl z-50 overflow-hidden" style={{ background: 'var(--az-surface)' }}>
+        <div className="absolute right-0 mt-2 w-80 max-h-[28rem] flex flex-col rounded-2xl border border-[var(--sn-border)] shadow-2xl z-50 overflow-hidden" style={{ background: 'var(--az-surface)' }}>
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e1e2e] flex-shrink-0">
-            <span className="text-sm font-semibold text-[#e8e8f0]">Notifications</span>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sn-border)] flex-shrink-0">
+            <span className="text-sm font-semibold text-[var(--sn-text)]">Notifications</span>
             {unread > 0 && (
               <button
                 onClick={handleMarkAll}
-                className="flex items-center gap-1 text-xs text-[#4f8ef7] hover:text-[#6ba3f8] transition-colors"
+                className="flex items-center gap-1 text-xs text-[var(--sn-blue)] hover:text-[#6ba3f8] transition-colors"
               >
                 <CheckCheck className="w-3.5 h-3.5" /> Mark all read
               </button>
@@ -149,22 +149,22 @@ export default function NotificationBell() {
           {/* List */}
           <div className="flex-1 overflow-y-auto">
             {loading && items.length === 0 ? (
-              <div className="px-4 py-10 text-center text-xs text-[#4a4a6a]">Loading…</div>
+              <div className="px-4 py-10 text-center text-xs text-[var(--sn-text-muted)]">Loading…</div>
             ) : items.length === 0 ? (
               <div className="px-4 py-10 text-center">
-                <Bell className="w-6 h-6 text-[#2a2a3e] mx-auto mb-2" />
-                <p className="text-xs text-[#4a4a6a]">No notifications yet</p>
+                <Bell className="w-6 h-6 text-[var(--sn-border)] mx-auto mb-2" />
+                <p className="text-xs text-[var(--sn-text-muted)]">No notifications yet</p>
               </div>
             ) : (
               items.map((n) => {
-                const meta = TYPE_META[n.type] || { icon: Bell, color: '#4a4a6a' };
+                const meta = TYPE_META[n.type] || { icon: Bell, color: 'var(--sn-text-muted)' };
                 const Icon = meta.icon;
                 return (
                   <button
                     key={n.id}
                     onClick={() => handleItemClick(n)}
                     className={cn(
-                      'w-full flex items-start gap-3 px-4 py-3 text-left border-b border-[#13131e] hover:bg-[#13131e] transition-colors',
+                      'w-full flex items-start gap-3 px-4 py-3 text-left border-b border-[var(--sn-card)] hover:bg-[var(--sn-card)] transition-colors',
                       !n.isRead && 'bg-[#00d97e08]'
                     )}
                   >
@@ -175,11 +175,11 @@ export default function NotificationBell() {
                       <Icon className="w-3.5 h-3.5" style={{ color: meta.color }} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-[#e8e8f0] truncate">{n.title}</p>
-                      <p className="text-xs text-[#7b7b9a] mt-0.5 line-clamp-2">{n.body}</p>
-                      <p className="text-[10px] text-[#4a4a6a] mt-1">{relativeTime(n.createdAt)}</p>
+                      <p className="text-xs font-semibold text-[var(--sn-text)] truncate">{n.title}</p>
+                      <p className="text-xs text-[var(--sn-text-muted)] mt-0.5 line-clamp-2">{n.body}</p>
+                      <p className="text-[10px] text-[var(--sn-text-muted)] mt-1">{relativeTime(n.createdAt)}</p>
                     </div>
-                    {!n.isRead && <span className="w-2 h-2 rounded-full bg-[#00d97e] flex-shrink-0 mt-1.5" />}
+                    {!n.isRead && <span className="w-2 h-2 rounded-full bg-[var(--sn-purple)] flex-shrink-0 mt-1.5" />}
                   </button>
                 );
               })
@@ -189,7 +189,7 @@ export default function NotificationBell() {
           {/* Footer — full feed */}
           <button
             onClick={() => { setOpen(false); navigate('/notifications'); }}
-            className="flex-shrink-0 w-full px-4 py-3 border-t border-[#1e1e2e] text-xs font-semibold text-[#00d97e] hover:bg-[#13131e] transition-colors"
+            className="flex-shrink-0 w-full px-4 py-3 border-t border-[var(--sn-border)] text-xs font-semibold text-[var(--sn-purple)] hover:bg-[var(--sn-card)] transition-colors"
           >
             View all notifications
           </button>

@@ -11,14 +11,14 @@ import {
 
 // Visual treatment per BizNotifType (mirrors NotificationBell).
 const TYPE_META = {
-  NEW_ORDER:          { icon: ShoppingBag,   color: '#00d97e' },
-  ORDER_FUNDED:       { icon: Wallet,        color: '#4f8ef7' },
-  ORDER_SATISFIED:    { icon: CheckCircle2,  color: '#00d97e' },
-  ORDER_DISPUTED:     { icon: AlertTriangle, color: '#f59e0b' },
-  ORDER_SETTLED:      { icon: CheckCircle2,  color: '#00d97e' },
-  ORDER_REFUNDED:     { icon: RotateCcw,     color: '#a78bfa' },
-  ORDER_CANCELLED:    { icon: XCircle,       color: '#f43f5e' },
-  KYB_STATUS_CHANGED: { icon: ShieldCheck,   color: '#4f8ef7' },
+  NEW_ORDER:          { icon: ShoppingBag,   color: 'var(--sn-purple)' },
+  ORDER_FUNDED:       { icon: Wallet,        color: 'var(--sn-blue)' },
+  ORDER_SATISFIED:    { icon: CheckCircle2,  color: 'var(--sn-purple)' },
+  ORDER_DISPUTED:     { icon: AlertTriangle, color: 'var(--sn-amber)' },
+  ORDER_SETTLED:      { icon: CheckCircle2,  color: 'var(--sn-purple)' },
+  ORDER_REFUNDED:     { icon: RotateCcw,     color: 'var(--sn-purple)' },
+  ORDER_CANCELLED:    { icon: XCircle,       color: 'var(--sn-red)' },
+  KYB_STATUS_CHANGED: { icon: ShieldCheck,   color: 'var(--sn-blue)' },
 };
 
 const ORDER_TYPES = new Set([
@@ -97,8 +97,8 @@ export default function Notifications() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-[#e8e8f0]">Notifications</h1>
-          <p className="text-sm text-[#7b7b9a] mt-1">
+          <h1 className="text-xl font-bold text-[var(--sn-text)]">Notifications</h1>
+          <p className="text-sm text-[var(--sn-text-muted)] mt-1">
             {unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}.` : 'You’re all caught up.'}
           </p>
         </div>
@@ -119,8 +119,8 @@ export default function Notifications() {
               onClick={() => setFilter(key)}
               className="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
               style={active
-                ? { background: '#00d97e1a', color: '#00d97e', border: '1px solid #00d97e40' }
-                : { background: '#13131e', color: '#4a4a6a', border: '1px solid #1e1e2e' }
+                ? { background: 'var(--sn-purple-subtle)', color: 'var(--sn-purple)', border: '1px solid #00d97e40' }
+                : { background: 'var(--sn-card)', color: 'var(--sn-text-muted)', border: '1px solid #1e1e2e' }
               }
             >
               {label}
@@ -144,17 +144,17 @@ export default function Notifications() {
               : 'Nothing matches this filter yet.'}
           />
         ) : (
-          <div className="divide-y divide-[#1e1e2e]">
+          <div className="divide-y divide-[var(--sn-border)]">
             {items.map((n) => {
-              const meta = TYPE_META[n.type] || { icon: Bell, color: '#4a4a6a' };
+              const meta = TYPE_META[n.type] || { icon: Bell, color: 'var(--sn-text-muted)' };
               const Icon = meta.icon;
               return (
                 <button
                   key={n.id}
                   onClick={() => handleClick(n)}
                   className={cn(
-                    'w-full flex items-start gap-3 px-5 py-4 text-left hover:bg-[#0f0f17] transition-colors',
-                    !n.isRead && 'bg-[#00d97e08]',
+                    'w-full flex items-start gap-3 px-5 py-4 text-left hover:bg-[var(--az-black)] transition-colors',
+                    !n.isRead && 'bg-[var(--sn-purple-subtle)]',
                   )}
                 >
                   <div
@@ -164,11 +164,11 @@ export default function Notifications() {
                     <Icon className="w-4 h-4" style={{ color: meta.color }} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-[#e8e8f0]">{n.title}</p>
-                    <p className="text-xs text-[#7b7b9a] mt-0.5">{n.body}</p>
-                    <p className="text-[10px] text-[#4a4a6a] mt-1">{relativeTime(n.createdAt)}</p>
+                    <p className="text-sm font-semibold text-[var(--sn-text)]">{n.title}</p>
+                    <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">{n.body}</p>
+                    <p className="text-[10px] text-[var(--sn-text-muted)] mt-1">{relativeTime(n.createdAt)}</p>
                   </div>
-                  {!n.isRead && <span className="w-2 h-2 rounded-full bg-[#00d97e] flex-shrink-0 mt-1.5" />}
+                  {!n.isRead && <span className="w-2 h-2 rounded-full bg-[var(--sn-purple)] flex-shrink-0 mt-1.5" />}
                 </button>
               );
             })}

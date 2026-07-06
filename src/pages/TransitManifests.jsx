@@ -106,7 +106,7 @@ export default function TransitManifests() {
     const next = CARGO_STATUS_FLOW[idx + 1];
     try {
       await cargoApi.updateStatus(parcelId, next);
-      toast.success(`Parcel -> ${CARGO_STATUS_META[next].label}`);
+      toast.success(`Parcel → ${CARGO_STATUS_META[next].label}`);
       loadManifest(selectedTrip);
     } catch { toast.error('Failed to update status'); }
   };
@@ -162,7 +162,7 @@ export default function TransitManifests() {
             className={`px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${selectedTrip === trip.id ? 'bg-[var(--sn-purple-subtle)] text-[var(--sn-purple)] border-[var(--sn-purple-border)]' : 'text-[var(--sn-text-muted)] border-[var(--sn-border)] hover:bg-[var(--sn-card-hover)]'}`}
           >
             <MapPin className="w-3.5 h-3.5 inline mr-1.5" />
-            {trip.origin} -> {trip.destination}
+            {trip.origin} → {trip.destination}
             <span className="ml-2 text-xs text-[var(--sn-text-muted)]">
               {new Date(trip.departureAt || trip.departureTime).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })}
             </span>

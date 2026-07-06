@@ -21,12 +21,12 @@ import {
 } from 'lucide-react';
 
 const RESERVATION_STATUS = {
-  PENDING:   { label: 'Pending',   color: '#f59e0b' },
-  CONFIRMED: { label: 'Confirmed', color: '#4f8ef7' },
-  CHECKED_IN:{ label: 'Checked In', color: '#00d97e' },
-  COMPLETED: { label: 'Completed', color: '#a78bfa' },
-  CANCELLED: { label: 'Cancelled', color: '#f43f5e' },
-  NO_SHOW:   { label: 'No-Show',   color: '#f43f5e' },
+  PENDING:   { label: 'Pending',   color: 'var(--sn-amber)' },
+  CONFIRMED: { label: 'Confirmed', color: 'var(--sn-blue)' },
+  CHECKED_IN:{ label: 'Checked In', color: 'var(--sn-purple)' },
+  COMPLETED: { label: 'Completed', color: 'var(--sn-purple)' },
+  CANCELLED: { label: 'Cancelled', color: 'var(--sn-red)' },
+  NO_SHOW:   { label: 'No-Show',   color: 'var(--sn-red)' },
 };
 
 export default function Reservations() {
@@ -84,12 +84,12 @@ export default function Reservations() {
       sortValue: (r) => r.customerName || r.azamanId || '',
       render: (r) => (
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#4f8ef71a] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
-            <span className="text-[10px] font-bold text-[#4f8ef7]">{(r.customerName || r.azamanId || '?').charAt(0).toUpperCase()}</span>
+          <div className="w-8 h-8 rounded-full bg-[var(--sn-blue)] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
+            <span className="text-[10px] font-bold text-[var(--sn-blue)]">{(r.customerName || r.azamanId || '?').charAt(0).toUpperCase()}</span>
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-[#e8e8f0] truncate">{r.customerName || 'Unknown'}</p>
-            <p className="text-[#4a4a6a] text-[10px] truncate">{r.azamanId}</p>
+            <p className="font-semibold text-[var(--sn-text)] truncate">{r.customerName || 'Unknown'}</p>
+            <p className="text-[var(--sn-text-muted)] text-[10px] truncate">{r.azamanId}</p>
           </div>
         </div>
       ),
@@ -101,13 +101,13 @@ export default function Reservations() {
         <div className="flex flex-col">
           {typeConfig.type === 'TRANSIT' ? (
             <>
-              <span className="text-[#e8e8f0] font-medium truncate max-w-[160px]">{r.tripRoute || r.reference}</span>
-              <span className="text-[#4a4a6a] text-[10px]">{r.seatIds?.join(', ') || '—'}</span>
+              <span className="text-[var(--sn-text)] font-medium truncate max-w-[160px]">{r.tripRoute || r.reference}</span>
+              <span className="text-[var(--sn-text-muted)] text-[10px]">{r.seatIds?.join(', ') || '—'}</span>
             </>
           ) : (
             <>
-              <span className="text-[#e8e8f0] font-medium">{formatDateTime(r.scheduledFor || r.createdAt)}</span>
-              <span className="text-[#4a4a6a] text-[10px]">{r.partySize ? `${r.partySize} guests` : r.reference}</span>
+              <span className="text-[var(--sn-text)] font-medium">{formatDateTime(r.scheduledFor || r.createdAt)}</span>
+              <span className="text-[var(--sn-text-muted)] text-[10px]">{r.partySize ? `${r.partySize} guests` : r.reference}</span>
             </>
           )}
         </div>
@@ -118,7 +118,7 @@ export default function Reservations() {
       label: 'Amount',
       sortable: true,
       sortValue: (r) => Number(r.amountUsdc) || 0,
-      render: (r) => <span className="text-[#e8e8f0] font-bold az-mono">{r.amountUsdc ? fmtUSDC(r.amountUsdc) : '—'}</span>,
+      render: (r) => <span className="text-[var(--sn-text)] font-bold az-mono">{r.amountUsdc ? fmtUSDC(r.amountUsdc) : '—'}</span>,
     },
     {
       key: 'status',
@@ -140,7 +140,7 @@ export default function Reservations() {
               <button
                 onClick={(e) => { e.stopPropagation(); confirmMut.mutate(r.id); }}
                 disabled={confirmMut.isPending}
-                className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#00d97e] transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-purple)] transition-colors"
                 title="Confirm"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -157,7 +157,7 @@ export default function Reservations() {
             <button
               onClick={(e) => { e.stopPropagation(); noShowMut.mutate(r.id); }}
               disabled={noShowMut.isPending}
-              className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#f43f5e] transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors"
               title="Mark no-show"
             >
               <UserX className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ export default function Reservations() {
           {['PENDING', 'CONFIRMED'].includes(r.status) && (
             <button
               onClick={(e) => { e.stopPropagation(); setCancelFor(r); }}
-              className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#f43f5e] transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors"
               title="Cancel"
             >
               <XCircle className="w-3.5 h-3.5" />
@@ -181,28 +181,28 @@ export default function Reservations() {
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-[#e8e8f0] flex items-center gap-2">
-          <CalendarCheck className="w-5 h-5 text-[#a78bfa]" />
+        <h1 className="text-xl font-bold text-[var(--sn-text)] flex items-center gap-2">
+          <CalendarCheck className="w-5 h-5 text-[var(--sn-purple)]" />
           Reservations
         </h1>
-        <p className="text-sm text-[#7b7b9a] mt-1">
+        <p className="text-sm text-[var(--sn-text-muted)] mt-1">
           {typeConfig.type === 'TRANSIT' ? 'Manage trip bookings and passenger reservations.' : 'Manage bookings, confirm reservations, and track no-shows.'}
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Widget title="Total" icon={Calendar} iconColor="#4f8ef7" loading={isLoading}>
+        <Widget title="Total" icon={Calendar} iconColor="var(--sn-blue)" loading={isLoading}>
           <WidgetStat value={fmt(stats.total || reservations.length, 0)} label="All reservations" />
         </Widget>
-        <Widget title="Pending" icon={Clock} iconColor="#f59e0b" loading={isLoading}>
-          <WidgetStat value={fmt(stats.pending || 0, 0)} label="Awaiting confirmation" color="#f59e0b" />
+        <Widget title="Pending" icon={Clock} iconColor="var(--sn-amber)" loading={isLoading}>
+          <WidgetStat value={fmt(stats.pending || 0, 0)} label="Awaiting confirmation" color="var(--sn-amber)" />
         </Widget>
-        <Widget title="Checked In" icon={CheckCircle2} iconColor="#00d97e" loading={isLoading}>
-          <WidgetStat value={fmt(stats.checkedIn || 0, 0)} label="Today" color="#00d97e" />
+        <Widget title="Checked In" icon={CheckCircle2} iconColor="var(--sn-purple)" loading={isLoading}>
+          <WidgetStat value={fmt(stats.checkedIn || 0, 0)} label="Today" color="var(--sn-purple)" />
         </Widget>
-        <Widget title="No-Shows" icon={UserX} iconColor="#f43f5e" loading={isLoading}>
-          <WidgetStat value={fmt(stats.noShows || 0, 0)} label="Penalties applied" color="#f43f5e" />
+        <Widget title="No-Shows" icon={UserX} iconColor="var(--sn-red)" loading={isLoading}>
+          <WidgetStat value={fmt(stats.noShows || 0, 0)} label="Penalties applied" color="var(--sn-red)" />
         </Widget>
       </div>
 
@@ -215,8 +215,8 @@ export default function Reservations() {
             className={cn(
               'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
               statusFilter === s
-                ? 'bg-[#00d97e1a] text-[#00d97e] border border-[#00d97e30]'
-                : 'text-[#7b7b9a] hover:bg-[#13131e] border border-transparent'
+                ? 'bg-[var(--sn-purple-subtle)] text-[var(--sn-purple)] border border-[#00d97e30]'
+                : 'text-[var(--sn-text-muted)] hover:bg-[var(--sn-card)] border border-transparent'
             )}
           >
             {s === 'all' ? 'All' : RESERVATION_STATUS[s]?.label || s}
@@ -225,7 +225,7 @@ export default function Reservations() {
       </div>
 
       {/* Reservations table */}
-      <Widget title="All Reservations" icon={CalendarCheck} iconColor="#a78bfa" className="p-0">
+      <Widget title="All Reservations" icon={CalendarCheck} iconColor="var(--sn-purple)" className="p-0">
         <DataTable
           columns={columns}
           data={reservations}
@@ -241,9 +241,9 @@ export default function Reservations() {
       <Modal open={cancelFor !== null} onClose={() => setCancelFor(null)} title="Cancel Reservation" className="max-w-md">
         <div className="space-y-4">
           {cancelFor && (
-            <div className="p-3 rounded-xl bg-[#0f0f17] border border-[#1e1e2e]">
-              <p className="text-sm text-[#e8e8f0] font-semibold">{cancelFor.customerName || cancelFor.azamanId}</p>
-              <p className="text-xs text-[#4a4a6a] mt-0.5">{cancelFor.reference || cancelFor.tripRoute}</p>
+            <div className="p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+              <p className="text-sm text-[var(--sn-text)] font-semibold">{cancelFor.customerName || cancelFor.azamanId}</p>
+              <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">{cancelFor.reference || cancelFor.tripRoute}</p>
             </div>
           )}
           <Input
@@ -252,9 +252,9 @@ export default function Reservations() {
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
           />
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-[#f43f5e10] border border-[#f43f5e30]">
-            <AlertCircle className="w-4 h-4 text-[#f43f5e] flex-shrink-0" />
-            <p className="text-xs text-[#f43f5e]">Escrow will be refunded to the customer. No-show penalties will not apply.</p>
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-[#f43f5e10] border border-[var(--sn-red)]">
+            <AlertCircle className="w-4 h-4 text-[var(--sn-red)] flex-shrink-0" />
+            <p className="text-xs text-[var(--sn-red)]">Escrow will be refunded to the customer. No-show penalties will not apply.</p>
           </div>
           <div className="flex gap-3">
             <Button variant="danger" onClick={handleCancel} loading={cancelMut.isPending} className="flex-1">
@@ -268,20 +268,20 @@ export default function Reservations() {
       {/* Counter-Propose Modal */}
       {showCounterModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-[400px] rounded-xl bg-white p-6 dark:bg-[#13131e] border border-[#252535] shadow-2xl">
-            <h2 className="mb-4 text-xl font-bold text-[#e8e8f0]">Propose Alternative Time</h2>
-            <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">New Date & Time</label>
+          <div className="w-[400px] rounded-xl bg-white p-6 dark:bg-[var(--sn-card)] border border-[var(--sn-border)] shadow-2xl">
+            <h2 className="mb-4 text-xl font-bold text-[var(--sn-text)]">Propose Alternative Time</h2>
+            <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">New Date & Time</label>
             <input
               type="datetime-local"
               value={proposedTime}
               onChange={(e) => setProposedTime(e.target.value)}
-              className="mb-4 w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2.5 text-[#e8e8f0] focus:border-[#00d97e] outline-none"
+              className="mb-4 w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2.5 text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
             />
-            <label className="text-xs text-[#7b7b9a] font-semibold mb-1 block">Note to customer (optional)</label>
+            <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Note to customer (optional)</label>
             <textarea
               value={counterNote}
               onChange={(e) => setCounterNote(e.target.value)}
-              className="mb-6 w-full rounded-lg border border-[#252535] bg-[#0a0a0f] p-2.5 text-[#e8e8f0] focus:border-[#00d97e] outline-none resize-none"
+              className="mb-6 w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2.5 text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none resize-none"
               rows={3}
               placeholder="e.g. We are fully booked at that time, but can accommodate you earlier."
             />
@@ -300,13 +300,13 @@ export default function Reservations() {
                     toast.error(e.message);
                   }
                 }}
-                className="flex-1 rounded-xl bg-[#00d97e] py-2.5 font-bold text-[#0a0a0f] hover:bg-[#00c572] transition-colors"
+                className="flex-1 rounded-xl bg-[var(--sn-purple)] py-2.5 font-bold text-[var(--az-black)] hover:bg-[#00c572] transition-colors"
               >
                 Send Proposal
               </button>
               <button
                 onClick={() => setShowCounterModal(null)}
-                className="flex-1 rounded-xl border border-[#252535] bg-transparent py-2.5 font-bold text-[#e8e8f0] hover:bg-[#1e1e2e] transition-colors"
+                className="flex-1 rounded-xl border border-[var(--sn-border)] bg-transparent py-2.5 font-bold text-[var(--sn-text)] hover:bg-[var(--sn-border)] transition-colors"
               >
                 Cancel
               </button>

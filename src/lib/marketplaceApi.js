@@ -1,28 +1,38 @@
 import { request } from './apiCore';
 
 export const transit = {
+  // Backend: GET /api/marketplace/transit/trips
   list: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/api/business/transit/trips${qs ? `?${qs}` : ''}`);
+    return request(`/api/marketplace/transit/trips${qs ? `?${qs}` : ''}`);
   },
-  get: (id) => request(`/api/business/transit/trips/${id}`),
-  create: (data) => request('/api/business/transit/trips', { method: 'POST', body: JSON.stringify(data) }),
-  update: (id, data) => request(`/api/business/transit/trips/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-  remove: (id) => request(`/api/business/transit/trips/${id}`, { method: 'DELETE' }),
-  getSeatMap: (tripId) => request(`/api/business/transit/trips/${tripId}/seats`),
-  updateSeatMap: (tripId, seats) => request(`/api/business/transit/trips/${tripId}/seats`, { method: 'PUT', body: JSON.stringify({ seats }) }),
-  bookings: (tripId) => request(`/api/business/transit/trips/${tripId}/bookings`),
+  // Backend: no single-trip GET exists, use list with id filter
+  get: (id) => request(`/api/marketplace/transit/trips?id=${id}`),
+  // Backend: POST /api/marketplace/business/trips
+  create: (data) => request('/api/marketplace/business/trips', { method: 'POST', body: JSON.stringify(data) }),
+  // Backend: no PATCH endpoint yet - use businessOS route
+  update: (id, data) => request(`/api/business-os/transit/manifests/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove: (id) => request(`/api/marketplace/transit/trips/${id}`, { method: 'DELETE' }),
+  // Backend: GET /api/marketplace-seat-map/:tripId
+  getSeatMap: (tripId) => request(`/api/marketplace-seat-map/${tripId}`),
+  // Backend: PUT /api/marketplace-seat-map/:tripId
+  updateSeatMap: (tripId, seats) => request(`/api/marketplace-seat-map/${tripId}`, { method: 'PUT', body: JSON.stringify({ seats }) }),
+  // Backend: GET /api/marketplace/transit/trips/:id/book (not quite - check)
+  bookings: (tripId) => request(`/api/marketplace/transit/trips/${tripId}/book`),
 };
 
 export const reservations = {
+  // Backend uses /api/reservations (not /api/business/reservations)
   list: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/api/business/reservations${qs ? `?${qs}` : ''}`);
+    return request(`/api/reservations/business/me${qs ? `?${qs}` : ''}`);
   },
-  get: (id) => request(`/api/business/reservations/${id}`),
-  confirm: (id) => request(`/api/business/reservations/${id}/confirm`, { method: 'POST' }),
-  cancel: (id, reason) => request(`/api/business/reservations/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) }),
-  markNoShow: (id) => request(`/api/business/reservations/${id}/no-show`, { method: 'POST' }),
+  get: (id) => request(`/api/reservations/${id}`),
+  confirm: (id) => request(`/api/reservations/${id}/confirm`, { method: 'PATCH' }),
+  cancel: (id, reason) => request(`/api/reservations/${id}/cancel`, { method: 'PATCH', body: JSON.stringify({ reason }) }),
+  markNoShow: (id) => request(`/api/reservations/${id}/no-show`, { method: 'PATCH' }),
+  checkIn: (id) => request(`/api/reservations/${id}/checkin`, { method: 'PATCH' }),
+  checkOut: (id) => request(`/api/reservations/${id}/checkout`, { method: 'PATCH' }),
   stats: () => request('/api/business/reservations/stats'),
 };
 
@@ -85,10 +95,10 @@ export const marketplaceApi = {
 
   // ── Showcase (uses /api/showcases) ────────────────────────────────────────
   getShowcase: (businessProfileId) => request(`/api/showcases/${businessProfileId}`),
-  addShowcaseSlide: (data) => request('/api/showcases', { method: "POST", body: JSON.stringify(data) }),
+  addShowcaseSlide: (businessProfileId, data) => request('/api/showcases', { method: "POST", body: JSON.stringify({ businessProfileId, ...data }) }),
   updateShowcaseSlide: (slideId, data) => request(`/api/showcases/${slideId}`, { method: "PATCH", body: JSON.stringify(data) }),
-  removeShowcaseSlide: (slideId) => request(`/api/showcases/${slideId}`, { method: "DELETE" }),
-  reorderShowcase: (slides) => request('/api/showcases/reorder', { method: "POST", body: JSON.stringify({ slides }) }),
+  removeShowcaseSlide: (businessProfileId, slideId) => request(`/api/showcases/${slideId}`, { method: "DELETE" }),
+  reorderShowcase: (businessProfileId, slides) => request('/api/showcases/reorder', { method: "POST", body: JSON.stringify({ slides }) }),
 
   // ── Follows (uses /api/follows) ───────────────────────────────────────────
   followBusiness: (businessProfileId) => request('/api/follows', { method: "POST", body: JSON.stringify({ businessProfileId }) }),

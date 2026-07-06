@@ -19,11 +19,11 @@ import {
 } from 'lucide-react';
 
 const TRIP_STATUS = {
-  SCHEDULED: { label: 'Scheduled', color: '#4f8ef7' },
-  BOARDING: { label: 'Boarding', color: '#f59e0b' },
-  DEPARTED: { label: 'Departed', color: '#a78bfa' },
-  COMPLETED: { label: 'Completed', color: '#00d97e' },
-  CANCELLED: { label: 'Cancelled', color: '#f43f5e' },
+  SCHEDULED: { label: 'Scheduled', color: 'var(--sn-blue)' },
+  BOARDING: { label: 'Boarding', color: 'var(--sn-amber)' },
+  DEPARTED: { label: 'Departed', color: 'var(--sn-purple)' },
+  COMPLETED: { label: 'Completed', color: 'var(--sn-purple)' },
+  CANCELLED: { label: 'Cancelled', color: 'var(--sn-red)' },
 };
 
 const BLANK_TRIP = {
@@ -138,12 +138,12 @@ export default function TransitTrips() {
       sortValue: (r) => r.routeName,
       render: (r) => (
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#4f8ef71a] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
-            <Route className="w-3.5 h-3.5 text-[#4f8ef7]" />
+          <div className="w-8 h-8 rounded-lg bg-[var(--sn-blue)] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
+            <Route className="w-3.5 h-3.5 text-[var(--sn-blue)]" />
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-[#e8e8f0] truncate">{r.routeName}</p>
-            <p className="text-[#4a4a6a] text-[10px] truncate">{r.origin} → {r.destination}</p>
+            <p className="font-semibold text-[var(--sn-text)] truncate">{r.routeName}</p>
+            <p className="text-[var(--sn-text-muted)] text-[10px] truncate">{r.origin} → {r.destination}</p>
           </div>
         </div>
       ),
@@ -155,8 +155,8 @@ export default function TransitTrips() {
       sortValue: (r) => new Date(r.departureTime).getTime(),
       render: (r) => (
         <div className="flex flex-col">
-          <span className="text-[#e8e8f0] font-medium">{formatDateTime(r.departureTime)}</span>
-          <span className="text-[#4a4a6a] text-[10px]">{r.vehiclePlate} · {r.vehicleType}</span>
+          <span className="text-[var(--sn-text)] font-medium">{formatDateTime(r.departureTime)}</span>
+          <span className="text-[var(--sn-text-muted)] text-[10px]">{r.vehiclePlate} · {r.vehicleType}</span>
         </div>
       ),
     },
@@ -171,9 +171,9 @@ export default function TransitTrips() {
         const pct = total > 0 ? (booked / total) * 100 : 0;
         return (
           <div className="flex flex-col gap-1">
-            <span className="text-[#e8e8f0] font-bold az-mono">{booked}/{total}</span>
-            <div className="w-20 h-1.5 rounded-full bg-[#1e1e2e] overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct > 80 ? '#f59e0b' : '#00d97e' }} />
+            <span className="text-[var(--sn-text)] font-bold az-mono">{booked}/{total}</span>
+            <div className="w-20 h-1.5 rounded-full bg-[var(--sn-border)] overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct > 80 ? 'var(--sn-amber)' : 'var(--sn-purple)' }} />
             </div>
           </div>
         );
@@ -184,7 +184,7 @@ export default function TransitTrips() {
       label: 'Fare',
       sortable: true,
       sortValue: (r) => Number(r.fareUsdc) || 0,
-      render: (r) => <span className="text-[#e8e8f0] font-bold az-mono">{fmtUSDC(r.fareUsdc)}</span>,
+      render: (r) => <span className="text-[var(--sn-text)] font-bold az-mono">{fmtUSDC(r.fareUsdc)}</span>,
     },
     {
       key: 'status',
@@ -203,14 +203,14 @@ export default function TransitTrips() {
         <div className="flex items-center gap-1">
           <button
             onClick={(e) => { e.stopPropagation(); setSeatEditorFor(r); }}
-            className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#4f8ef7] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-blue)] transition-colors"
             title="Edit seat map"
           >
             <Grid3x3 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); openEdit(r); }}
-            className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#00d97e] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-purple)] transition-colors"
             title="Edit trip"
           >
             <Pencil className="w-3.5 h-3.5" />
@@ -220,7 +220,7 @@ export default function TransitTrips() {
               e.stopPropagation();
               if (confirm(`Delete trip "${r.routeName}"? This cannot be undone.`)) deleteMut.mutate(r.id);
             }}
-            className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#f43f5e] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors"
             title="Delete trip"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -235,11 +235,11 @@ export default function TransitTrips() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#e8e8f0] flex items-center gap-2">
-            <Bus className="w-5 h-5 text-[#4f8ef7]" />
+          <h1 className="text-xl font-bold text-[var(--sn-text)] flex items-center gap-2">
+            <Bus className="w-5 h-5 text-[var(--sn-blue)]" />
             Transit Trips
           </h1>
-          <p className="text-sm text-[#7b7b9a] mt-1">Create and manage scheduled trips, seat maps, and bookings.</p>
+          <p className="text-sm text-[var(--sn-text-muted)] mt-1">Create and manage scheduled trips, seat maps, and bookings.</p>
         </div>
         <Button onClick={openCreate} size="sm">
           <Plus className="w-4 h-4" /> New Trip
@@ -248,22 +248,22 @@ export default function TransitTrips() {
 
       {/* Stats widgets */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Widget title="Total Trips" icon={Bus} iconColor="#4f8ef7" loading={isLoading}>
+        <Widget title="Total Trips" icon={Bus} iconColor="var(--sn-blue)" loading={isLoading}>
           <WidgetStat value={fmt(totalTrips, 0)} label="All trips" />
         </Widget>
-        <Widget title="Active" icon={Clock} iconColor="#f59e0b" loading={isLoading}>
-          <WidgetStat value={fmt(activeTrips, 0)} label="Scheduled + boarding" color="#f59e0b" />
+        <Widget title="Active" icon={Clock} iconColor="var(--sn-amber)" loading={isLoading}>
+          <WidgetStat value={fmt(activeTrips, 0)} label="Scheduled + boarding" color="var(--sn-amber)" />
         </Widget>
-        <Widget title="Bookings" icon={Users} iconColor="#a78bfa" loading={isLoading}>
-          <WidgetStat value={fmt(totalBookings, 0)} label="Seats sold" color="#a78bfa" />
+        <Widget title="Bookings" icon={Users} iconColor="var(--sn-purple)" loading={isLoading}>
+          <WidgetStat value={fmt(totalBookings, 0)} label="Seats sold" color="var(--sn-purple)" />
         </Widget>
-        <Widget title="Revenue" icon={DollarSign} iconColor="#00d97e" loading={isLoading}>
-          <WidgetStat value={fmtUSDC(totalRevenue)} label="From sold seats" color="#00d97e" />
+        <Widget title="Revenue" icon={DollarSign} iconColor="var(--sn-purple)" loading={isLoading}>
+          <WidgetStat value={fmtUSDC(totalRevenue)} label="From sold seats" color="var(--sn-purple)" />
         </Widget>
       </div>
 
       {/* Trips table */}
-      <Widget title="All Trips" icon={Route} iconColor="#4f8ef7" className="p-0">
+      <Widget title="All Trips" icon={Route} iconColor="var(--sn-blue)" className="p-0">
         <div className="p-0">
           <DataTable
             columns={columns}
@@ -281,9 +281,9 @@ export default function TransitTrips() {
       <Modal open={modal !== null} onClose={closeModal} title={modal === 'create' ? 'Create New Trip' : 'Edit Trip'} className="max-w-xl">
         <form onSubmit={handleSubmit} className="space-y-4">
           {formError && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-[#f43f5e1a] border border-[#f43f5e40]">
-              <AlertCircle className="w-4 h-4 text-[#f43f5e] flex-shrink-0" />
-              <p className="text-xs text-[#f43f5e]">{formError}</p>
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--sn-red)] border border-[var(--sn-red)]">
+              <AlertCircle className="w-4 h-4 text-[var(--sn-red)] flex-shrink-0" />
+              <p className="text-xs text-[var(--sn-red)]">{formError}</p>
             </div>
           )}
 
@@ -426,24 +426,24 @@ function SeatMapEditor({ trip, onClose }) {
         {/* Legend */}
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-lg bg-[#00d97e1a] border border-[#00d97e40]" />
-            <span className="text-xs text-[#7b7b9a]">Available</span>
+            <div className="w-5 h-5 rounded-lg bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple)]" />
+            <span className="text-xs text-[var(--sn-text-muted)]">Available</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-lg bg-[#f59e0b1a] border border-[#f59e0b40]" />
-            <span className="text-xs text-[#7b7b9a]">Occupied</span>
+            <div className="w-5 h-5 rounded-lg bg-[var(--sn-amber)] border border-[var(--sn-amber)]" />
+            <span className="text-xs text-[var(--sn-text-muted)]">Occupied</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-lg bg-[#f43f5e1a] border border-[#f43f5e40]" />
-            <span className="text-xs text-[#7b7b9a]">Blocked</span>
+            <div className="w-5 h-5 rounded-lg bg-[var(--sn-red)] border border-[var(--sn-red)]" />
+            <span className="text-xs text-[var(--sn-text-muted)]">Blocked</span>
           </div>
         </div>
 
         {/* Bus outline */}
-        <div className="rounded-2xl border-2 border-[#2a2a3e] p-4 mx-auto max-w-sm" style={{ background: '#0a0a0f' }}>
+        <div className="rounded-2xl border-2 border-[var(--sn-border)] p-4 mx-auto max-w-sm" style={{ background: 'var(--az-black)' }}>
           {/* Driver */}
           <div className="flex justify-center mb-3">
-            <div className="w-10 h-6 rounded-lg bg-[#1e1e2e] flex items-center justify-center text-[10px] text-[#4a4a6a] font-bold">
+            <div className="w-10 h-6 rounded-lg bg-[var(--sn-border)] flex items-center justify-center text-[10px] text-[var(--sn-text-muted)] font-bold">
               DRIVER
             </div>
           </div>
@@ -519,9 +519,9 @@ function toggleSeat(seat, seats, setSeats) {
 
 function SeatButton({ seat, onClick }) {
   const colors = {
-    AVAILABLE: { bg: '#00d97e1a', border: '#00d97e40', text: '#00d97e' },
-    OCCUPIED: { bg: '#f59e0b1a', border: '#f59e0b40', text: '#f59e0b' },
-    BLOCKED: { bg: '#f43f5e1a', border: '#f43f5e40', text: '#f43f5e' },
+    AVAILABLE: { bg: 'var(--sn-purple-subtle)', border: 'var(--sn-purple)', text: 'var(--sn-purple)' },
+    OCCUPIED: { bg: 'var(--sn-amber)', border: 'var(--sn-amber)', text: 'var(--sn-amber)' },
+    BLOCKED: { bg: 'var(--sn-red)', border: 'var(--sn-red)', text: 'var(--sn-red)' },
   };
   const c = colors[seat.status] || colors.AVAILABLE;
   return (

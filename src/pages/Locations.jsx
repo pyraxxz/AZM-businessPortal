@@ -129,8 +129,8 @@ export default function Locations() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#e8e8f0]">Locations &amp; Branches</h1>
-          <p className="text-sm text-[#7b7b9a] mt-0.5">Manage where customers can find and pay you</p>
+          <h1 className="text-xl font-bold text-[var(--sn-text)]">Locations &amp; Branches</h1>
+          <p className="text-sm text-[var(--sn-text-muted)] mt-0.5">Manage where customers can find and pay you</p>
         </div>
         <Button onClick={openCreate}><Plus className="w-4 h-4" /> Add Location</Button>
       </div>
@@ -171,55 +171,55 @@ export default function Locations() {
             <Input label='Latitude *' placeholder='5.6037' value={form.latitude} onChange={e => setForm(f=>({...f,latitude:e.target.value}))} />
             <Input label='Longitude *' placeholder='-0.1870' value={form.longitude} onChange={e => setForm(f=>({...f,longitude:e.target.value}))} />
           </div>
-          <p className='text-xs text-[#4a4a6a] -mt-2'>Open Google Maps → right-click your location → copy coordinates</p>
+          <p className='text-xs text-[var(--sn-text-muted)] -mt-2'>Open Google Maps → right-click your location → copy coordinates</p>
           <Input label="Phone (optional)" value={form.phoneNumber} onChange={e => setForm(f=>({...f,phoneNumber:e.target.value}))} />
           {/* Operating Hours */}
           <div className='space-y-2'>
-            <p className='text-xs font-semibold text-[#7b7b9a] uppercase tracking-wide'>Operating Hours</p>
+            <p className='text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wide'>Operating Hours</p>
             {DAYS.map(d => (
               <div key={d} className='flex items-center gap-3'>
-                <span className='text-xs text-[#7b7b9a] w-20'>{DAY_LABELS[d]}</span>
-                <input type="checkbox" checked={hours[d].closed} onChange={e => setHours(h=>({...h,[d]:{...h[d],closed:e.target.checked}}))} className="accent-[#00d97e]" />
-                <span className='text-xs text-[#4a4a6a]'>Closed</span>
+                <span className='text-xs text-[var(--sn-text-muted)] w-20'>{DAY_LABELS[d]}</span>
+                <input type="checkbox" checked={hours[d].closed} onChange={e => setHours(h=>({...h,[d]:{...h[d],closed:e.target.checked}}))} className="accent-[var(--sn-purple)]" />
+                <span className='text-xs text-[var(--sn-text-muted)]'>Closed</span>
                 {!hours[d].closed && (<>
-                  <input type='time' value={hours[d].open}  onChange={e=>setHours(h=>({...h,[d]:{...h[d],open:e.target.value}}))}  className='bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-2 py-1 text-xs text-[#e8e8f0]' />
-                  <span className='text-xs text-[#4a4a6a]'>to</span>
-                  <input type='time' value={hours[d].close} onChange={e=>setHours(h=>({...h,[d]:{...h[d],close:e.target.value}}))} className='bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-2 py-1 text-xs text-[#e8e8f0]' />
+                  <input type='time' value={hours[d].open}  onChange={e=>setHours(h=>({...h,[d]:{...h[d],open:e.target.value}}))}  className='bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-2 py-1 text-xs text-[var(--sn-text)]' />
+                  <span className='text-xs text-[var(--sn-text-muted)]'>to</span>
+                  <input type='time' value={hours[d].close} onChange={e=>setHours(h=>({...h,[d]:{...h[d],close:e.target.value}}))} className='bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-2 py-1 text-xs text-[var(--sn-text)]' />
                 </>)}
               </div>
             ))}
           </div>
           {/* Gallery */}
           <div className='space-y-2'>
-            <p className='text-xs font-semibold text-[#7b7b9a] uppercase tracking-wide'>Gallery Photos (max 10)</p>
+            <p className='text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wide'>Gallery Photos (max 10)</p>
             <div className='grid grid-cols-4 gap-2'>
               {form.galleryUrls.map((url,i) => (
-                <div key={i} className='relative aspect-square rounded-xl overflow-hidden border border-[#2a2a3e]'>
+                <div key={i} className='relative aspect-square rounded-xl overflow-hidden border border-[var(--sn-border)]'>
                   <img src={url} alt="" className="w-full h-full object-cover" />
                   <button onClick={()=>setForm(f=>({...f,galleryUrls:f.galleryUrls.filter((_,j)=>j!==i)}))}
-                    className='absolute top-1 right-1 w-5 h-5 bg-[#f43f5e] rounded-full text-white text-[10px] font-bold flex items-center justify-center'>×</button>
+                    className='absolute top-1 right-1 w-5 h-5 bg-[var(--sn-red)] rounded-full text-white text-[10px] font-bold flex items-center justify-center'>×</button>
                 </div>
               ))}
               {form.galleryUrls.length < 10 && (
-                <label className='aspect-square rounded-xl border-2 border-dashed border-[#2a2a3e] flex flex-col items-center justify-center cursor-pointer hover:border-[#00d97e40]'>
+                <label className='aspect-square rounded-xl border-2 border-dashed border-[var(--sn-border)] flex flex-col items-center justify-center cursor-pointer hover:border-[var(--sn-purple)]'>
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} className="hidden" />
                   {uploading
-                    ? <div className='w-4 h-4 border-2 border-[#00d97e] border-t-transparent rounded-full animate-spin'/>
-                    : <><Image className='w-4 h-4 text-[#4a4a6a]' /><span className='text-[10px] text-[#4a4a6a] mt-1'>Add</span></>}
+                    ? <div className='w-4 h-4 border-2 border-[var(--sn-purple)] border-t-transparent rounded-full animate-spin'/>
+                    : <><Image className='w-4 h-4 text-[var(--sn-text-muted)]' /><span className='text-[10px] text-[var(--sn-text-muted)] mt-1'>Add</span></>}
                 </label>
               )}
             </div>
             {!isCloudinaryConfigured() && (
-              <p className='text-xs text-[#4a4a6a]'>Image upload is not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to enable uploads.</p>
+              <p className='text-xs text-[var(--sn-text-muted)]'>Image upload is not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to enable uploads.</p>
             )}
           </div>
           {/* isPrimary */}
           <label className='flex items-center gap-3 cursor-pointer'>
-            <input type="checkbox" checked={form.isPrimary} onChange={e=>setForm(f=>({...f,isPrimary:e.target.checked}))} className="accent-[#00d97e] w-4 h-4" />
-            <span className='text-sm text-[#e8e8f0]'>Set as primary location</span>
+            <input type="checkbox" checked={form.isPrimary} onChange={e=>setForm(f=>({...f,isPrimary:e.target.checked}))} className="accent-[var(--sn-purple)] w-4 h-4" />
+            <span className='text-sm text-[var(--sn-text)]'>Set as primary location</span>
           </label>
         </div>
-        <div className='flex gap-3 mt-4 pt-4 border-t border-[#1e1e2e]'>
+        <div className='flex gap-3 mt-4 pt-4 border-t border-[var(--sn-border)]'>
           <Button variant='secondary' onClick={closeModal} className='flex-1'>Cancel</Button>
           <Button onClick={handleSubmit} loading={createMut.isPending || updateMut.isPending} className='flex-1'>
             {modal === 'create' ? 'Add Location' : 'Save Changes'}
@@ -266,27 +266,27 @@ function LocationCard({ loc, onEdit, onDelete, expandedTables, setExpandedTables
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-[#00d97e1a] border border-[#00d97e30] flex items-center justify-center flex-shrink-0">
-            <MapPin className="w-5 h-5 text-[#00d97e]" />
+          <div className="w-10 h-10 rounded-xl bg-[var(--sn-purple-subtle)] border border-[#00d97e30] flex items-center justify-center flex-shrink-0">
+            <MapPin className="w-5 h-5 text-[var(--sn-purple)]" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-bold text-[#e8e8f0] truncate">{loc.label}</p>
-              {loc.isPrimary && <Badge color="#00d97e">Primary</Badge>}
+              <p className="text-sm font-bold text-[var(--sn-text)] truncate">{loc.label}</p>
+              {loc.isPrimary && <Badge color="var(--sn-purple)">Primary</Badge>}
             </div>
-            <p className="text-xs text-[#7b7b9a] mt-0.5 truncate">{loc.address}</p>
+            <p className="text-xs text-[var(--sn-text-muted)] mt-0.5 truncate">{loc.address}</p>
             {(loc.city || loc.region) && (
-              <p className="text-xs text-[#4a4a6a] mt-0.5 truncate">{[loc.city, loc.region].filter(Boolean).join(', ')}</p>
+              <p className="text-xs text-[var(--sn-text-muted)] mt-0.5 truncate">{[loc.city, loc.region].filter(Boolean).join(', ')}</p>
             )}
           </div>
         </div>
-        <Badge color={loc.isActive ? '#00d97e' : '#7b7b9a'} bg={loc.isActive ? '#00d97e1a' : '#7b7b9a1a'}>
+        <Badge color={loc.isActive ? 'var(--sn-purple)' : 'var(--sn-text-muted)'} bg={loc.isActive ? 'var(--sn-purple-subtle)' : '#7b7b9a1a'}>
           {loc.isActive ? 'Active' : 'Inactive'}
         </Badge>
       </div>
 
       {/* Meta row */}
-      <div className="flex items-center gap-4 text-xs text-[#7b7b9a]">
+      <div className="flex items-center gap-4 text-xs text-[var(--sn-text-muted)]">
         <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {hoursSummary(loc.operatingHours)}</span>
         <span className="flex items-center gap-1.5"><Image className="w-3.5 h-3.5" /> {galleryCount} photo{galleryCount === 1 ? '' : 's'}</span>
         <span>{(loc.tables?.length || 0)} table{(loc.tables?.length || 0) === 1 ? '' : 's'}</span>
@@ -307,17 +307,17 @@ function LocationCard({ loc, onEdit, onDelete, expandedTables, setExpandedTables
 
       {/* Tables sub-panel */}
       {expanded && (
-        <div className="mt-1 pt-3 border-t border-[#1e1e2e] space-y-2">
+        <div className="mt-1 pt-3 border-t border-[var(--sn-border)] space-y-2">
           {tables.length === 0 ? (
-            <p className="text-xs text-[#4a4a6a]">No tables yet. Add one below.</p>
+            <p className="text-xs text-[var(--sn-text-muted)]">No tables yet. Add one below.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {tables.map(t => (
-                <span key={t.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0a0a12] border border-[#2a2a3e] text-xs text-[#e8e8f0]">
+                <span key={t.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--az-black)] border border-[var(--sn-border)] text-xs text-[var(--sn-text)]">
                   {t.label}
                   <button
                     onClick={() => { if (confirm(`Remove table "${t.label}"?`)) deleteTableMut.mutate(t.id); }}
-                    className="text-[#4a4a6a] hover:text-[#f43f5e] transition-colors"
+                    className="text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors"
                   >×</button>
                 </span>
               ))}
@@ -330,7 +330,7 @@ function LocationCard({ loc, onEdit, onDelete, expandedTables, setExpandedTables
               value={newTableLabel[loc.id] || ''}
               onChange={e => setNewTableLabel(s => ({ ...s, [loc.id]: e.target.value }))}
               onKeyDown={e => { if (e.key === 'Enter') submitTable(); }}
-              className="flex-1 bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-3 py-1.5 text-xs text-[#e8e8f0] placeholder:text-[#4a4a6a] outline-none focus:border-[#00d97e60]"
+              className="flex-1 bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-3 py-1.5 text-xs text-[var(--sn-text)] placeholder:text-[var(--sn-text-muted)] outline-none focus:border-[var(--sn-purple)]"
             />
             <Button size="sm" onClick={submitTable} loading={createTableMut.isPending}>
               <Plus className="w-3.5 h-3.5" /> Add

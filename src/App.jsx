@@ -23,7 +23,6 @@ import Reviews from '@/pages/Reviews';
 import DineIn from '@/pages/DineIn';
 import Guests from '@/pages/Guests';
 import Marketing from '@/pages/Marketing';
-import Finance from '@/pages/Finance';
 import FinanceV2 from '@/pages/FinanceV2';
 import Showcase from '@/pages/Showcase';
 import SeatMapEditor from '@/pages/SeatMapEditor';

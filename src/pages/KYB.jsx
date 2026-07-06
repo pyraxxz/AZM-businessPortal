@@ -17,9 +17,9 @@ const DOC_TYPES = [
 ];
 
 function statusIcon(status) {
-  if (status === 'APPROVED') return <CheckCircle2 className="w-4 h-4 text-[#00d97e]" />;
-  if (status === 'REJECTED') return <XCircle className="w-4 h-4 text-[#f43f5e]" />;
-  return <Clock className="w-4 h-4 text-[#f59e0b]" />;
+  if (status === 'APPROVED') return <CheckCircle2 className="w-4 h-4 text-[var(--sn-purple)]" />;
+  if (status === 'REJECTED') return <XCircle className="w-4 h-4 text-[var(--sn-red)]" />;
+  return <Clock className="w-4 h-4 text-[var(--sn-amber)]" />;
 }
 
 export default function KYB() {
@@ -87,8 +87,8 @@ export default function KYB() {
     <div className="p-6 max-w-3xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-[#e8e8f0]">Business Verification</h1>
-        <p className="text-sm text-[#7b7b9a] mt-1">Upload your documents to verify your business and unlock full access.</p>
+        <h1 className="text-xl font-bold text-[var(--sn-text)]">Business Verification</h1>
+        <p className="text-sm text-[var(--sn-text-muted)] mt-1">Upload your documents to verify your business and unlock full access.</p>
       </div>
 
       {/* Status card */}
@@ -102,10 +102,10 @@ export default function KYB() {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-1">
-              <p className="text-base font-bold text-[#e8e8f0]">Verification Status</p>
+              <p className="text-base font-bold text-[var(--sn-text)]">Verification Status</p>
               <Badge color={kybMeta.color} bg={kybMeta.bg}>{kybMeta.label}</Badge>
             </div>
-            <p className="text-sm text-[#7b7b9a]">
+            <p className="text-sm text-[var(--sn-text-muted)]">
               {kybStatus === 'UNVERIFIED' && 'Submit your documents below to start the verification process.'}
               {kybStatus === 'PENDING'    && 'Your documents are being reviewed. This usually takes 24–48 hours.'}
               {kybStatus === 'VERIFIED'   && 'Your business is verified. You can now receive orders publicly.'}
@@ -118,12 +118,12 @@ export default function KYB() {
       {/* Verified — full green state */}
       {kybStatus === 'VERIFIED' && (
         <Card className="flex flex-col items-center py-10 gap-4">
-          <div className="w-16 h-16 rounded-full bg-[#00d97e1a] border border-[#00d97e40] flex items-center justify-center">
-            <CheckCircle2 className="w-8 h-8 text-[#00d97e]" />
+          <div className="w-16 h-16 rounded-full bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple)] flex items-center justify-center">
+            <CheckCircle2 className="w-8 h-8 text-[var(--sn-purple)]" />
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-[#00d97e]">Business Verified</p>
-            <p className="text-sm text-[#7b7b9a] mt-1 max-w-xs">
+            <p className="text-lg font-bold text-[var(--sn-purple)]">Business Verified</p>
+            <p className="text-sm text-[var(--sn-text-muted)] mt-1 max-w-xs">
               All your documents have been approved. Your business listing is publicly visible.
             </p>
           </div>
@@ -133,7 +133,7 @@ export default function KYB() {
       {/* Document list + upload */}
       {kybStatus !== 'VERIFIED' && (
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-[#4a4a6a] uppercase tracking-wider">Required Documents</p>
+          <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Required Documents</p>
 
           {DOC_TYPES.map(({ value, label, desc }) => {
             const existing = docMap[value];
@@ -143,54 +143,54 @@ export default function KYB() {
               <Card key={value} className="p-0 overflow-hidden">
                 {/* Row header */}
                 <button
-                  className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[#0f0f17] transition-colors text-left"
+                  className="w-full flex items-center gap-4 px-5 py-4 hover:bg-[var(--az-black)] transition-colors text-left"
                   onClick={() => setExpanded(isExpanded ? null : value)}
                 >
                   <div className="flex-shrink-0">
                     {existing ? statusIcon(existing.status) : (
-                      <div className="w-4 h-4 rounded-full border-2 border-[#2a2a3e]" />
+                      <div className="w-4 h-4 rounded-full border-2 border-[var(--sn-border)]" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#e8e8f0]">{label}</p>
-                    <p className="text-xs text-[#4a4a6a] mt-0.5">{desc}</p>
+                    <p className="text-sm font-semibold text-[var(--sn-text)]">{label}</p>
+                    <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">{desc}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {existing && (
                       <Badge
-                        color={existing.status === 'APPROVED' ? '#00d97e' : existing.status === 'REJECTED' ? '#f43f5e' : '#f59e0b'}
-                        bg={existing.status === 'APPROVED' ? '#00d97e1a' : existing.status === 'REJECTED' ? '#f43f5e1a' : '#f59e0b1a'}
+                        color={existing.status === 'APPROVED' ? 'var(--sn-purple)' : existing.status === 'REJECTED' ? 'var(--sn-red)' : 'var(--sn-amber)'}
+                        bg={existing.status === 'APPROVED' ? 'var(--sn-purple-subtle)' : existing.status === 'REJECTED' ? 'var(--sn-red)' : 'var(--sn-amber)'}
                       >
                         {existing.status}
                       </Badge>
                     )}
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-[#4a4a6a]" /> : <ChevronDown className="w-4 h-4 text-[#4a4a6a]" />}
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-[var(--sn-text-muted)]" /> : <ChevronDown className="w-4 h-4 text-[var(--sn-text-muted)]" />}
                   </div>
                 </button>
 
                 {/* Expanded — URL input */}
                 {isExpanded && (
-                  <div className="px-5 pb-4 border-t border-[#1e1e2e]">
+                  <div className="px-5 pb-4 border-t border-[var(--sn-border)]">
                     <div className="pt-4 space-y-3">
                       {existing?.status === 'APPROVED' ? (
-                        <div className="flex items-center gap-2 p-3 rounded-xl bg-[#00d97e1a] border border-[#00d97e30]">
-                          <CheckCircle2 className="w-4 h-4 text-[#00d97e]" />
-                          <p className="text-xs text-[#00d97e]">This document has been approved and cannot be replaced.</p>
+                        <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--sn-purple-subtle)] border border-[#00d97e30]">
+                          <CheckCircle2 className="w-4 h-4 text-[var(--sn-purple)]" />
+                          <p className="text-xs text-[var(--sn-purple)]">This document has been approved and cannot be replaced.</p>
                         </div>
                       ) : (
                         <>
                           {existing?.status === 'REJECTED' && existing.reviewNotes && (
-                            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#f43f5e1a] border border-[#f43f5e30]">
-                              <AlertCircle className="w-4 h-4 text-[#f43f5e] flex-shrink-0 mt-0.5" />
+                            <div className="flex items-start gap-2 p-3 rounded-xl bg-[var(--sn-red)] border border-[var(--sn-red)]">
+                              <AlertCircle className="w-4 h-4 text-[var(--sn-red)] flex-shrink-0 mt-0.5" />
                               <div>
-                                <p className="text-xs font-semibold text-[#f43f5e]">Rejection reason:</p>
-                                <p className="text-xs text-[#f43f5e] mt-0.5">{existing.reviewNotes}</p>
+                                <p className="text-xs font-semibold text-[var(--sn-red)]">Rejection reason:</p>
+                                <p className="text-xs text-[var(--sn-red)] mt-0.5">{existing.reviewNotes}</p>
                               </div>
                             </div>
                           )}
                           {isCloudinaryConfigured() && (
                             <div className="flex items-center gap-3">
-                              <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors ${uploadingType === value ? 'opacity-60 border-[#2a2a3e] text-[#4a4a6a]' : 'cursor-pointer border-[#00d97e40] text-[#00d97e] hover:bg-[#00d97e10]'}`}>
+                              <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors ${uploadingType === value ? 'opacity-60 border-[var(--sn-border)] text-[var(--sn-text-muted)]' : 'cursor-pointer border-[var(--sn-purple)] text-[var(--sn-purple)] hover:bg-[#00d97e10]'}`}>
                                 <input
                                   type="file"
                                   accept="image/jpeg,image/png,image/webp"
@@ -204,7 +204,7 @@ export default function KYB() {
                                 }
                               </label>
                               {urls[value] && uploadingType !== value && (
-                                <span className="flex items-center gap-1 text-xs text-[#00d97e]">
+                                <span className="flex items-center gap-1 text-xs text-[var(--sn-purple)]">
                                   <CheckCircle2 className="w-3.5 h-3.5" /> Ready to submit
                                 </span>
                               )}
@@ -216,7 +216,7 @@ export default function KYB() {
                             value={urls[value] || ''}
                             onChange={e => setUrls(u => ({ ...u, [value]: e.target.value }))}
                           />
-                          <p className="text-xs text-[#4a4a6a]">
+                          <p className="text-xs text-[var(--sn-text-muted)]">
                             {isCloudinaryConfigured()
                               ? 'Upload an image directly, or paste a Cloudinary URL (e.g. for PDFs).'
                               : 'Upload your document to Cloudinary first, then paste the URL here.'}

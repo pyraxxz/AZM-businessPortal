@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
 // ── Badge ─────────────────────────────────────────────────────────────────────
-export function Badge({ children, color = '#00d97e', bg, className }) {
+export function Badge({ children, color = 'var(--sn-purple)', bg, className }) {
   const bgColor = bg || `${color}1a`;
   return (
     <span
@@ -19,11 +19,11 @@ export function Badge({ children, color = '#00d97e', bg, className }) {
 export function Button({ children, variant = 'primary', size = 'md', loading, disabled, className, ...props }) {
   const base = 'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed select-none';
   const variants = {
-    primary:   'bg-[#00d97e] text-[#0a0a0f] hover:bg-[#00c870] active:scale-[0.98] az-glow-emerald',
-    secondary: 'bg-[#13131e] border border-[#2a2a3e] text-[#e8e8f0] hover:bg-[#1e1e2e] hover:border-[#3a3a5a]',
-    ghost:     'text-[#7b7b9a] hover:bg-[#13131e] hover:text-[#e8e8f0]',
-    danger:    'bg-[#f43f5e1a] border border-[#f43f5e40] text-[#f43f5e] hover:bg-[#f43f5e25]',
-    outline:   'border border-[#2a2a3e] text-[#7b7b9a] hover:border-[#00d97e40] hover:text-[#00d97e]',
+    primary:   'bg-[var(--sn-purple)] text-[var(--az-black)] hover:bg-[#00c870] active:scale-[0.98] az-glow-emerald',
+    secondary: 'bg-[var(--sn-card)] border border-[var(--sn-border)] text-[var(--sn-text)] hover:bg-[var(--sn-border)] hover:border-[#3a3a5a]',
+    ghost:     'text-[var(--sn-text-muted)] hover:bg-[var(--sn-card)] hover:text-[var(--sn-text)]',
+    danger:    'bg-[var(--sn-red)] border border-[var(--sn-red)] text-[var(--sn-red)] hover:bg-[var(--sn-red)]',
+    outline:   'border border-[var(--sn-border)] text-[var(--sn-text-muted)] hover:border-[var(--sn-purple)] hover:text-[var(--sn-purple)]',
   };
   const sizes = {
     sm: 'px-3 py-1.5 text-xs',
@@ -47,7 +47,7 @@ export function Card({ children, className, hover = false, ...props }) {
   return (
     <div
       className={cn(
-        'rounded-2xl border border-[#1e1e2e] p-5',
+        'rounded-2xl border border-[var(--sn-border)] p-5',
         hover && 'az-card-hover cursor-pointer',
         className
       )}
@@ -63,18 +63,18 @@ export function Card({ children, className, hover = false, ...props }) {
 export function Input({ label, error, className, ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <label className="text-xs font-semibold text-[#7b7b9a] uppercase tracking-wider">{label}</label>}
+      {label && <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">{label}</label>}
       <input
         className={cn(
-          'w-full px-4 py-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e] text-[#e8e8f0] text-sm',
-          'placeholder:text-[#4a4a6a] outline-none',
-          'focus:border-[#00d97e60] focus:ring-1 focus:ring-[#00d97e20] transition-colors',
-          error && 'border-[#f43f5e60]',
+          'w-full px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] text-[var(--sn-text)] text-sm',
+          'placeholder:text-[var(--sn-text-muted)] outline-none',
+          'focus:border-[var(--sn-purple)] focus:ring-1 focus:ring-[var(--sn-purple)] transition-colors',
+          error && 'border-[var(--sn-red)]',
           className
         )}
         {...props}
       />
-      {error && <p className="text-xs text-[#f43f5e]">{error}</p>}
+      {error && <p className="text-xs text-[var(--sn-red)]">{error}</p>}
     </div>
   );
 }
@@ -83,19 +83,19 @@ export function Input({ label, error, className, ...props }) {
 export function Textarea({ label, error, className, ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <label className="text-xs font-semibold text-[#7b7b9a] uppercase tracking-wider">{label}</label>}
+      {label && <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">{label}</label>}
       <textarea
         rows={3}
         className={cn(
-          'w-full px-4 py-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e] text-[#e8e8f0] text-sm resize-none',
-          'placeholder:text-[#4a4a6a] outline-none',
-          'focus:border-[#00d97e60] focus:ring-1 focus:ring-[#00d97e20] transition-colors',
-          error && 'border-[#f43f5e60]',
+          'w-full px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] text-[var(--sn-text)] text-sm resize-none',
+          'placeholder:text-[var(--sn-text-muted)] outline-none',
+          'focus:border-[var(--sn-purple)] focus:ring-1 focus:ring-[var(--sn-purple)] transition-colors',
+          error && 'border-[var(--sn-red)]',
           className
         )}
         {...props}
       />
-      {error && <p className="text-xs text-[#f43f5e]">{error}</p>}
+      {error && <p className="text-xs text-[var(--sn-red)]">{error}</p>}
     </div>
   );
 }
@@ -104,23 +104,23 @@ export function Textarea({ label, error, className, ...props }) {
 export function Select({ label, error, options = [], className, ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <label className="text-xs font-semibold text-[#7b7b9a] uppercase tracking-wider">{label}</label>}
+      {label && <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">{label}</label>}
       <select
         className={cn(
-          'w-full px-4 py-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e] text-[#e8e8f0] text-sm',
-          'outline-none focus:border-[#00d97e60] transition-colors cursor-pointer',
-          error && 'border-[#f43f5e60]',
+          'w-full px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] text-[var(--sn-text)] text-sm',
+          'outline-none focus:border-[var(--sn-purple)] transition-colors cursor-pointer',
+          error && 'border-[var(--sn-red)]',
           className
         )}
         {...props}
       >
         {options.map(({ value, label: lbl }) => (
-          <option key={value} value={value} style={{ background: '#13131e' }}>
+          <option key={value} value={value} style={{ background: 'var(--sn-card)' }}>
             {lbl}
           </option>
         ))}
       </select>
-      {error && <p className="text-xs text-[#f43f5e]">{error}</p>}
+      {error && <p className="text-xs text-[var(--sn-red)]">{error}</p>}
     </div>
   );
 }
@@ -134,7 +134,7 @@ export function Skeleton({ className }) {
 export function Spinner({ size = 'md' }) {
   const sz = { sm: 'w-4 h-4', md: 'w-6 h-6', lg: 'w-8 h-8' };
   return (
-    <div className={cn('border-2 border-[#2a2a3e] border-t-[#00d97e] rounded-full animate-spin', sz[size])} />
+    <div className={cn('border-2 border-[var(--sn-border)] border-t-[var(--sn-purple)] rounded-full animate-spin', sz[size])} />
   );
 }
 
@@ -143,12 +143,12 @@ export function Empty({ icon: Icon, title, description, action }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       {Icon && (
-        <div className="w-16 h-16 rounded-2xl bg-[#13131e] border border-[#2a2a3e] flex items-center justify-center mb-4">
-          <Icon className="w-7 h-7 text-[#4a4a6a]" />
+        <div className="w-16 h-16 rounded-2xl bg-[var(--sn-card)] border border-[var(--sn-border)] flex items-center justify-center mb-4">
+          <Icon className="w-7 h-7 text-[var(--sn-text-muted)]" />
         </div>
       )}
-      <p className="text-[#e8e8f0] font-semibold text-base mb-1">{title}</p>
-      {description && <p className="text-[#7b7b9a] text-sm max-w-xs">{description}</p>}
+      <p className="text-[var(--sn-text)] font-semibold text-base mb-1">{title}</p>
+      {description && <p className="text-[var(--sn-text-muted)] text-sm max-w-xs">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -162,15 +162,15 @@ export function Modal({ open, onClose, title, children, className }) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div
         className={cn(
-          'relative w-full max-w-lg rounded-2xl border border-[#2a2a3e] shadow-2xl animate-scale-in',
+          'relative w-full max-w-lg rounded-2xl border border-[var(--sn-border)] shadow-2xl animate-scale-in',
           className
         )}
         style={{ background: 'var(--az-card)' }}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e1e2e]">
-            <h2 className="text-base font-bold text-[#e8e8f0]">{title}</h2>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#e8e8f0] transition-colors">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--sn-border)]">
+            <h2 className="text-base font-bold text-[var(--sn-text)]">{title}</h2>
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-text)] transition-colors">
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
@@ -184,15 +184,15 @@ export function Modal({ open, onClose, title, children, className }) {
 }
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
-export function StatCard({ label, value, sub, icon: Icon, color = '#00d97e', loading }) {
+export function StatCard({ label, value, sub, icon: Icon, color = 'var(--sn-purple)', loading }) {
   if (loading) return <Skeleton className="h-28" />;
   return (
     <Card>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold text-[#4a4a6a] uppercase tracking-wider mb-2">{label}</p>
-          <p className="text-2xl font-bold text-[#e8e8f0] az-mono">{value}</p>
-          {sub && <p className="text-xs text-[#7b7b9a] mt-1">{sub}</p>}
+          <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider mb-2">{label}</p>
+          <p className="text-2xl font-bold text-[var(--sn-text)] az-mono">{value}</p>
+          {sub && <p className="text-xs text-[var(--sn-text-muted)] mt-1">{sub}</p>}
         </div>
         {Icon && (
           <div

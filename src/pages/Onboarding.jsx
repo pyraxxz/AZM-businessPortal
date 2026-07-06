@@ -71,12 +71,12 @@ export default function Onboarding() {
 
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-[#00d97e1a] border border-[#00d97e35] flex items-center justify-center az-glow-emerald">
-            <Store className="w-5 h-5 text-[#00d97e]" />
+          <div className="w-10 h-10 rounded-xl bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple)] flex items-center justify-center az-glow-emerald">
+            <Store className="w-5 h-5 text-[var(--sn-purple)]" />
           </div>
           <div>
-            <p className="text-base font-bold text-[#e8e8f0]">AZAMAN</p>
-            <p className="text-xs text-[#00d97e]">Business Portal</p>
+            <p className="text-base font-bold text-[var(--sn-text)]">AZAMAN</p>
+            <p className="text-xs text-[var(--sn-purple)]">Business Portal</p>
           </div>
         </div>
 
@@ -87,24 +87,24 @@ export default function Onboarding() {
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                 style={s <= step
-                  ? { background: '#00d97e1a', border: '1.5px solid #00d97e', color: '#00d97e' }
-                  : { background: 'transparent', border: '1.5px solid #2a2a3e', color: '#4a4a6a' }
+                  ? { background: 'var(--sn-purple-subtle)', border: '1.5px solid #00d97e', color: 'var(--sn-purple)' }
+                  : { background: 'transparent', border: '1.5px solid #2a2a3e', color: 'var(--sn-text-muted)' }
                 }
               >
                 {s}
               </div>
-              {s < 2 && <div className="w-12 h-0.5 rounded-full" style={{ background: step > s ? '#00d97e40' : '#1e1e2e' }} />}
+              {s < 2 && <div className="w-12 h-0.5 rounded-full" style={{ background: step > s ? 'var(--sn-purple)' : 'var(--sn-border)' }} />}
             </div>
           ))}
-          <span className="ml-2 text-xs text-[#4a4a6a]">Step {step} of 2</span>
+          <span className="ml-2 text-xs text-[var(--sn-text-muted)]">Step {step} of 2</span>
         </div>
 
         {/* Step 1 — Core info */}
         {step === 1 && (
           <div className="space-y-5">
             <div>
-              <h2 className="text-xl font-bold text-[#e8e8f0]">Set up your business</h2>
-              <p className="text-sm text-[#7b7b9a] mt-1">Tell us the basics about your business.</p>
+              <h2 className="text-xl font-bold text-[var(--sn-text)]">Set up your business</h2>
+              <p className="text-sm text-[var(--sn-text-muted)] mt-1">Tell us the basics about your business.</p>
             </div>
             <Input
               label="Business Name"
@@ -133,8 +133,8 @@ export default function Onboarding() {
         {step === 2 && (
           <div className="space-y-5">
             <div>
-              <h2 className="text-xl font-bold text-[#e8e8f0]">Contact information</h2>
-              <p className="text-sm text-[#7b7b9a] mt-1">Help customers reach you. All fields are optional.</p>
+              <h2 className="text-xl font-bold text-[var(--sn-text)]">Contact information</h2>
+              <p className="text-sm text-[var(--sn-text-muted)] mt-1">Help customers reach you. All fields are optional.</p>
             </div>
             <Input label="Phone Number"  placeholder="+233 20 000 0000"    value={form.phoneNumber}   onChange={set('phoneNumber')} />
             <Input label="Contact Email" placeholder="contact@yourbiz.com" value={form.contactEmail}  onChange={set('contactEmail')} type="email" />
@@ -145,9 +145,9 @@ export default function Onboarding() {
 
         {/* Error */}
         {error && (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-[#f43f5e1a] border border-[#f43f5e30] mt-4">
-            <AlertCircle className="w-4 h-4 text-[#f43f5e] flex-shrink-0" />
-            <p className="text-xs text-[#f43f5e]">{error}</p>
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--sn-red)] border border-[var(--sn-red)] mt-4">
+            <AlertCircle className="w-4 h-4 text-[var(--sn-red)] flex-shrink-0" />
+            <p className="text-xs text-[var(--sn-red)]">{error}</p>
           </div>
         )}
 

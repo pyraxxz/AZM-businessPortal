@@ -52,10 +52,10 @@ function computeFunnel(orders) {
   const funded    = ['PAID', 'DELIVERED', 'COMPLETED', 'DISPUTED'];
   const delivered = ['DELIVERED', 'COMPLETED'];
   return [
-    { label: 'Total',     count: orders.length,                                          color: '#4f8ef7' },
-    { label: 'Paid',      count: orders.filter(o => funded.includes(o.status)).length,    color: '#a78bfa' },
-    { label: 'Delivered', count: orders.filter(o => delivered.includes(o.status)).length, color: '#00b8d9' },
-    { label: 'Completed', count: orders.filter(o => o.status === 'COMPLETED').length,      color: '#00d97e' },
+    { label: 'Total',     count: orders.length,                                          color: 'var(--sn-blue)' },
+    { label: 'Paid',      count: orders.filter(o => funded.includes(o.status)).length,    color: 'var(--sn-purple)' },
+    { label: 'Delivered', count: orders.filter(o => delivered.includes(o.status)).length, color: 'var(--sn-blue)' },
+    { label: 'Completed', count: orders.filter(o => o.status === 'COMPLETED').length,      color: 'var(--sn-purple)' },
   ];
 }
 
@@ -73,32 +73,32 @@ export default function Dashboard() {
       return (
           <div className="p-6 space-y-6 max-w-7xl mx-auto">
               <header>
-                  <h1 className="text-2xl font-bold text-[#e8e8f0]">Marketplace Overview</h1>
-                  <p className="text-sm text-[#7b7b9a] mt-1">Select a business from the sidebar to manage their portal.</p>
+                  <h1 className="text-2xl font-bold text-[var(--sn-text)]">Marketplace Overview</h1>
+                  <p className="text-sm text-[var(--sn-text-muted)] mt-1">Select a business from the sidebar to manage their portal.</p>
               </header>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Widget className="p-4">
-                      <p className="text-xs text-[#7b7b9a] font-semibold uppercase">Total</p>
-                      <p className="text-2xl font-bold text-[#e8e8f0] mt-1">{adminBusinesses.length}</p>
+                      <p className="text-xs text-[var(--sn-text-muted)] font-semibold uppercase">Total</p>
+                      <p className="text-2xl font-bold text-[var(--sn-text)] mt-1">{adminBusinesses.length}</p>
                   </Widget>
                   <Widget className="p-4">
-                      <p className="text-xs text-[#7b7b9a] font-semibold uppercase">Restaurants</p>
-                      <p className="text-2xl font-bold text-[#e8e8f0] mt-1">{grouped['FOOD_BEVERAGE']?.length || 0}</p>
+                      <p className="text-xs text-[var(--sn-text-muted)] font-semibold uppercase">Restaurants</p>
+                      <p className="text-2xl font-bold text-[var(--sn-text)] mt-1">{grouped['FOOD_BEVERAGE']?.length || 0}</p>
                   </Widget>
                   <Widget className="p-4">
-                      <p className="text-xs text-[#7b7b9a] font-semibold uppercase">Hotels</p>
-                      <p className="text-2xl font-bold text-[#e8e8f0] mt-1">{grouped['REAL_ESTATE']?.length || 0}</p>
+                      <p className="text-xs text-[var(--sn-text-muted)] font-semibold uppercase">Hotels</p>
+                      <p className="text-2xl font-bold text-[var(--sn-text)] mt-1">{grouped['REAL_ESTATE']?.length || 0}</p>
                   </Widget>
                   <Widget className="p-4">
-                      <p className="text-xs text-[#7b7b9a] font-semibold uppercase">Transit</p>
-                      <p className="text-2xl font-bold text-[#e8e8f0] mt-1">{grouped['LOGISTICS']?.length || 0}</p>
+                      <p className="text-xs text-[var(--sn-text-muted)] font-semibold uppercase">Transit</p>
+                      <p className="text-2xl font-bold text-[var(--sn-text)] mt-1">{grouped['LOGISTICS']?.length || 0}</p>
                   </Widget>
               </div>
 
               {Object.entries(grouped).map(([category, businesses]) => (
                   <div key={category} className="space-y-3">
-                      <h2 className="text-sm font-bold text-[#e8e8f0] uppercase tracking-wider">{category}</h2>
+                      <h2 className="text-sm font-bold text-[var(--sn-text)] uppercase tracking-wider">{category}</h2>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {businesses.map(b => (
                               <button
@@ -107,10 +107,10 @@ export default function Dashboard() {
                                       localStorage.setItem('admin_selected_biz', b.id);
                                       selectBusiness(b.id);
                                   }}
-                                  className="text-left rounded-xl border border-[#252535] bg-[#13131e] hover:bg-[#1a1a2e] hover:border-[#00d97e50] p-4 transition-all"
+                                  className="text-left rounded-xl border border-[var(--sn-border)] bg-[var(--sn-card)] hover:bg-[var(--sn-hover)] hover:border-[var(--sn-purple)50] p-4 transition-all"
                               >
-                                  <p className="text-sm font-bold text-[#e8e8f0] truncate">{b.businessName}</p>
-                                  <p className="text-xs text-[#7b7b9a] mt-1 truncate">ID: {b.azamanId || b.bizId}</p>
+                                  <p className="text-sm font-bold text-[var(--sn-text)] truncate">{b.businessName}</p>
+                                  <p className="text-xs text-[var(--sn-text-muted)] mt-1 truncate">ID: {b.azamanId || b.bizId}</p>
                                   <div className="flex gap-2 mt-3">
                                       <Badge variant={b.kybStatus === 'VERIFIED' ? 'success' : 'secondary'}>{b.kybStatus}</Badge>
                                       {b._count && (
@@ -221,11 +221,11 @@ export default function Dashboard() {
       {/* ── Header with business type badge ──────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#e8e8f0] flex items-center gap-2">
+          <h1 className="text-xl font-bold text-[var(--sn-text)] flex items-center gap-2">
             {greeting}, {bizName}
           </h1>
           <div className="flex items-center gap-2 mt-1.5">
-            <p className="text-sm text-[#7b7b9a]">Here's what's happening today.</p>
+            <p className="text-sm text-[var(--sn-text-muted)]">Here's what's happening today.</p>
             <span
               className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
               style={{ background: `${typeConfig.color}1a`, color: typeConfig.color, border: `1px solid ${typeConfig.color}30` }}
@@ -237,7 +237,7 @@ export default function Dashboard() {
         </div>
         <Link
           to="/orders"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-[#00d97e] bg-[#00d97e1a] border border-[#00d97e30] hover:bg-[#00d97e25] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-[var(--sn-purple)] bg-[var(--sn-purple)1a] border border-[var(--sn-purple)30] hover:bg-[var(--sn-purple)25] transition-colors"
         >
           View all orders <ArrowRight className="w-3.5 h-3.5" />
         </Link>
@@ -259,7 +259,7 @@ export default function Dashboard() {
                 {bizProfile?.kybStatus === 'PENDING' && 'Verification is under review'}
                 {bizProfile?.kybStatus === 'REJECTED' && 'Verification rejected — please resubmit'}
               </p>
-              <p className="text-xs text-[#7b7b9a] mt-0.5">
+              <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">
                 {bizProfile?.kybStatus === 'UNVERIFIED' && 'Upload your business documents to start receiving orders publicly.'}
                 {bizProfile?.kybStatus === 'PENDING' && "We're reviewing your documents. This usually takes 24–48 hours."}
                 {bizProfile?.kybStatus === 'REJECTED' && 'Review the feedback and upload corrected documents.'}
@@ -272,45 +272,45 @@ export default function Dashboard() {
 
       {/* ── Core stats widgets (all business types) ───────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Widget title="Total Orders" icon={ShoppingBag} iconColor="#4f8ef7" loading={statsLoading}>
-          <WidgetStat value={fmt(stats.totalOrders || 0, 0)} label="All time" color="#4f8ef7" />
+        <Widget title="Total Orders" icon={ShoppingBag} iconColor="var(--sn-blue)" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.totalOrders || 0, 0)} label="All time" color="var(--sn-blue)" />
         </Widget>
-        <Widget title="Revenue" icon={TrendingUp} iconColor="#00d97e" loading={statsLoading}>
-          <WidgetStat value={fmtUSDC(stats.totalRevenue || 0)} label="Completed orders" color="#00d97e" />
+        <Widget title="Revenue" icon={TrendingUp} iconColor="var(--sn-purple)" loading={statsLoading}>
+          <WidgetStat value={fmtUSDC(stats.totalRevenue || 0)} label="Completed orders" color="var(--sn-purple)" />
         </Widget>
-        <Widget title="Pending" icon={Clock} iconColor="#f59e0b" loading={statsLoading}>
-          <WidgetStat value={fmt(stats.pendingOrders || 0, 0)} label="Awaiting action" color="#f59e0b" />
+        <Widget title="Pending" icon={Clock} iconColor="var(--sn-amber)" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.pendingOrders || 0, 0)} label="Awaiting action" color="var(--sn-amber)" />
         </Widget>
-        <Widget title="Completed" icon={CheckCircle2} iconColor="#00d97e" loading={statsLoading}>
-          <WidgetStat value={fmt(stats.completedOrders || 0, 0)} label="All time" color="#00d97e" />
+        <Widget title="Completed" icon={CheckCircle2} iconColor="var(--sn-purple)" loading={statsLoading}>
+          <WidgetStat value={fmt(stats.completedOrders || 0, 0)} label="All time" color="var(--sn-purple)" />
         </Widget>
       </div>
 
       {/* ── Business-type-specific widgets ────────────────────────────────── */}
       {typeConfig.type === 'TRANSIT' && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Widget title="Active Trips" icon={Bus} iconColor="#4f8ef7">
+          <Widget title="Active Trips" icon={Bus} iconColor="var(--sn-blue)">
             <WidgetStat
               value={fmt(trips.filter(t => ['SCHEDULED','BOARDING'].includes(t.status)).length, 0)}
               label="Scheduled + boarding"
-              color="#4f8ef7"
+              color="var(--sn-blue)"
             />
           </Widget>
-          <Widget title="Seats Sold" icon={Users} iconColor="#a78bfa">
+          <Widget title="Seats Sold" icon={Users} iconColor="var(--sn-purple)">
             <WidgetStat
               value={fmt(trips.reduce((s, t) => s + (t.bookedSeats || 0), 0), 0)}
               label="All trips"
-              color="#a78bfa"
+              color="var(--sn-purple)"
             />
           </Widget>
-          <Widget title="Check-Ins Today" icon={QrCode} iconColor="#00d97e">
-            <WidgetStat value={fmt(checkInStats.todayCount || 0, 0)} label="Passengers" color="#00d97e" />
+          <Widget title="Check-Ins Today" icon={QrCode} iconColor="var(--sn-purple)">
+            <WidgetStat value={fmt(checkInStats.todayCount || 0, 0)} label="Passengers" color="var(--sn-purple)" />
           </Widget>
-          <Widget title="Transit Revenue" icon={DollarSign} iconColor="#00d97e">
+          <Widget title="Transit Revenue" icon={DollarSign} iconColor="var(--sn-purple)">
             <WidgetStat
               value={fmtUSDC(trips.reduce((s, t) => s + (t.bookedSeats || 0) * (Number(t.fareUsdc) || 0), 0))}
               label="From seat bookings"
-              color="#00d97e"
+              color="var(--sn-purple)"
             />
           </Widget>
         </div>
@@ -318,31 +318,31 @@ export default function Dashboard() {
 
       {['RESTAURANT', 'HOTEL', 'SERVICES'].includes(typeConfig.type) && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Widget title="Reservations" icon={CalendarCheck} iconColor="#a78bfa">
-            <WidgetStat value={fmt(resStats.total || 0, 0)} label="All bookings" color="#a78bfa" />
+          <Widget title="Reservations" icon={CalendarCheck} iconColor="var(--sn-purple)">
+            <WidgetStat value={fmt(resStats.total || 0, 0)} label="All bookings" color="var(--sn-purple)" />
           </Widget>
-          <Widget title="Pending" icon={Clock} iconColor="#f59e0b">
-            <WidgetStat value={fmt(resStats.pending || 0, 0)} label="Awaiting confirmation" color="#f59e0b" />
+          <Widget title="Pending" icon={Clock} iconColor="var(--sn-amber)">
+            <WidgetStat value={fmt(resStats.pending || 0, 0)} label="Awaiting confirmation" color="var(--sn-amber)" />
           </Widget>
-          <Widget title="Checked In" icon={UserCheck} iconColor="#00d97e">
-            <WidgetStat value={fmt(checkInStats.todayCount || 0, 0)} label="Today" color="#00d97e" />
+          <Widget title="Checked In" icon={UserCheck} iconColor="var(--sn-purple)">
+            <WidgetStat value={fmt(checkInStats.todayCount || 0, 0)} label="Today" color="var(--sn-purple)" />
           </Widget>
-          <Widget title="No-Shows" icon={UserX} iconColor="#f43f5e">
-            <WidgetStat value={fmt(resStats.noShows || 0, 0)} label="Penalties applied" color="#f43f5e" />
+          <Widget title="No-Shows" icon={UserX} iconColor="var(--sn-red)">
+            <WidgetStat value={fmt(resStats.noShows || 0, 0)} label="Penalties applied" color="var(--sn-red)" />
           </Widget>
         </div>
       )}
 
       {/* ── Invoice KPIs (all types) ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Widget title="Invoices Sent" icon={Receipt} iconColor="#4f8ef7">
-          <WidgetStat value={fmt(invoiceStats.sent, 0)} label="Awaiting payment" color="#4f8ef7" />
+        <Widget title="Invoices Sent" icon={Receipt} iconColor="var(--sn-blue)">
+          <WidgetStat value={fmt(invoiceStats.sent, 0)} label="Awaiting payment" color="var(--sn-blue)" />
         </Widget>
-        <Widget title="Invoices Paid" icon={CheckCircle2} iconColor="#00d97e">
-          <WidgetStat value={fmt(invoiceStats.paid, 0)} label="Settled" color="#00d97e" />
+        <Widget title="Invoices Paid" icon={CheckCircle2} iconColor="var(--sn-purple)">
+          <WidgetStat value={fmt(invoiceStats.paid, 0)} label="Settled" color="var(--sn-purple)" />
         </Widget>
-        <Widget title="Invoice Revenue" icon={DollarSign} iconColor="#a78bfa">
-          <WidgetStat value={fmtUSDC(invoiceStats.paidRevenue)} label="From paid invoices" color="#a78bfa" />
+        <Widget title="Invoice Revenue" icon={DollarSign} iconColor="var(--sn-purple)">
+          <WidgetStat value={fmtUSDC(invoiceStats.paidRevenue)} label="From paid invoices" color="var(--sn-purple)" />
         </Widget>
       </div>
 
@@ -350,32 +350,32 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Revenue trend — Area chart (Sentry-style) */}
         <div className="lg:col-span-2">
-          <Widget title="Revenue Trend" subtitle="Completed orders · last 30 days" icon={TrendingUp} iconColor="#00d97e" loading={analyticsLoading}>
+          <Widget title="Revenue Trend" subtitle="Completed orders · last 30 days" icon={TrendingUp} iconColor="var(--sn-purple)" loading={analyticsLoading}>
             {!hasRevenue ? (
               <div className="h-[200px] flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 rounded-2xl bg-[#00d97e1a] border border-[#00d97e30] flex items-center justify-center mb-3">
-                  <TrendingUp className="w-6 h-6 text-[#00d97e]" />
+                <div className="w-12 h-12 rounded-2xl bg-[var(--sn-purple)1a] border border-[var(--sn-purple)30] flex items-center justify-center mb-3">
+                  <TrendingUp className="w-6 h-6 text-[var(--sn-purple)]" />
                 </div>
-                <p className="text-sm text-[#7b7b9a]">Complete your first order to see revenue.</p>
+                <p className="text-sm text-[var(--sn-text-muted)]">Complete your first order to see revenue.</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={dailyRevenue} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00d97e" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#00d97e" stopOpacity={0} />
+                      <stop offset="0%" stopColor="var(--sn-purple)" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="var(--sn-purple)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="label" tick={{ fill: '#4a4a6a', fontSize: 10 }} tickLine={false} axisLine={false} interval={4} />
-                  <YAxis tick={{ fill: '#4a4a6a', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v.toFixed(0)}`} />
+                  <XAxis dataKey="label" tick={{ fill: 'var(--sn-text-muted)', fontSize: 10 }} tickLine={false} axisLine={false} interval={4} />
+                  <YAxis tick={{ fill: 'var(--sn-text-muted)', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v.toFixed(0)}`} />
                   <Tooltip
-                    cursor={{ stroke: '#2a2a3e', strokeDasharray: '4 4' }}
-                    contentStyle={{ background: '#13131e', border: '1px solid #2a2a3e', borderRadius: 12 }}
-                    labelStyle={{ color: '#e8e8f0', fontSize: 12 }}
+                    cursor={{ stroke: 'var(--sn-border)', strokeDasharray: '4 4' }}
+                    contentStyle={{ background: 'var(--sn-card)', border: '1px solid var(--sn-border)', borderRadius: 12 }}
+                    labelStyle={{ color: 'var(--sn-text)', fontSize: 12 }}
                     formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
                   />
-                  <Area type="monotone" dataKey="revenue" stroke="#00d97e" strokeWidth={2} fill="url(#revGrad)" />
+                  <Area type="monotone" dataKey="revenue" stroke="var(--sn-purple)" strokeWidth={2} fill="url(#revGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -383,15 +383,15 @@ export default function Dashboard() {
         </div>
 
         {/* Order funnel */}
-        <Widget title="Order Funnel" subtitle="Lifecycle progression" icon={Package} iconColor="#4f8ef7" loading={analyticsLoading}>
+        <Widget title="Order Funnel" subtitle="Lifecycle progression" icon={Package} iconColor="var(--sn-blue)" loading={analyticsLoading}>
           <div className="space-y-3 pt-2">
             {funnel.map(stage => (
               <div key={stage.label}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-[#7b7b9a]">{stage.label}</span>
-                  <span className="text-xs font-bold text-[#e8e8f0] az-mono">{stage.count}</span>
+                  <span className="text-xs font-semibold text-[var(--sn-text-muted)]">{stage.label}</span>
+                  <span className="text-xs font-bold text-[var(--sn-text)] az-mono">{stage.count}</span>
                 </div>
-                <div className="h-2 rounded-full bg-[#1e1e2e] overflow-hidden">
+                <div className="h-2 rounded-full bg-[var(--sn-border)] overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{ width: `${(stage.count / funnelMax) * 100}%`, background: stage.color }}
@@ -406,7 +406,7 @@ export default function Dashboard() {
       {/* ── Transit-specific: upcoming trips widget ────────────────────────── */}
       {typeConfig.type === 'TRANSIT' && trips.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Widget title="Upcoming Trips" subtitle="Next departures" icon={Route} iconColor="#4f8ef7">
+          <Widget title="Upcoming Trips" subtitle="Next departures" icon={Route} iconColor="var(--sn-blue)">
             <div className="space-y-0 max-h-[240px] overflow-y-auto">
               {trips
                 .filter(t => ['SCHEDULED', 'BOARDING'].includes(t.status))
@@ -421,7 +421,7 @@ export default function Dashboard() {
                       key={trip.id}
                       label={trip.routeName}
                       value={`${booked}/${total}`}
-                      badge={<Badge color={pct > 80 ? '#f59e0b' : '#00d97e'}>{pct > 80 ? 'Filling Up' : 'Available'}</Badge>}
+                      badge={<Badge color={pct > 80 ? 'var(--sn-amber)' : 'var(--sn-purple)'}>{pct > 80 ? 'Filling Up' : 'Available'}</Badge>}
                       onClick={() => window.location.href = '/transit'}
                     />
                   );
@@ -430,12 +430,12 @@ export default function Dashboard() {
           </Widget>
 
           {/* Recent check-ins for transit */}
-          <Widget title="Recent Check-Ins" subtitle="Passenger activity" icon={QrCode} iconColor="#00d97e">
+          <Widget title="Recent Check-Ins" subtitle="Passenger activity" icon={QrCode} iconColor="var(--sn-purple)">
             <div className="space-y-0">
-              <WidgetRow label="Checked in today" value={fmt(checkInStats.todayCount || 0, 0)} badge={<Badge color="#00d97e">Today</Badge>} />
-              <WidgetRow label="Pending" value={fmt(checkInStats.pending || 0, 0)} badge={<Badge color="#f59e0b">Waiting</Badge>} />
-              <WidgetRow label="No-shows" value={fmt(checkInStats.noShows || 0, 0)} badge={<Badge color="#f43f5e">Today</Badge>} />
-              <WidgetRow label="Total guests" value={fmt(checkInStats.totalGuests || 0, 0)} badge={<Badge color="#4f8ef7">All time</Badge>} />
+              <WidgetRow label="Checked in today" value={fmt(checkInStats.todayCount || 0, 0)} badge={<Badge color="var(--sn-purple)">Today</Badge>} />
+              <WidgetRow label="Pending" value={fmt(checkInStats.pending || 0, 0)} badge={<Badge color="var(--sn-amber)">Waiting</Badge>} />
+              <WidgetRow label="No-shows" value={fmt(checkInStats.noShows || 0, 0)} badge={<Badge color="var(--sn-red)">Today</Badge>} />
+              <WidgetRow label="Total guests" value={fmt(checkInStats.totalGuests || 0, 0)} badge={<Badge color="var(--sn-blue)">All time</Badge>} />
             </div>
           </Widget>
         </div>
@@ -444,21 +444,21 @@ export default function Dashboard() {
       {/* ── Reservation-specific widgets ──────────────────────────────────── */}
       {['RESTAURANT', 'HOTEL', 'SERVICES'].includes(typeConfig.type) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Widget title="Reservation Summary" subtitle="By status" icon={CalendarCheck} iconColor="#a78bfa">
+          <Widget title="Reservation Summary" subtitle="By status" icon={CalendarCheck} iconColor="var(--sn-purple)">
             <div className="space-y-0">
-              <WidgetRow label="Pending" value={fmt(resStats.pending || 0, 0)} badge={<Badge color="#f59e0b">Action needed</Badge>} />
-              <WidgetRow label="Confirmed" value={fmt(resStats.confirmed || 0, 0)} badge={<Badge color="#4f8ef7">Upcoming</Badge>} />
-              <WidgetRow label="Checked In" value={fmt(resStats.checkedIn || 0, 0)} badge={<Badge color="#00d97e">Today</Badge>} />
-              <WidgetRow label="No-Shows" value={fmt(resStats.noShows || 0, 0)} badge={<Badge color="#f43f5e">Penalized</Badge>} />
+              <WidgetRow label="Pending" value={fmt(resStats.pending || 0, 0)} badge={<Badge color="var(--sn-amber)">Action needed</Badge>} />
+              <WidgetRow label="Confirmed" value={fmt(resStats.confirmed || 0, 0)} badge={<Badge color="var(--sn-blue)">Upcoming</Badge>} />
+              <WidgetRow label="Checked In" value={fmt(resStats.checkedIn || 0, 0)} badge={<Badge color="var(--sn-purple)">Today</Badge>} />
+              <WidgetRow label="No-Shows" value={fmt(resStats.noShows || 0, 0)} badge={<Badge color="var(--sn-red)">Penalized</Badge>} />
             </div>
           </Widget>
 
-          <Widget title="Check-In Activity" subtitle="Today" icon={QrCode} iconColor="#00d97e">
+          <Widget title="Check-In Activity" subtitle="Today" icon={QrCode} iconColor="var(--sn-purple)">
             <div className="space-y-0">
-              <WidgetRow label="Checked in" value={fmt(checkInStats.todayCount || 0, 0)} badge={<Badge color="#00d97e">Today</Badge>} />
-              <WidgetRow label="Pending" value={fmt(checkInStats.pending || 0, 0)} badge={<Badge color="#f59e0b">Waiting</Badge>} />
-              <WidgetRow label="No-shows" value={fmt(checkInStats.noShows || 0, 0)} badge={<Badge color="#f43f5e">Today</Badge>} />
-              <WidgetRow label="Total guests" value={fmt(checkInStats.totalGuests || 0, 0)} badge={<Badge color="#4f8ef7">All time</Badge>} />
+              <WidgetRow label="Checked in" value={fmt(checkInStats.todayCount || 0, 0)} badge={<Badge color="var(--sn-purple)">Today</Badge>} />
+              <WidgetRow label="Pending" value={fmt(checkInStats.pending || 0, 0)} badge={<Badge color="var(--sn-amber)">Waiting</Badge>} />
+              <WidgetRow label="No-shows" value={fmt(checkInStats.noShows || 0, 0)} badge={<Badge color="var(--sn-red)">Today</Badge>} />
+              <WidgetRow label="Total guests" value={fmt(checkInStats.totalGuests || 0, 0)} badge={<Badge color="var(--sn-blue)">All time</Badge>} />
             </div>
           </Widget>
         </div>
@@ -466,27 +466,27 @@ export default function Dashboard() {
 
       {/* ── Reviews widget (all types) ────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Widget title="Customer Rating" icon={Star} iconColor="#f59e0b">
+        <Widget title="Customer Rating" icon={Star} iconColor="var(--sn-amber)">
           <div className="flex items-center gap-3">
-            <WidgetStat value={fmt(reviewStats.avgRating || 0, 1)} color="#f59e0b" />
+            <WidgetStat value={fmt(reviewStats.avgRating || 0, 1)} color="var(--sn-amber)" />
             <div className="flex items-center gap-0.5">
               {[1, 2, 3, 4, 5].map(s => (
-                <Star key={s} className={cn('w-4 h-4', s <= Math.round(reviewStats.avgRating || 0) ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-[#2a2a3e]')} />
+                <Star key={s} className={cn('w-4 h-4', s <= Math.round(reviewStats.avgRating || 0) ? 'text-[var(--sn-amber)] fill-[var(--sn-amber)]' : 'text-[var(--sn-border)]')} />
               ))}
             </div>
           </div>
-          <p className="text-[11px] text-[#4a4a6a] mt-2">{reviewStats.total || 0} reviews</p>
+          <p className="text-[11px] text-[var(--sn-text-muted)] mt-2">{reviewStats.total || 0} reviews</p>
         </Widget>
 
-        <Widget title="Stories Promoted" icon={Sparkles} iconColor="#a78bfa">
-          <WidgetStat value={fmt(reviewStats.storiesPromoted || 0, 0)} label="From reviews" color="#a78bfa" />
+        <Widget title="Stories Promoted" icon={Sparkles} iconColor="var(--sn-purple)">
+          <WidgetStat value={fmt(reviewStats.storiesPromoted || 0, 0)} label="From reviews" color="var(--sn-purple)" />
         </Widget>
 
         {/* Recent orders widget */}
-        <Widget title="Recent Orders" subtitle="Latest activity" icon={ShoppingBag} iconColor="#4f8ef7" loading={recentLoading}>
+        <Widget title="Recent Orders" subtitle="Latest activity" icon={ShoppingBag} iconColor="var(--sn-blue)" loading={recentLoading}>
           {recent.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full min-h-[80px] text-center">
-              <p className="text-xs text-[#7b7b9a]">No orders yet.</p>
+              <p className="text-xs text-[var(--sn-text-muted)]">No orders yet.</p>
             </div>
           ) : (
             <div className="space-y-0 max-h-[160px] overflow-y-auto">

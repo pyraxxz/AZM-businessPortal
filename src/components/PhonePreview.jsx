@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { X, Battery, Wifi, Signal, Star, MapPin, Clock, ChevronRight, Search, Bus, UtensilsCrossed, BedDouble, ShoppingBag } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { motion, useDragControls } from 'framer-motion';
+import { X, Battery, Wifi, Signal, Star, MapPin, Clock, ChevronRight, Search, Bus, UtensilsCrossed, BedDouble, ShoppingBag, Smartphone, Minus, Move } from 'lucide-react';
 import { getTypeConfig } from '@/lib/businessTypes';
 
 // ── iPhone 17 Pro Max dimensions (Apple's official CSS px) ──
@@ -14,10 +14,17 @@ const FRAME_W = SCREEN_W + BEZEL * 2;
 const FRAME_H = SCREEN_H + BEZEL * 2;
 const FRAME_CORNER = CORNER_R + BEZEL;
 
+// Floating widget scale — shrinks the full iPhone frame down to a small
+// movable card that sits alongside the portal instead of covering it.
+const WIDGET_SCALE = 0.5;
+
 export function PhonePreview({ business, onClose }) {
   const [currentTime, setCurrentTime] = useState(
     new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
   );
+  const [minimized, setMinimized] = useState(false);
+  const dragControls = useDragControls();
+  const constraintsRef = useRef(null);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -35,45 +42,75 @@ export function PhonePreview({ business, onClose }) {
   if (!business) return null;
   const typeConfig = getTypeConfig(business);
 
+  // Invisible full-viewport bounds so the widget can be dragged anywhere
+  // on screen but never off it. It does NOT intercept clicks — the portal
+  // underneath stays fully usable while the preview floats on top.
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-md bg-black/60"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.8, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="relative flex flex-col items-center"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute -top-4 -right-4 z-[110] w-9 h-9 rounded-full bg-[var(--sn-elevated)] border border-[var(--sn-border-bright)] flex items-center justify-center text-[var(--sn-text-secondary)] hover:text-white hover:bg-[var(--sn-hover)] transition-all shadow-sn-tooltip"
-          aria-label="Close preview"
+    <div ref={constraintsRef} className="fixed inset-0 z-[100] pointer-events-none">
+      {minimized ? (
+        <motion.button
+          drag
+          dragControls={dragControls}
+          dragMomentum={false}
+          dragConstraints={constraintsRef}
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.6 }}
+          onClick={() => setMinimized(false)}
+          className="pointer-events-auto absolute bottom-8 right-8 w-14 h-14 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing shadow-sn-tooltip"
+          style={{ background: 'var(--sn-purple)', touchAction: 'none' }}
+          title="Show live preview"
         >
-          <X className="w-4 h-4" />
-        </button>
+          <Smartphone className="w-6 h-6 text-white" />
+        </motion.button>
+      ) : (
+        <motion.div
+          drag
+          dragListener={false}
+          dragControls={dragControls}
+          dragMomentum={false}
+          dragConstraints={constraintsRef}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+          className="pointer-events-auto absolute bottom-8 right-8 flex flex-col items-center"
+        >
+          {/* Drag handle / title bar */}
+          <div
+            onPointerDown={(e) => dragControls.start(e)}
+            className="w-full mb-2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--sn-elevated)] border border-[var(--sn-border-bright)] shadow-sn-tooltip cursor-grab active:cursor-grabbing select-none"
+            style={{ touchAction: 'none' }}
+          >
+            <Move className="w-3 h-3 text-[var(--sn-text-muted)] flex-shrink-0" />
+            <p className="text-[11px] font-medium text-[var(--sn-text-secondary)] truncate flex-1">
+              Live Preview: <span className="font-bold text-[var(--sn-text)]">{business.businessName}</span>
+            </p>
+            <button
+              onClick={() => setMinimized(true)}
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--sn-text-muted)] hover:text-white hover:bg-[var(--sn-hover)] flex-shrink-0"
+              aria-label="Minimize preview"
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+            <button
+              onClick={onClose}
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--sn-text-muted)] hover:text-white hover:bg-[var(--sn-hover)] flex-shrink-0"
+              aria-label="Close preview"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
 
-        {/* Title badge */}
-        <div className="absolute -top-14 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/10 backdrop-blur-lg border border-white/20 px-4 py-1.5 rounded-full">
-          <p className="text-xs font-medium text-white tracking-wide">
-            Live Preview: <span className="font-bold">{business.businessName}</span>
-          </p>
-        </div>
-
-        {/* ── iPHONE 17 PRO MAX — SVG-MASKED FRAME ── */}
+        {/* ── iPHONE 17 PRO MAX — SVG-MASKED FRAME (scaled down as a floating widget) ── */}
         <div
           className="relative rounded-[46px]"
           style={{
             width: FRAME_W,
             height: FRAME_H,
+            transform: `scale(${WIDGET_SCALE})`,
+            transformOrigin: 'top center',
+            marginBottom: -FRAME_H * (1 - WIDGET_SCALE),
             background: 'linear-gradient(135deg, #3a3a3c 0%, #1c1c1e 25%, #2c2c2e 50%, #1c1c1e 75%, #3a3a3c 100%)',
             boxShadow: '0 0 0 1px rgba(255,255,255,0.15), 0 20px 40px -10px rgba(0,0,0,0.5), 0 40px 100px -20px rgba(0,0,0,0.8)',
             padding: BEZEL,
@@ -144,7 +181,8 @@ export function PhonePreview({ business, onClose }) {
           </div>
         </div>
       </motion.div>
-    </motion.div>
+      )}
+    </div>
   );
 }
 

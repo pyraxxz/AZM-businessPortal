@@ -11,10 +11,10 @@ import { toast } from 'sonner';
 
 // ── Invoice status display config ───────────────────────────────────────────
 const INVOICE_STATUS_META = {
-  DRAFT:  { label: 'Draft',  color: '#7b7b9a', bg: '#7b7b9a1a' },
-  SENT:   { label: 'Sent',   color: '#4f8ef7', bg: '#4f8ef71a' },
-  PAID:   { label: 'Paid',   color: '#00d97e', bg: '#00d97e1a' },
-  VOIDED: { label: 'Voided', color: '#f43f5e', bg: '#f43f5e1a' },
+  DRAFT:  { label: 'Draft',  color: 'var(--sn-text-muted)', bg: '#7b7b9a1a' },
+  SENT:   { label: 'Sent',   color: 'var(--sn-blue)', bg: 'var(--sn-blue)' },
+  PAID:   { label: 'Paid',   color: 'var(--sn-purple)', bg: 'var(--sn-purple-subtle)' },
+  VOIDED: { label: 'Voided', color: 'var(--sn-red)', bg: 'var(--sn-red)' },
 };
 const TABS = ['ALL', 'DRAFT', 'SENT', 'PAID', 'VOIDED'];
 
@@ -69,8 +69,8 @@ export default function Invoices() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-bold text-[#e8e8f0]">Invoices</h1>
-          <p className="text-sm text-[#7b7b9a] mt-1">Create and track bills sent to your customers.</p>
+          <h1 className="text-xl font-bold text-[var(--sn-text)]">Invoices</h1>
+          <p className="text-sm text-[var(--sn-text-muted)] mt-1">Create and track bills sent to your customers.</p>
         </div>
         <Button onClick={() => setShowCreate(true)}><Plus className="w-4 h-4" /> New Invoice</Button>
       </div>
@@ -80,22 +80,22 @@ export default function Invoices() {
         {['SENT','PAID','DRAFT','VOIDED'].map(s => {
           const meta = INVOICE_STATUS_META[s];
           return (
-            <div key={s} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#13131e] border border-[#1e1e2e]">
+            <div key={s} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--sn-card)] border border-[var(--sn-border)]">
               <span className="text-xs font-semibold" style={{ color: meta.color }}>{meta.label}</span>
-              <span className="text-xs font-bold text-[#e8e8f0] az-mono">{fmt(counts[s], 0)}</span>
+              <span className="text-xs font-bold text-[var(--sn-text)] az-mono">{fmt(counts[s], 0)}</span>
             </div>
           );
         })}
       </div>
 
       {/* Filter tabs */}
-      <div className="flex flex-wrap gap-1 border-b border-[#1e1e2e]">
+      <div className="flex flex-wrap gap-1 border-b border-[var(--sn-border)]">
         {TABS.map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition-colors ${
-              tab === t ? 'border-[#00d97e] text-[#00d97e]' : 'border-transparent text-[#4a4a6a] hover:text-[#7b7b9a]'
+              tab === t ? 'border-[var(--sn-purple)] text-[var(--sn-purple)]' : 'border-transparent text-[var(--sn-text-muted)] hover:text-[var(--sn-text-muted)]'
             }`}
           >
             {t === 'ALL' ? 'All' : INVOICE_STATUS_META[t].label}
@@ -115,17 +115,17 @@ export default function Invoices() {
         />
       ) : (
         <Card className="p-0 overflow-hidden">
-          <div className="divide-y divide-[#1e1e2e]">
+          <div className="divide-y divide-[var(--sn-border)]">
             {filtered.map(inv => {
               const meta = INVOICE_STATUS_META[inv.status] || INVOICE_STATUS_META.DRAFT;
               return (
-                <div key={inv.id} className="flex items-center gap-4 px-5 py-4 hover:bg-[#0f0f17] transition-colors">
+                <div key={inv.id} className="flex items-center gap-4 px-5 py-4 hover:bg-[var(--az-black)] transition-colors">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-[#e8e8f0] az-mono truncate">{inv.invoiceRef}</p>
+                      <p className="text-sm font-bold text-[var(--sn-text)] az-mono truncate">{inv.invoiceRef}</p>
                       <Badge color={meta.color} bg={meta.bg}>{meta.label}</Badge>
                     </div>
-                    <p className="text-xs text-[#4a4a6a] mt-0.5 truncate">
+                    <p className="text-xs text-[var(--sn-text-muted)] mt-0.5 truncate">
                       {inv.customer?.username || 'Customer'}
                       {inv.location?.label && ` · ${inv.location.label}`}
                       {inv.table?.label && ` · ${inv.table.label}`}
@@ -135,7 +135,7 @@ export default function Invoices() {
                         : `Created ${relativeTime(inv.createdAt)}`}
                     </p>
                   </div>
-                  <p className="text-sm font-bold text-[#e8e8f0] az-mono flex-shrink-0">{fmtUSDC(inv.billTotalUsdc)}</p>
+                  <p className="text-sm font-bold text-[var(--sn-text)] az-mono flex-shrink-0">{fmtUSDC(inv.billTotalUsdc)}</p>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Button variant="secondary" size="sm" onClick={() => setDetailId(inv.id)}>
                       <Eye className="w-3.5 h-3.5" /> View
@@ -200,19 +200,19 @@ function CustomerLookup({ customer, onSelect, onClear }) {
 
   if (customer) {
     return (
-      <div className="flex items-center gap-3 p-3 rounded-xl bg-[#0f0f17] border border-[#00d97e30]">
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--az-black)] border border-[#00d97e30]">
         {customer.profilePictureUrl ? (
           <img src={customer.profilePictureUrl} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-[#4f8ef71a] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-bold text-[#4f8ef7]">{initials(customer.username)}</span>
+          <div className="w-10 h-10 rounded-full bg-[var(--sn-blue)] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
+            <span className="text-sm font-bold text-[var(--sn-blue)]">{initials(customer.username)}</span>
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[#e8e8f0] truncate">{customer.username}</p>
-          <p className="text-xs text-[#4a4a6a] az-mono truncate">{customer.azamanId}</p>
+          <p className="text-sm font-semibold text-[var(--sn-text)] truncate">{customer.username}</p>
+          <p className="text-xs text-[var(--sn-text-muted)] az-mono truncate">{customer.azamanId}</p>
         </div>
-        <button onClick={onClear} className="p-1.5 rounded-lg hover:bg-[#1e1e2e] text-[#4a4a6a] hover:text-[#e8e8f0] transition-colors">
+        <button onClick={onClear} className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-text)] transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -319,13 +319,13 @@ function CreateInvoiceModal({ onClose, onCreated }) {
       <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
         {/* Step 1 — customer */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[#7b7b9a] uppercase tracking-wide">Customer</p>
+          <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wide">Customer</p>
           <CustomerLookup customer={customer} onSelect={setCustomer} onClear={() => setCustomer(null)} />
         </div>
 
         {/* Step 2 — line items */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[#7b7b9a] uppercase tracking-wide">Line Items</p>
+          <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wide">Line Items</p>
           <div className="space-y-2">
             {lineItems.map((it, i) => (
               <div key={i} className="flex items-end gap-2">
@@ -333,23 +333,23 @@ function CreateInvoiceModal({ onClose, onCreated }) {
                   <input
                     type="text" maxLength={200} placeholder="Description"
                     value={it.description} onChange={e => setLine(i, 'description', e.target.value)}
-                    className="w-full bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-3 py-2 text-sm text-[#e8e8f0] placeholder:text-[#4a4a6a] outline-none focus:border-[#00d97e60]"
+                    className="w-full bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-3 py-2 text-sm text-[var(--sn-text)] placeholder:text-[var(--sn-text-muted)] outline-none focus:border-[var(--sn-purple)]"
                   />
                 </div>
                 <input
                   type="number" min="1" step="1" placeholder="Qty"
                   value={it.quantity} onChange={e => setLine(i, 'quantity', e.target.value)}
-                  className="w-16 bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-2 py-2 text-sm text-[#e8e8f0] text-center outline-none focus:border-[#00d97e60]"
+                  className="w-16 bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-2 py-2 text-sm text-[var(--sn-text)] text-center outline-none focus:border-[var(--sn-purple)]"
                 />
                 <input
                   type="number" min="0" step="0.01" placeholder="Price"
                   value={it.unitPrice} onChange={e => setLine(i, 'unitPrice', e.target.value)}
-                  className="w-24 bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-2 py-2 text-sm text-[#e8e8f0] text-right outline-none focus:border-[#00d97e60]"
+                  className="w-24 bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-2 py-2 text-sm text-[var(--sn-text)] text-right outline-none focus:border-[var(--sn-purple)]"
                 />
-                <div className="w-24 text-right text-sm font-semibold text-[#e8e8f0] az-mono py-2">{fmtUSDC(lineTotals[i])}</div>
+                <div className="w-24 text-right text-sm font-semibold text-[var(--sn-text)] az-mono py-2">{fmtUSDC(lineTotals[i])}</div>
                 <button
                   onClick={() => removeLine(i)} disabled={lineItems.length === 1}
-                  className="p-2 rounded-lg text-[#4a4a6a] hover:text-[#f43f5e] disabled:opacity-30 transition-colors"
+                  className="p-2 rounded-lg text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] disabled:opacity-30 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -357,46 +357,46 @@ function CreateInvoiceModal({ onClose, onCreated }) {
             ))}
           </div>
           <div className="flex items-center justify-between">
-            <button onClick={addLine} className="flex items-center gap-1.5 text-xs font-semibold text-[#00d97e] hover:text-[#00b870] transition-colors">
+            <button onClick={addLine} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--sn-purple)] hover:text-[#00b870] transition-colors">
               <Plus className="w-3.5 h-3.5" /> Add Item
             </button>
-            <span className="text-xs text-[#7b7b9a]">Subtotal: <span className="font-bold text-[#e8e8f0] az-mono">{fmtUSDC(subtotal)}</span></span>
+            <span className="text-xs text-[var(--sn-text-muted)]">Subtotal: <span className="font-bold text-[var(--sn-text)] az-mono">{fmtUSDC(subtotal)}</span></span>
           </div>
         </div>
 
         {/* Tax lines */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[#7b7b9a] uppercase tracking-wide">Taxes &amp; Charges (optional)</p>
+          <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wide">Taxes &amp; Charges (optional)</p>
           {taxLines.map((t, i) => (
             <div key={i} className="flex items-end gap-2">
               <input
                 type="text" maxLength={100} placeholder="e.g. VAT"
                 value={t.name} onChange={e => setTax(i, 'name', e.target.value)}
-                className="flex-1 bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-3 py-2 text-sm text-[#e8e8f0] placeholder:text-[#4a4a6a] outline-none focus:border-[#00d97e60]"
+                className="flex-1 bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-3 py-2 text-sm text-[var(--sn-text)] placeholder:text-[var(--sn-text-muted)] outline-none focus:border-[var(--sn-purple)]"
               />
               <select
                 value={t.type} onChange={e => setTax(i, 'type', e.target.value)}
-                className="bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-2 py-2 text-sm text-[#e8e8f0] outline-none focus:border-[#00d97e60] cursor-pointer"
+                className="bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-2 py-2 text-sm text-[var(--sn-text)] outline-none focus:border-[var(--sn-purple)] cursor-pointer"
               >
-                <option value="PERCENTAGE" style={{ background: '#13131e' }}>%</option>
-                <option value="FLAT" style={{ background: '#13131e' }}>Flat</option>
+                <option value="PERCENTAGE" style={{ background: 'var(--sn-card)' }}>%</option>
+                <option value="FLAT" style={{ background: 'var(--sn-card)' }}>Flat</option>
               </select>
               <input
                 type="number" min="0" step="0.01" placeholder="Value"
                 value={t.value} onChange={e => setTax(i, 'value', e.target.value)}
-                className="w-24 bg-[#0a0a12] border border-[#2a2a3e] rounded-lg px-2 py-2 text-sm text-[#e8e8f0] text-right outline-none focus:border-[#00d97e60]"
+                className="w-24 bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-2 py-2 text-sm text-[var(--sn-text)] text-right outline-none focus:border-[var(--sn-purple)]"
               />
-              <div className="w-24 text-right text-sm font-semibold text-[#e8e8f0] az-mono py-2">{fmtUSDC(taxComputed[i])}</div>
-              <button onClick={() => removeTax(i)} className="p-2 rounded-lg text-[#4a4a6a] hover:text-[#f43f5e] transition-colors">
+              <div className="w-24 text-right text-sm font-semibold text-[var(--sn-text)] az-mono py-2">{fmtUSDC(taxComputed[i])}</div>
+              <button onClick={() => removeTax(i)} className="p-2 rounded-lg text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
           ))}
           <div className="flex items-center justify-between">
-            <button onClick={addTax} className="flex items-center gap-1.5 text-xs font-semibold text-[#00d97e] hover:text-[#00b870] transition-colors">
+            <button onClick={addTax} className="flex items-center gap-1.5 text-xs font-semibold text-[var(--sn-purple)] hover:text-[#00b870] transition-colors">
               <Plus className="w-3.5 h-3.5" /> Add Tax Line
             </button>
-            {taxTotal > 0 && <span className="text-xs text-[#7b7b9a]">Tax total: <span className="font-bold text-[#e8e8f0] az-mono">{fmtUSDC(taxTotal)}</span></span>}
+            {taxTotal > 0 && <span className="text-xs text-[var(--sn-text-muted)]">Tax total: <span className="font-bold text-[var(--sn-text)] az-mono">{fmtUSDC(taxTotal)}</span></span>}
           </div>
         </div>
 
@@ -425,25 +425,25 @@ function CreateInvoiceModal({ onClose, onCreated }) {
         />
 
         {/* Summary preview */}
-        <div className="p-4 rounded-xl bg-[#0a0a12] border border-[#1e1e2e] space-y-2">
+        <div className="p-4 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-[#7b7b9a]">Subtotal</span>
-            <span className="text-[#e8e8f0] az-mono">{fmtUSDC(subtotal)}</span>
+            <span className="text-[var(--sn-text-muted)]">Subtotal</span>
+            <span className="text-[var(--sn-text)] az-mono">{fmtUSDC(subtotal)}</span>
           </div>
           {taxLines.map((t, i) => (t.name || t.value) ? (
             <div key={i} className="flex justify-between text-sm">
-              <span className="text-[#7b7b9a]">{t.name || 'Tax'}{t.type === 'PERCENTAGE' && t.value ? ` (${t.value}%)` : ''}</span>
-              <span className="text-[#e8e8f0] az-mono">{fmtUSDC(taxComputed[i])}</span>
+              <span className="text-[var(--sn-text-muted)]">{t.name || 'Tax'}{t.type === 'PERCENTAGE' && t.value ? ` (${t.value}%)` : ''}</span>
+              <span className="text-[var(--sn-text)] az-mono">{fmtUSDC(taxComputed[i])}</span>
             </div>
           ) : null)}
-          <div className="flex justify-between pt-2 border-t border-[#1e1e2e]">
-            <span className="text-sm font-bold text-[#e8e8f0]">Bill Total</span>
-            <span className="text-sm font-bold text-[#00d97e] az-mono">{fmtUSDC(billTotal)}</span>
+          <div className="flex justify-between pt-2 border-t border-[var(--sn-border)]">
+            <span className="text-sm font-bold text-[var(--sn-text)]">Bill Total</span>
+            <span className="text-sm font-bold text-[var(--sn-purple)] az-mono">{fmtUSDC(billTotal)}</span>
           </div>
         </div>
       </div>
 
-      <div className="flex gap-3 mt-4 pt-4 border-t border-[#1e1e2e]">
+      <div className="flex gap-3 mt-4 pt-4 border-t border-[var(--sn-border)]">
         <Button variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
         <Button onClick={submit} loading={createMut.isPending} className="flex-1">Create Invoice</Button>
       </div>
@@ -471,7 +471,7 @@ function InvoiceDetailModal({ invoiceId, onClose, onSend, onVoid, sending, voidi
           {/* Header */}
           <div className="flex items-center justify-between">
             <Badge color={meta.color} bg={meta.bg} className="text-sm px-3 py-1">{meta.label}</Badge>
-            <div className="text-right text-xs text-[#4a4a6a]">
+            <div className="text-right text-xs text-[var(--sn-text-muted)]">
               {inv.paidAt && <p>Paid {formatDateTime(inv.paidAt)}</p>}
               {inv.sentAt && !inv.paidAt && <p>Sent {formatDateTime(inv.sentAt)}</p>}
               {inv.voidedAt && <p>Voided {formatDateTime(inv.voidedAt)}</p>}
@@ -481,44 +481,44 @@ function InvoiceDetailModal({ invoiceId, onClose, onSend, onVoid, sending, voidi
 
           {/* Customer + location */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
-              <p className="text-xs font-semibold text-[#4a4a6a] uppercase tracking-wider mb-2 flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> Customer</p>
+            <div className="p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+              <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider mb-2 flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> Customer</p>
               <div className="flex items-center gap-2.5">
                 {inv.customer?.profilePictureUrl ? (
                   <img src={inv.customer.profilePictureUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#4f8ef71a] border border-[#4f8ef730] flex items-center justify-center">
-                    <span className="text-xs font-bold text-[#4f8ef7]">{initials(inv.customer?.username)}</span>
+                  <div className="w-8 h-8 rounded-full bg-[var(--sn-blue)] border border-[#4f8ef730] flex items-center justify-center">
+                    <span className="text-xs font-bold text-[var(--sn-blue)]">{initials(inv.customer?.username)}</span>
                   </div>
                 )}
-                <p className="text-sm font-semibold text-[#e8e8f0] truncate">{inv.customer?.username || 'Customer'}</p>
+                <p className="text-sm font-semibold text-[var(--sn-text)] truncate">{inv.customer?.username || 'Customer'}</p>
               </div>
             </div>
             {(inv.location || inv.table) && (
-              <div className="p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
-                <p className="text-xs font-semibold text-[#4a4a6a] uppercase tracking-wider mb-2 flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> Location</p>
-                {inv.location && <p className="text-sm text-[#e8e8f0]">{inv.location.label}</p>}
-                {inv.location?.address && <p className="text-xs text-[#4a4a6a] mt-0.5">{inv.location.address}</p>}
-                {inv.table && <p className="text-xs text-[#7b7b9a] mt-1">Table: {inv.table.label}</p>}
+              <div className="p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+                <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider mb-2 flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> Location</p>
+                {inv.location && <p className="text-sm text-[var(--sn-text)]">{inv.location.label}</p>}
+                {inv.location?.address && <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">{inv.location.address}</p>}
+                {inv.table && <p className="text-xs text-[var(--sn-text-muted)] mt-1">Table: {inv.table.label}</p>}
               </div>
             )}
           </div>
 
           {/* Line items */}
-          <div className="rounded-xl border border-[#1e1e2e] overflow-hidden">
-            <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-[#0f0f17] text-xs font-semibold text-[#4a4a6a] uppercase tracking-wider">
+          <div className="rounded-xl border border-[var(--sn-border)] overflow-hidden">
+            <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-[var(--az-black)] text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">
               <span className="col-span-6">Item</span>
               <span className="col-span-2 text-center">Qty</span>
               <span className="col-span-2 text-right">Price</span>
               <span className="col-span-2 text-right">Total</span>
             </div>
-            <div className="divide-y divide-[#1e1e2e]">
+            <div className="divide-y divide-[var(--sn-border)]">
               {(inv.lineItems || []).map(li => (
                 <div key={li.id} className="grid grid-cols-12 gap-2 px-4 py-2.5 text-sm">
-                  <span className="col-span-6 text-[#e8e8f0] truncate">{li.description}</span>
-                  <span className="col-span-2 text-center text-[#7b7b9a] az-mono">{li.quantity}</span>
-                  <span className="col-span-2 text-right text-[#7b7b9a] az-mono">{fmtUSDC(li.unitPrice)}</span>
-                  <span className="col-span-2 text-right text-[#e8e8f0] az-mono">{fmtUSDC(li.lineTotal)}</span>
+                  <span className="col-span-6 text-[var(--sn-text)] truncate">{li.description}</span>
+                  <span className="col-span-2 text-center text-[var(--sn-text-muted)] az-mono">{li.quantity}</span>
+                  <span className="col-span-2 text-right text-[var(--sn-text-muted)] az-mono">{fmtUSDC(li.unitPrice)}</span>
+                  <span className="col-span-2 text-right text-[var(--sn-text)] az-mono">{fmtUSDC(li.lineTotal)}</span>
                 </div>
               ))}
             </div>
@@ -527,63 +527,63 @@ function InvoiceDetailModal({ invoiceId, onClose, onSend, onVoid, sending, voidi
           {/* Summary */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-[#7b7b9a]">Subtotal</span>
-              <span className="text-[#e8e8f0] az-mono">{fmtUSDC(inv.subtotalUsdc)}</span>
+              <span className="text-[var(--sn-text-muted)]">Subtotal</span>
+              <span className="text-[var(--sn-text)] az-mono">{fmtUSDC(inv.subtotalUsdc)}</span>
             </div>
             {(inv.taxLines || []).map(t => (
               <div key={t.id} className="flex justify-between text-sm">
-                <span className="text-[#7b7b9a]">{t.name}{t.type === 'PERCENTAGE' ? ` (${fmt(t.value, 0)}%)` : ''}</span>
-                <span className="text-[#e8e8f0] az-mono">{fmtUSDC(t.computedAmount)}</span>
+                <span className="text-[var(--sn-text-muted)]">{t.name}{t.type === 'PERCENTAGE' ? ` (${fmt(t.value, 0)}%)` : ''}</span>
+                <span className="text-[var(--sn-text)] az-mono">{fmtUSDC(t.computedAmount)}</span>
               </div>
             ))}
             {inv.status === 'PAID' && Number(inv.tipUsdc) > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#7b7b9a]">Tip</span>
-                <span className="text-[#e8e8f0] az-mono">{fmtUSDC(inv.tipUsdc)}</span>
+                <span className="text-[var(--sn-text-muted)]">Tip</span>
+                <span className="text-[var(--sn-text)] az-mono">{fmtUSDC(inv.tipUsdc)}</span>
               </div>
             )}
             {inv.status === 'PAID' && Number(inv.feeUsdc) > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#7b7b9a]">Platform fee</span>
-                <span className="text-[#7b7b9a] az-mono">{fmtUSDC(inv.feeUsdc)}</span>
+                <span className="text-[var(--sn-text-muted)]">Platform fee</span>
+                <span className="text-[var(--sn-text-muted)] az-mono">{fmtUSDC(inv.feeUsdc)}</span>
               </div>
             )}
-            <div className="flex justify-between pt-2 border-t border-[#1e1e2e]">
-              <span className="text-sm font-bold text-[#e8e8f0]">{inv.status === 'PAID' ? 'Total Paid' : 'Bill Total'}</span>
-              <span className="text-sm font-bold text-[#00d97e] az-mono">{fmtUSDC(inv.status === 'PAID' && inv.customerPaidUsdc != null ? inv.customerPaidUsdc : inv.billTotalUsdc)}</span>
+            <div className="flex justify-between pt-2 border-t border-[var(--sn-border)]">
+              <span className="text-sm font-bold text-[var(--sn-text)]">{inv.status === 'PAID' ? 'Total Paid' : 'Bill Total'}</span>
+              <span className="text-sm font-bold text-[var(--sn-purple)] az-mono">{fmtUSDC(inv.status === 'PAID' && inv.customerPaidUsdc != null ? inv.customerPaidUsdc : inv.billTotalUsdc)}</span>
             </div>
           </div>
 
           {/* Notes */}
           {inv.businessNote && (
-            <div className="p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
-              <p className="text-xs font-semibold text-[#4a4a6a] mb-1">Your note</p>
-              <p className="text-sm text-[#7b7b9a]">{inv.businessNote}</p>
+            <div className="p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+              <p className="text-xs font-semibold text-[var(--sn-text-muted)] mb-1">Your note</p>
+              <p className="text-sm text-[var(--sn-text-muted)]">{inv.businessNote}</p>
             </div>
           )}
           {inv.customerNote && (
-            <div className="p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
-              <p className="text-xs font-semibold text-[#4a4a6a] mb-1">Customer note</p>
-              <p className="text-sm text-[#7b7b9a]">{inv.customerNote}</p>
+            <div className="p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+              <p className="text-xs font-semibold text-[var(--sn-text-muted)] mb-1">Customer note</p>
+              <p className="text-sm text-[var(--sn-text-muted)]">{inv.customerNote}</p>
             </div>
           )}
 
           {/* Review */}
           {inv.review && (
-            <div className="p-3 rounded-xl bg-[#f59e0b0d] border border-[#f59e0b30]">
-              <p className="text-xs font-semibold text-[#4a4a6a] mb-1.5">Customer review</p>
+            <div className="p-3 rounded-xl bg-[var(--sn-amber)] border border-[var(--sn-amber)]">
+              <p className="text-xs font-semibold text-[var(--sn-text-muted)] mb-1.5">Customer review</p>
               <div className="flex items-center gap-1 mb-1">
                 {[1,2,3,4,5].map(n => (
-                  <Star key={n} className="w-4 h-4" fill={n <= inv.review.rating ? '#f59e0b' : 'none'} style={{ color: n <= inv.review.rating ? '#f59e0b' : '#4a4a6a' }} />
+                  <Star key={n} className="w-4 h-4" fill={n <= inv.review.rating ? 'var(--sn-amber)' : 'none'} style={{ color: n <= inv.review.rating ? 'var(--sn-amber)' : 'var(--sn-text-muted)' }} />
                 ))}
               </div>
-              {inv.review.comment && <p className="text-sm text-[#7b7b9a]">{inv.review.comment}</p>}
+              {inv.review.comment && <p className="text-sm text-[var(--sn-text-muted)]">{inv.review.comment}</p>}
             </div>
           )}
         </div>
       )}
 
-      <div className="flex gap-3 mt-4 pt-4 border-t border-[#1e1e2e]">
+      <div className="flex gap-3 mt-4 pt-4 border-t border-[var(--sn-border)]">
         <Button variant="secondary" onClick={onClose} className="flex-1">Back</Button>
         {inv?.status === 'DRAFT' && (
           <Button onClick={() => onSend(inv.id)} loading={sending} className="flex-1">

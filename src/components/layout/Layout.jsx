@@ -74,9 +74,11 @@ export default function Layout() {
   const [flyout, setFlyout] = useState(null);
   const [showPhonePreview, setShowPhonePreview] = useState(false);
   const [pinnedSectionKey, setPinnedSectionKey] = useState('dashboard');
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const railRef = useRef(null);
+  const profileRef = useRef(null);
   const { bizProfile, user, logout, isAdmin, adminBusinesses, selectedBusinessId, selectBusiness } = useAuth();
 
   useBizNotifications();
@@ -98,6 +100,15 @@ export default function Layout() {
     return () => document.removeEventListener('mousedown', onClick);
   }, [flyout]);
 
+  // Close profile menu on outside click
+  useEffect(() => {
+    const onClick = (e) => {
+      if (profileMenuOpen && profileRef.current && !profileRef.current.contains(e.target)) setProfileMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [profileMenuOpen]);
+
   const typeConfig = isAdmin && !selectedBusinessId
     ? { label: 'Admin View-All', icon: 'Store', navItems: [], color: '#6C5FC7' }
     : getTypeConfig(bizProfile);
@@ -116,14 +127,20 @@ export default function Layout() {
   // ── Rail sections ──
   // Admin always gets "All Business Tools" for testing, plus a type-specific
   // section when a business is selected so they can see both views.
+  // NOTE: for admins, the business-type-specific section ('type') is listed
+  // BEFORE the generic 'tools' (All Business Tools) section. Several routes
+  // (e.g. Front Desk, Housekeeping) appear in both lists, and the active
+  // section is resolved by the first array match — so ordering 'type' first
+  // ensures clicking a business-specific tool keeps the sidebar pinned to
+  // that business's section instead of jumping to "All Business Tools".
   const railSections = isAdmin
     ? [
         { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, direct: '/' },
         { key: 'commerce',  label: 'Commerce', icon: ShoppingBag, items: COMMERCE_NAV },
-        { key: 'tools',     label: 'All Business Tools', icon: LayoutGrid, items: ADMIN_ALL_NAV },
         ...(marketplaceNavItems.length > 0
           ? [{ key: 'type', label: typeConfig.label, icon: TypeIcon, items: marketplaceNavItems }]
           : []),
+        { key: 'tools',     label: 'All Business Tools', icon: LayoutGrid, items: ADMIN_ALL_NAV },
         { key: 'manage',    label: 'Manage', icon: Wrench, items: MANAGE_NAV },
       ]
     : [
@@ -254,8 +271,8 @@ export default function Layout() {
         style={{ background: 'var(--sn-black)' }}
       >
         {/* Logo */}
-        <Link to="/" className="w-9 h-9 rounded-lg bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple-border)] flex items-center justify-center mb-4 flex-shrink-0">
-          <Store className="w-4 h-4 text-[var(--sn-purple)]" />
+        <Link to="/" className="w-9 h-9 rounded-lg bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple-border)] flex items-center justify-center mb-4 flex-shrink-0 overflow-hidden">
+          <img src="/azaman-logo.png" alt="Azaman" className="w-5 h-5 object-contain" />
         </Link>
 
         {/* Section icons */}
@@ -278,17 +295,58 @@ export default function Layout() {
           </div>
         )}
 
-        {/* User avatar → logout */}
-        <div className="relative group w-full flex justify-center">
+        {/* User avatar → account popover (hover or click) */}
+        <div
+          ref={profileRef}
+          className="relative group w-full flex justify-center"
+          onMouseEnter={() => setProfileMenuOpen(true)}
+          onMouseLeave={() => setProfileMenuOpen(false)}
+        >
           <button
-            onClick={handleLogout}
+            onClick={() => setProfileMenuOpen(v => !v)}
             className="btn-sentry w-9 h-9 rounded-lg flex items-center justify-center bg-[var(--sn-blue-subtle)] text-[var(--sn-blue)] font-bold text-xs"
           >
             {initial}
           </button>
-          <div className="tooltip-sentry absolute left-full ml-2 bottom-0 px-2.5 py-1.5 rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50 flex items-center gap-1.5">
-            <LogOut className="w-3 h-3" /> Sign out
-          </div>
+
+          <AnimatePresence>
+            {profileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, x: -6, scale: 0.97 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -6, scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+                className="absolute left-full ml-2 bottom-0 w-56 rounded-lg border border-[var(--sn-border-bright)] shadow-sn-dropdown z-50 overflow-hidden"
+                style={{ background: 'var(--sn-elevated)' }}
+              >
+                <div className="px-3.5 py-3 border-b border-[var(--sn-border)] flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--sn-blue-subtle)] text-[var(--sn-blue)] font-bold text-xs flex-shrink-0">
+                    {initial}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[var(--sn-text)] truncate">
+                      {bizProfile?.businessName || user?.username || 'Account'}
+                    </p>
+                    <p className="text-xs text-[var(--sn-text-muted)] truncate">
+                      {user?.email || user?.username || 'Signed in'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setProfileMenuOpen(false); navigate('/settings'); }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-[var(--sn-text-secondary)] hover:bg-[var(--sn-hover)] hover:text-[var(--sn-text)] transition-colors"
+                >
+                  <Settings className="w-3.5 h-3.5" /> Account settings
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-[var(--sn-red)] hover:bg-[var(--sn-red-subtle)] transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5" /> Sign out
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </aside>
 

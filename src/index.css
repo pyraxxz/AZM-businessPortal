@@ -54,6 +54,30 @@
     --az-cyan:           var(--sn-blue);
     --az-cyan-dim:       var(--sn-blue-subtle);
     --az-accent-grad:    linear-gradient(135deg, #33BF9E 0%, #3D74DB 100%);
+
+    /* ── shadcn/ui compatibility layer ──
+       Some pages use generic shadcn utility classes (bg-card, text-foreground,
+       bg-primary, border-input, etc). Map them onto the Sentry dark theme so
+       those pages aren't left with unstyled browser-default white inputs. */
+    --background:          var(--sn-black);
+    --foreground:          var(--sn-text);
+    --card:                var(--sn-card);
+    --card-foreground:     var(--sn-text);
+    --popover:             var(--sn-elevated);
+    --popover-foreground:  var(--sn-text);
+    --primary:             var(--sn-purple);
+    --primary-foreground:  #ffffff;
+    --secondary:           var(--sn-surface);
+    --secondary-foreground: var(--sn-text);
+    --muted:               var(--sn-surface);
+    --muted-foreground:    var(--sn-text-muted);
+    --accent:              var(--sn-hover);
+    --accent-foreground:   var(--sn-text);
+    --destructive:         var(--sn-red);
+    --destructive-foreground: #ffffff;
+    --border:              var(--sn-border);
+    --input:               var(--sn-border);
+    --ring:                var(--sn-purple);
   }
 
   * { box-sizing: border-box; }
