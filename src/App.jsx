@@ -36,6 +36,7 @@ import RestaurantTables from '@/pages/RestaurantTables';
 import TransitFleet from '@/pages/TransitFleet';
 import TransitDrivers from '@/pages/TransitDrivers';
 import TransitManifests from '@/pages/TransitManifests';
+import RestaurantInventory from '@/pages/RestaurantInventory';
 
 const qc = new QueryClient({
   defaultOptions: {
