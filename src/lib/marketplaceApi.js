@@ -115,3 +115,45 @@ export const marketplaceApi = {
   acceptCounterProposal: (resId) =>
     request(`/api/business/reservations/${resId}/accept-counter`, { method: "POST" }),
 };
+
+// ── Employee Management ──────────────────────────────────────────────────
+// All endpoints are under /api/business-os/ and use the request() function already imported at top of file
+
+export const employeeApi = {
+  getEmployees: () => request('/api/business-os/employees'),
+  addEmployee: (data) => request('/api/business-os/employees', { method: 'POST', body: JSON.stringify(data) }),
+  terminateEmployee: (id, reason) => request(`/api/business-os/employees/${id}/terminate`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  getShifts: (start, end) => request(`/api/business-os/shifts?startDate=${start}&endDate=${end}`),
+  createShift: (data) => request('/api/business-os/shifts', { method: 'POST', body: JSON.stringify(data) }),
+  requestTimeOff: (data) => request('/api/business-os/time-off', { method: 'POST', body: JSON.stringify(data) }),
+  processPayroll: (data) => request('/api/business-os/payroll/process', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+export const financeApi = {
+  getLedger: () => request('/api/business-os/ledger'),
+  getCashFlow: (days = 30) => request(`/api/business-os/finance/cash-flow?days=${days}`),
+  getPnl: (month) => request(`/api/business-os/finance/pnl?month=${month}`),
+  payOut: (amount, destination) => request('/api/business-os/finance/payout', { method: 'POST', body: JSON.stringify({ amount, destination }) }),
+};
+
+export const hotelOpsApi = {
+  getRooms: () => request('/api/business-os/hotel/rooms'),
+  updateRoomStatus: (id, status) => request(`/api/business-os/hotel/rooms/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  getHousekeepingTasks: () => request('/api/business-os/hotel/housekeeping'),
+  assignTask: (id, employeeId) => request(`/api/business-os/hotel/housekeeping/${id}/assign`, { method: 'PUT', body: JSON.stringify({ employeeId }) }),
+};
+
+export const restaurantOpsApi = {
+  getKitchenOrders: () => request('/api/business-os/restaurant/kitchen'),
+  updateOrderStatus: (id, status) => request(`/api/business-os/restaurant/kitchen/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  getTables: () => request('/api/business-os/restaurant/tables'),
+  updateTableStatus: (id, status) => request(`/api/business-os/restaurant/tables/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+};
+
+export const transitOpsApi = {
+  getVehicles: () => request('/api/business-os/transit/vehicles'),
+  updateVehicleStatus: (id, status) => request(`/api/business-os/transit/vehicles/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  getManifests: (date) => request(`/api/business-os/transit/manifests?date=${date}`),
+};
+
+export default marketplaceApi;

@@ -5,18 +5,57 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'az-black':   '#08080c',
-        'az-surface': '#0d0d14',
-        'az-card':    '#11111a',
-        'az-card-elevated': '#161620',
-        'az-border':  '#1c1c28',
-        'az-border-bright': '#28283a',
-        'az-emerald': '#00d97e',
-        'az-blue':    '#4f8ef7',
-        'az-purple':  '#a78bfa',
-        'az-amber':   '#f59e0b',
-        'az-red':     '#f43f5e',
-        'az-cyan':    '#00b8d9',
+        // ── Sentry v3 palette — deep indigo-black (NOT purple) ──
+        'sn-black':          '#16141c',
+        'sn-surface':        '#1a1822',
+        'sn-elevated':       '#211f2a',
+        'sn-hover':          '#272531',
+        'sn-card':           '#1e1c26',
+        'sn-card-hover':     '#25232f',
+        'sn-border':         '#2a2732',
+        'sn-border-hover':   '#36333f',
+        'sn-border-bright':  '#3d3a47',
+
+        // Text
+        'sn-text':           '#f0f0f5',
+        'sn-text-secondary': '#c6bdcf',
+        'sn-text-muted':     '#776589',
+
+        // Accents — purple constrained to buttons/active/progress only
+        'sn-purple':         '#6C5FC7',
+        'sn-purple-h':       '#7B70D4',
+        'sn-purple-subtle':  '#6C5FC71a',
+        'sn-purple-border':  '#6C5FC740',
+
+        'sn-blue':           '#3D74DB',
+        'sn-blue-subtle':    '#3D74DB1a',
+
+        'sn-green':          '#33BF9E',
+        'sn-green-subtle':   '#33BF9E1a',
+
+        'sn-red':            '#F55459',
+        'sn-red-subtle':     '#F554591a',
+        'sn-red-solid':      '#F55459',
+
+        'sn-amber':          '#FFC227',
+        'sn-amber-subtle':   '#FFC2271a',
+
+        'sn-orange':         '#FF7738',
+        'sn-pink':           '#F05781',
+
+        // Legacy aliases (backward compat)
+        'az-black':          '#16141c',
+        'az-surface':        '#1a1822',
+        'az-card':           '#1e1c26',
+        'az-card-elevated':  '#211f2a',
+        'az-border':         '#2a2732',
+        'az-border-bright':  '#3d3a47',
+        'az-emerald':        '#33BF9E',
+        'az-blue':           '#3D74DB',
+        'az-purple':         '#6C5FC7',
+        'az-amber':          '#FFC227',
+        'az-red':            '#F55459',
+        'az-cyan':           '#3D74DB',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -24,27 +63,44 @@ module.exports = {
       },
       borderRadius: {
         '2xl': '16px',
-        lg: '14px',
+        lg: '12px',
         md: '10px',
-        sm: '7px',
+        sm: '8px',
+      },
+      boxShadow: {
+        'sn-button':        '0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
+        'sn-button-active': '0 0 0 rgba(0,0,0,0), inset 0 1px 2px rgba(0,0,0,0.3)',
+        'sn-dropdown':      '0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,95,199,0.1)',
+        'sn-modal':         '0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(108,95,199,0.15)',
+        'sn-card':          '0 1px 3px rgba(0,0,0,0.3), 0 0 0 1px rgba(42,39,50,0.5)',
+        'sn-card-hover':    '0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(108,95,199,0.2)',
+        'sn-input-focus':   '0 0 0 3px rgba(108,95,199,0.15)',
+        'sn-glow':          '0 0 20px rgba(108,95,199,0.15)',
+        'sn-tooltip':       '0 4px 12px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,95,199,0.1)',
       },
       keyframes: {
         'fade-in':   { from: { opacity: 0, transform: 'translateY(4px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
         'slide-in':  { from: { transform: 'translateX(-10px)', opacity: 0 }, to: { transform: 'translateX(0)', opacity: 1 } },
+        'slide-in-right': { from: { transform: 'translateX(100%)' }, to: { transform: 'translateX(0)' } },
         'scale-in':  { from: { transform: 'scale(0.97)', opacity: 0 }, to: { transform: 'scale(1)', opacity: 1 } },
+        'phone-in':  { from: { transform: 'scale(0.92)', opacity: 0 }, to: { transform: 'scale(1)', opacity: 1 } },
         'pulse-dot': { '0%,100%': { opacity: 1 }, '50%': { opacity: 0.4 } },
         shimmer:     { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
       },
       animation: {
         'fade-in':   'fade-in 0.25s ease-out',
         'slide-in':  'slide-in 0.25s ease-out',
+        'slide-in-right': 'slide-in-right 0.3s ease-out',
         'scale-in':  'scale-in 0.2s ease-out',
+        'phone-in':  'phone-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
         'pulse-dot': 'pulse-dot 2s ease-in-out infinite',
         shimmer:     'shimmer 1.6s linear infinite',
       },
+      transitionTimingFunction: {
+        'sn-spring': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'sn-ease':   'cubic-bezier(0.4, 0, 0.2, 1)',
+      },
     },
   },
-  plugins: [require('tailwindcss-animate')],
-}
-
-
+  plugins: [],
+};

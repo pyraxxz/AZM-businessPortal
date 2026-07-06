@@ -210,3 +210,14 @@ export function StatCard({ label, value, sub, icon: Icon, color = '#00d97e', loa
 export * from './Widget';
 export * from './DataTable';
 export * from './GlobalFilter';
+export * from './Tabs';
+export * from './Progress';
+export * from './Avatar';
+export * from './Tooltip';
+export * from './Switch';
+export * from './Sheet';
+export * from './DatePicker';
+export * from './Toast';
+export * from './Command';
+export * from './Separator';
+export * from './DropdownMenu';

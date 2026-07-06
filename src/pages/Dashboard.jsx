@@ -209,6 +209,14 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in">
+      {/* Employee Summary Widget */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <KpiCard title="Total Employees" value="42" change="+2 this month" trend="up" />
+        <KpiCard title="Active Shifts" value="12" subtitle="Right now" />
+        <KpiCard title="Time Off Requests" value="3" subtitle="Pending approval" />
+        <KpiCard title="Monthly Payroll" value="24,500 USDC" change="+5% vs last" trend="up" />
+      </div>
+
       {/* ── Header with business type badge ──────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>

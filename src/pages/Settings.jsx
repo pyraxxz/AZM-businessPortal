@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { business as businessApi, locations as locApi } from '@/lib/api';
 import { marketplaceApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
-import { Card, Button, Input, Textarea, Select, Badge } from '@/components/ui';
+import { Card, Button, Input, Textarea, Select, Badge, Switch } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
-import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode } from 'lucide-react';
+import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import PublicProfilePreview from '@/components/PublicProfilePreview';
 import QrCodePanel from '@/components/QrCodePanel';
@@ -349,6 +349,36 @@ export default function Settings() {
         >
             Save Penalty Policy
         </Button>
+      </Card>
+
+      <Card className="space-y-4">
+        <div>
+          <h3 className="text-sm font-bold text-[#e8e8f0] flex items-center gap-2">
+            <Wallet className="w-4 h-4 text-[#00d97e]" />
+            Payroll & Smart Routing
+          </h3>
+          <p className="text-xs text-[#7b7b9a] mt-1">
+            Configure how payroll is disbursed to employees. Smart Routing allows employees to auto-split their salaries into USDC savings.
+          </p>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
+            <div>
+              <p className="text-sm font-semibold text-[#e8e8f0]">Allow Employee Smart Routing</p>
+              <p className="text-xs text-[#7b7b9a]">Employees can define percentage splits (e.g. 80% checking, 20% savings)</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          
+          <div className="flex items-center justify-between p-3 rounded-xl bg-[#0f0f17] border border-[#2a2a3e]">
+            <div>
+              <p className="text-sm font-semibold text-[#e8e8f0]">Auto-Approve Time Off</p>
+              <p className="text-xs text-[#7b7b9a]">Automatically approve requests &lt; 2 days</p>
+            </div>
+            <Switch />
+          </div>
+        </div>
       </Card>
 
       <PublicProfilePreview

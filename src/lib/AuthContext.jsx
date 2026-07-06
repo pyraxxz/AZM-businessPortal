@@ -69,6 +69,8 @@ export function AuthProvider({ children }) {
             setIsAdmin(true);
             request('/api/admin/marketplace-businesses').then(data => {
                 setAdminBusinesses(data.businesses || []);
+                const savedBizId = localStorage.getItem('admin_selected_biz');
+                if (savedBizId) selectBusiness(savedBizId);
             }).catch(() => {});
         }
       } catch { /* ignore */ }
@@ -115,6 +117,11 @@ export function AuthProvider({ children }) {
         try {
             const adminData = await request('/api/admin/marketplace-businesses');
             setAdminBusinesses(adminData.businesses || []);
+            if (adminData.businesses?.length > 0) {
+                const firstBiz = adminData.businesses[0];
+                localStorage.setItem('admin_selected_biz', firstBiz.id);
+                selectBusiness(firstBiz.id);
+            }
         } catch (e) {
             console.error('Failed to load admin businesses:', e);
         }

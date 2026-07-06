@@ -1,280 +1,361 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { KYB_STATUS_META } from '@/lib/utils';
 import { useBizNotifications } from '@/hooks/useBizNotifications';
 import { getTypeConfig, MARKETPLACE_NAV } from '@/lib/businessTypes';
-import { LayoutDashboard, Calendar, Package, ShoppingBag, ScanLine, Utensils, Users, Star, Image as ImageIcon, Grid3x3, Megaphone, Wallet, Receipt, Settings, Menu, X, Bell, LogOut, ChevronDown, ChevronRight, ChevronLeft, Building2, MapPin, Bus, UtensilsCrossed, Briefcase, Store, CalendarCheck, QrCode, BedDouble, FileCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import { BusinessSelector } from './BusinessSelector';
+import { PhonePreview } from '../PhonePreview';
+import {
+  LayoutDashboard, Package, ShoppingBag, Receipt, Settings, Bell, LogOut,
+  ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight, MapPin, Bus, UtensilsCrossed,
+  Building2, Briefcase, Store, CalendarCheck, QrCode, BedDouble, FileCheck,
+  AlertCircle, CheckCircle2, Users, Wallet, Megaphone, Image as ImageIcon,
+  Grid3x3, Star, Utensils, Smartphone, Search, LayoutGrid, Wrench, LineChart,
+} from 'lucide-react';
 
-// Icon mapping for business types
-const TYPE_ICONS = {
-  Bus, UtensilsCrossed, Building2, ShoppingBag, Briefcase, Store,
-};
+const TYPE_ICONS = { Bus, UtensilsCrossed, Building2, ShoppingBag, Briefcase, Store };
 
-// Icon mapping for marketplace nav items
 const NAV_ICONS = {
-  transit: Bus,
-  reservations: CalendarCheck,
-  checkin: QrCode,
-  reviews: Star,
-  tables: MapPin,
-  rooms: BedDouble,
-  dineIn: Utensils,
-  marketing: Megaphone,
-  finance: Wallet,
-  showcase: ImageIcon,
-  seatMap: Grid3x3,
-  guests: Users,
+  transit: Bus, reservations: CalendarCheck, checkin: QrCode, reviews: Star,
+  tables: MapPin, rooms: BedDouble, dineIn: Utensils, marketing: Megaphone,
+  finance: Wallet, showcase: ImageIcon, seatMap: Grid3x3, guests: Users,
 };
 
-const BASE_NAV = [
-  { label: 'Dashboard',  icon: LayoutDashboard, to: '/' },
-  { label: 'Orders',     icon: ShoppingBag,      to: '/orders' },
-  { label: 'Products',   icon: Package,          to: '/products' },
-  { label: 'Invoices',   icon: Receipt,          to: '/invoices' },
-  { label: 'Locations',  icon: MapPin,           to: '/locations' },
+const COMMERCE_NAV = [
+  { label: 'Orders',    icon: ShoppingBag, to: '/orders' },
+  { label: 'Products',  icon: Package,     to: '/products' },
+  { label: 'Invoices',  icon: Receipt,     to: '/invoices' },
+  { label: 'Locations', icon: MapPin,      to: '/locations' },
+  { label: 'Employees', icon: Users,       to: '/employees' },
+  { label: 'Finance',   icon: LineChart,   to: '/finance' },
 ];
 
-const BOTTOM_NAV = [
-  { label: 'Reviews',      icon: Star,            to: '/reviews' },
-  { label: 'Notifications', icon: Bell,           to: '/notifications' },
-  { label: 'Verification',  icon: FileCheck,      to: '/kyb' },
-  { label: 'Settings',     icon: Settings,        to: '/settings' },
+const MANAGE_NAV = [
+  { label: 'Reviews',       icon: Star,       to: '/reviews' },
+  { label: 'Notifications', icon: Bell,       to: '/notifications' },
+  { label: 'Verification',  icon: FileCheck,  to: '/kyb' },
+  { label: 'Settings',      icon: Settings,   to: '/settings' },
+];
+
+const ADMIN_ALL_NAV = [
+  { label: 'Transit Trips',   icon: Bus,           to: '/transit' },
+  { label: 'Reservations',    icon: CalendarCheck, to: '/reservations' },
+  { label: 'Check-In',        icon: QrCode,        to: '/checkin' },
+  { label: 'Dine-In Tabs',    icon: Utensils,      to: '/dine-in' },
+  { label: 'Marketing',       icon: Megaphone,     to: '/marketing' },
+  { label: 'Finance',         icon: Wallet,        to: '/finance' },
+  { label: 'Showcase',        icon: ImageIcon,     to: '/showcase' },
+  { label: 'Seat Map Editor', icon: Grid3x3,       to: '/seat-map' },
+  { label: 'Guests',          icon: Users,         to: '/guests' },
+  { label: 'Reviews',         icon: Star,          to: '/reviews' },
 ];
 
 export default function Layout() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [paneCollapsed, setPaneCollapsed] = useState(false);
+  const [flyout, setFlyout] = useState(null);
+  const [showPhonePreview, setShowPhonePreview] = useState(false);
+  const [pinnedSectionKey, setPinnedSectionKey] = useState('dashboard');
   const location = useLocation();
   const navigate = useNavigate();
+  const railRef = useRef(null);
   const { bizProfile, user, logout, isAdmin, adminBusinesses, selectedBusinessId, selectBusiness } = useAuth();
 
   useBizNotifications();
 
-  // If admin and no business selected, show ALL nav items
+  // Auto-collapse Pane 2 under lg breakpoint
+  useEffect(() => {
+    const check = () => { if (window.innerWidth < 1024) setPaneCollapsed(true); };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Close flyout on outside click
+  useEffect(() => {
+    const onClick = (e) => {
+      if (flyout && railRef.current && !railRef.current.contains(e.target)) setFlyout(null);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [flyout]);
+
   const typeConfig = isAdmin && !selectedBusinessId
-      ? { label: 'Admin View-All Mode', icon: 'Store', navItems: [], color: '#f43f5e' }
-      : getTypeConfig(bizProfile);
+    ? { label: 'Admin View-All', icon: 'Store', navItems: [], color: '#6C5FC7' }
+    : getTypeConfig(bizProfile);
 
   const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
   const TypeIcon = TYPE_ICONS[typeConfig.icon] || Store;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
+  const handleLogout = () => { logout(); navigate('/login'); };
   const initial = (bizProfile?.businessName || user?.username || 'B').charAt(0).toUpperCase();
 
-  // Build type-specific nav items
-  const marketplaceNavItems = typeConfig.navItems
+  const marketplaceNavItems = (typeConfig.navItems || [])
     .map(key => MARKETPLACE_NAV[key])
     .filter(Boolean)
-    .map(item => ({
-      label: item.label,
-      icon: NAV_ICONS[item.icon] || Star,
-      to: item.to,
-    }));
+    .map(item => ({ label: item.label, icon: NAV_ICONS[item.icon] || Star, to: item.to }));
 
-  // For admin: show ALL marketplace nav items (union of all types)
-  const adminAllNavItems = isAdmin ? [
-      { label: 'Transit Trips',    icon: Bus,           to: '/transit' },
-      { label: 'Reservations',     icon: CalendarCheck,  to: '/reservations' },
-      { label: 'Check-In',         icon: QrCode,         to: '/checkin' },
-      { label: 'Dine-In Tabs',     icon: Utensils,       to: '/dine-in' },
-      { label: 'Marketing',        icon: Megaphone,      to: '/marketing' },
-      { label: 'Finance',          icon: Wallet,         to: '/finance' },
-      { label: 'Showcase',         icon: ImageIcon,      to: '/showcase' },
-      { label: 'Seat Map Editor',  icon: Grid3x3,        to: '/seat-map' },
-      { label: 'Guests',           icon: Users,          to: '/guests' },
-      { label: 'Reviews',          icon: Star,           to: '/reviews' },
-  ] : [];
+  // ── Rail sections ──
+  const railSections = isAdmin
+    ? [
+        { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, direct: '/' },
+        { key: 'tools',     label: 'All Business Tools', icon: LayoutGrid, items: ADMIN_ALL_NAV },
+        { key: 'manage',    label: 'Manage', icon: Wrench, items: MANAGE_NAV },
+      ]
+    : [
+        { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, direct: '/' },
+        { key: 'commerce',  label: 'Commerce', icon: ShoppingBag, items: COMMERCE_NAV },
+        ...(marketplaceNavItems.length > 0
+          ? [{ key: 'type', label: typeConfig.label, icon: TypeIcon, items: marketplaceNavItems }]
+          : []),
+        { key: 'manage', label: 'Manage', icon: Wrench, items: MANAGE_NAV },
+      ];
 
-  // Group nav into sections
-  const sections = isAdmin ? [
-      { label: 'Admin Oversight', items: [{ label: 'Dashboard', icon: LayoutDashboard, to: '/' }] },
-      { label: 'All Business Tools', items: adminAllNavItems },
-      { label: 'Manage', items: BOTTOM_NAV },
-  ] : [
-      { label: 'Overview', items: BASE_NAV.slice(0, 1) }, // Dashboard
-      { label: 'Commerce', items: BASE_NAV.slice(1) },    // Orders, Products, Invoices, Locations
-  ];
+  // Determine active section from route
+  const activeSection = railSections.find(s =>
+    s.direct ? location.pathname === s.direct
+             : s.items?.some(i => location.pathname === i.to || (i.to !== '/' && location.pathname.startsWith(i.to)))
+  ) || railSections[0];
 
-  if (!isAdmin && marketplaceNavItems.length > 0) {
-    sections.splice(1, 0, { label: typeConfig.label, items: marketplaceNavItems });
-  }
+  // Sync pinned section to active route when route changes
+  useEffect(() => {
+    if (activeSection) setPinnedSectionKey(activeSection.key);
+  }, [activeSection?.key]);
 
-  if (!isAdmin) {
-    sections.push({ label: 'Manage', items: BOTTOM_NAV });
-  }
+  const displaySection = railSections.find(s => s.key === pinnedSectionKey) || activeSection;
 
-  const renderNavItem = ({ label, icon: Icon, to }) => {
-    const active = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
+  const handleRailClick = (section) => {
+    if (section.direct) {
+      navigate(section.direct);
+      setFlyout(null);
+      return;
+    }
+    if (paneCollapsed) {
+      setFlyout(flyout === section.key ? null : section.key);
+    } else {
+      setPinnedSectionKey(section.key);
+    }
+  };
+
+  const isItemActive = (to) => location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
+
+  // ── PROMPT 1: Magic Hover with Framer Motion layoutId ──
+  // The active background and left-border accent are motion.div elements
+  // with a shared layoutId. When the active item changes, Framer Motion
+  // smoothly slides the highlight to the new position with a spring.
+  const renderPaneItem = (item) => {
+    const active = isItemActive(item.to);
     return (
       <Link
-        key={to}
-        to={to}
-        title={collapsed ? label : undefined}
+        key={item.to}
+        to={item.to}
+        onClick={() => setFlyout(null)}
         className={cn(
-          'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 relative group text-sm',
-          active
-            ? 'bg-[#00d97e15] text-[#00d97e] font-semibold'
-            : 'text-[#4a4a6a] hover:bg-[#13131e] hover:text-[#7b7b9a]'
+          'nav-sentry relative px-3 py-2 text-sm',
+          active ? 'text-[var(--sn-purple)] font-semibold' : 'text-[var(--sn-text-muted)]'
         )}
       >
-        <Icon className={cn('w-4 h-4 flex-shrink-0', active && 'text-[#00d97e]')} />
-        {!collapsed && <span>{label}</span>}
+        {/* Magic hover: active background glides between items */}
         {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#00d97e] rounded-r-full" />
+          <motion.div
+            layoutId="sidebar-active-bg"
+            className="absolute inset-0 rounded-md bg-[var(--sn-purple-subtle)]"
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          />
         )}
-        {collapsed && (
-          <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#13131e] border border-[#2a2a3e] rounded-lg text-xs whitespace-nowrap text-[#e8e8f0] opacity-0 group-hover:opacity-100 pointer-events-none z-50 shadow-xl">
-            {label}
-          </div>
+        {/* Magic hover: left-border accent glides between items */}
+        {active && (
+          <motion.div
+            layoutId="sidebar-active-accent"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[var(--sn-purple)] rounded-r-full"
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          />
         )}
+        <item.icon className="w-4 h-4 flex-shrink-0 relative z-10" />
+        <span className="truncate relative z-10">{item.label}</span>
       </Link>
     );
   };
 
-  return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--az-black)' }}>
-      {/* Sidebar */}
-      <aside className={cn(
-        'flex flex-col border-r border-[#1e1e2e] transition-all duration-300 flex-shrink-0',
-        collapsed ? 'w-16' : 'w-64'
-      )} style={{ background: 'var(--az-surface)' }}>
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-4 h-16 border-b border-[#1e1e2e] flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-[#00d97e1a] border border-[#00d97e35] flex items-center justify-center flex-shrink-0 az-glow-emerald">
-            <Store className="w-4 h-4 text-[#00d97e]" />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-[#e8e8f0] leading-none tracking-tight truncate">AZAMAN</p>
-              <p className="text-xs text-[#00d97e] mt-0.5 font-medium">Business Portal</p>
-            </div>
+  // Rail icon active indicator (also uses layoutId for smooth glide)
+  const renderRailIcon = (section) => {
+    const isActive = section.key === displaySection.key || (section.direct && location.pathname === section.direct);
+    return (
+      <div key={section.key} className="relative group w-full flex justify-center">
+        <button
+          onClick={() => handleRailClick(section)}
+          className={cn(
+            'btn-sentry w-10 h-10 rounded-lg flex items-center justify-center relative',
+            isActive ? 'text-[var(--sn-purple)]' : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text-secondary)] hover:bg-[var(--sn-hover)]'
           )}
+        >
+          {isActive && (
+            <motion.div
+              layoutId="rail-active-bg"
+              className="absolute inset-0 rounded-lg bg-[var(--sn-purple-subtle)]"
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            />
+          )}
+          <section.icon className="w-[18px] h-[18px] relative z-10" />
+        </button>
+        {/* Tooltip */}
+        <div className="tooltip-sentry absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50">
+          {section.label}
         </div>
-
-        {/* Business pill with type badge */}
-        {!collapsed && bizProfile && !isAdmin && (
-          <div className="mx-3 mt-3 p-3 rounded-xl border border-[#2a2a3e]" style={{ background: '#0a0a0f' }}>
-            <div className="flex items-center gap-2.5">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: `${typeConfig.color}1a`, border: `1px solid ${typeConfig.color}30` }}
-              >
-                <TypeIcon className="w-3.5 h-3.5" style={{ color: typeConfig.color }} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-[#e8e8f0] truncate leading-tight">{bizProfile.businessName}</p>
-                <p className="text-[10px] mt-0.5 font-medium truncate" style={{ color: typeConfig.color }}>
-                  {typeConfig.label}
-                </p>
-              </div>
+        {/* Flyout popout (when Pane 2 is collapsed) */}
+        {paneCollapsed && flyout === section.key && section.items && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.15 }}
+            className="absolute left-full ml-2 top-0 w-56 rounded-lg border border-[var(--sn-border-bright)] shadow-sn-dropdown py-2 px-1.5 z-50"
+            style={{ background: 'var(--sn-elevated)' }}
+          >
+            <p className="px-2.5 pb-1.5 mb-1 text-[10px] font-bold uppercase tracking-wider text-[var(--sn-text-muted)] border-b border-[var(--sn-border)]">{section.label}</p>
+            <div className="space-y-0.5">
+              {section.items.map(renderPaneItem)}
             </div>
-          </div>
+          </motion.div>
         )}
+      </div>
+    );
+  };
 
-        {/* Add admin business selector at the top of the sidebar: */}
-        {!collapsed && isAdmin && (
-            <div className="px-3 py-3 border-b border-[#13131e]">
-                <label className="text-xs text-[#7b7b9a] mb-1.5 block">Viewing as</label>
-                <select
-                    value={selectedBusinessId || ''}
-                    onChange={(e) => {
-                        const val = e.target.value;
-                        localStorage.setItem('admin_selected_biz', val);
-                        selectBusiness(val);
-                    }}
-                    className="w-full rounded-lg bg-[#13131e] px-3 py-2 text-sm text-[#e0e0f0] border border-[#252535]"
-                >
-                    <option value="">— Select a business —</option>
-                    {adminBusinesses.map(b => (
-                        <option key={b.id} value={b.id}>
-                            {b.businessName} ({b.category})
-                        </option>
-                    ))}
-                </select>
-                {selectedBusinessId && bizProfile && (
-                    <div className="mt-2 text-xs text-[#7b7b9a]">
-                        Type: {getTypeConfig(bizProfile).label} · KYB: {bizProfile.kybStatus}
-                    </div>
-                )}
-            </div>
-        )}
+  return (
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--sn-black)' }}>
+      {/* ── PANE 1 — Global icon rail ── */}
+      <aside
+        ref={railRef}
+        className="w-14 flex-shrink-0 flex flex-col items-center py-3 border-r border-[var(--sn-border)] relative z-20"
+        style={{ background: 'var(--sn-black)' }}
+      >
+        {/* Logo */}
+        <Link to="/" className="w-9 h-9 rounded-lg bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple-border)] flex items-center justify-center mb-4 flex-shrink-0">
+          <Store className="w-4 h-4 text-[var(--sn-purple)]" />
+        </Link>
 
-        {/* Nav sections */}
-        <nav className="flex-1 py-3 overflow-y-auto space-y-4 px-2">
-          {sections.map(section => (
-            <div key={section.label}>
-              {!collapsed && (
-                <p className="px-3 mb-1.5 text-[10px] font-bold text-[#3a3a5a] uppercase tracking-widest">{section.label}</p>
-              )}
-              <div className="space-y-0.5">
-                {section.items.map(renderNavItem)}
-              </div>
-            </div>
-          ))}
+        {/* Section icons */}
+        <nav className="flex-1 flex flex-col items-center gap-1 w-full px-1.5">
+          {railSections.map(renderRailIcon)}
         </nav>
 
-        {/* User + Logout */}
-        <div className="border-t border-[#1e1e2e] p-3 space-y-1">
-          {!collapsed && user && (
-            <div className="flex items-center gap-2.5 px-2 py-2">
-              <div className="w-7 h-7 rounded-lg bg-[#4f8ef71a] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
-                <span className="text-xs text-[#4f8ef7] font-bold">{initial}</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-[#e8e8f0] truncate">{user.username || user.email}</p>
-                <p className="text-xs text-[#4a4a6a] truncate">{user.email}</p>
-              </div>
+        {/* Phone preview trigger */}
+        {bizProfile && (
+          <div className="relative group w-full flex justify-center mb-1">
+            <button
+              onClick={() => setShowPhonePreview(true)}
+              className="btn-sentry w-10 h-10 rounded-lg flex items-center justify-center text-[var(--sn-text-muted)] hover:text-[var(--sn-purple)] hover:bg-[var(--sn-hover)]"
+            >
+              <Smartphone className="w-[18px] h-[18px]" />
+            </button>
+            <div className="tooltip-sentry absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50">
+              Live Preview
             </div>
-          )}
+          </div>
+        )}
+
+        {/* User avatar → logout */}
+        <div className="relative group w-full flex justify-center">
           <button
             onClick={handleLogout}
-            title={collapsed ? 'Sign out' : undefined}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[#4a4a6a] hover:bg-[#f43f5e10] hover:text-[#f43f5e] transition-colors text-sm"
+            className="btn-sentry w-9 h-9 rounded-lg flex items-center justify-center bg-[var(--sn-blue-subtle)] text-[var(--sn-blue)] font-bold text-xs"
           >
-            <LogOut className="w-4 h-4 flex-shrink-0" />
-            {!collapsed && <span>Sign out</span>}
+            {initial}
           </button>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl hover:bg-[#13131e] text-[#4a4a6a] hover:text-[#7b7b9a] transition-colors"
-          >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <><ChevronLeft className="w-4 h-4" /><span className="text-xs">Collapse</span></>}
-          </button>
+          <div className="tooltip-sentry absolute left-full ml-2 bottom-0 px-2.5 py-1.5 rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50 flex items-center gap-1.5">
+            <LogOut className="w-3 h-3" /> Sign out
+          </div>
         </div>
       </aside>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Topbar */}
-        <header className="h-16 border-b border-[#1e1e2e] flex items-center justify-between px-6 flex-shrink-0" style={{ background: 'var(--az-surface)' }}>
-          <div className="flex items-center gap-2.5">
-            <div className="relative w-2 h-2">
-              <div className="w-2 h-2 rounded-full bg-[#00d97e]" />
-              <div className="absolute inset-0 w-2 h-2 rounded-full bg-[#00d97e] az-pulse" />
+      {/* ── PANE 2 — Contextual menu ── */}
+      <AnimatePresence initial={false}>
+        {!paneCollapsed && (
+          <motion.aside
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 224, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="flex-shrink-0 flex flex-col border-r border-[var(--sn-border)] overflow-hidden"
+            style={{ background: 'var(--sn-surface)' }}
+          >
+            <div className="w-56 flex flex-col h-full">
+              <div className="h-14 flex items-center justify-between px-4 border-b border-[var(--sn-border)] flex-shrink-0">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--sn-text-muted)] leading-none">AZAMAN</p>
+                  <p className="text-sm font-semibold text-[var(--sn-text)] mt-0.5">{displaySection.label}</p>
+                </div>
+                <button
+                  onClick={() => setPaneCollapsed(true)}
+                  className="btn-sentry w-7 h-7 rounded-md flex items-center justify-center text-[var(--sn-text-muted)] hover:text-[var(--sn-text-secondary)] hover:bg-[var(--sn-hover)] flex-shrink-0"
+                  title="Collapse"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+              </div>
+
+              {!isAdmin && bizProfile && (
+                <div className="mx-3 mt-3 p-2.5 rounded-lg border border-[var(--sn-border)]" style={{ background: 'var(--sn-card)' }}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+                         style={{ background: `${typeConfig.color}1a`, border: `1px solid ${typeConfig.color}30` }}>
+                      <TypeIcon className="w-3.5 h-3.5" style={{ color: typeConfig.color }} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-[var(--sn-text)] truncate leading-tight">{bizProfile.businessName}</p>
+                      <p className="text-[10px] mt-0.5 font-medium truncate" style={{ color: typeConfig.color }}>{typeConfig.label}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isAdmin && (
+                <div className="px-3 py-3 border-b border-[var(--sn-border)]">
+                  <BusinessSelector />
+                </div>
+              )}
+
+              <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+                {(displaySection.items || []).map(renderPaneItem)}
+              </nav>
             </div>
-            <span className="text-xs text-[#4a4a6a] font-medium">
-              {bizProfile ? bizProfile.businessName : 'Connected'}
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Expand handle when Pane 2 is collapsed */}
+      {paneCollapsed && (
+        <button
+          onClick={() => setPaneCollapsed(false)}
+          className="btn-sentry w-5 flex-shrink-0 flex items-center justify-center border-r border-[var(--sn-border)] hover:bg-[var(--sn-hover)] text-[var(--sn-text-muted)]"
+          style={{ background: 'var(--sn-black)' }}
+          title="Expand"
+        >
+          <ChevronsRight className="w-3.5 h-3.5" />
+        </button>
+      )}
+
+      {/* ── Main ── */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-14 border-b border-[var(--sn-border)] flex items-center justify-between px-5 flex-shrink-0" style={{ background: 'var(--sn-surface)' }}>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-[var(--sn-text-muted)]">{displaySection.label}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-[var(--sn-text-muted)]" />
+            <span className="text-[var(--sn-text)] font-medium">
+              {bizProfile ? bizProfile.businessName : 'Overview'}
             </span>
           </div>
-
           <div className="flex items-center gap-2">
             {bizProfile && bizProfile.kybStatus !== 'VERIFIED' && (
               <Link
                 to="/kyb"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
+                className="btn-sentry flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
                 style={{ background: kybMeta.bg, color: kybMeta.color, border: `1px solid ${kybMeta.color}30` }}
               >
-                {bizProfile.kybStatus === 'UNVERIFIED' ? (
-                  <AlertCircle className="w-3.5 h-3.5" />
-                ) : (
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                )}
+                {bizProfile.kybStatus === 'UNVERIFIED' ? <AlertCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                 {kybMeta.label}
               </Link>
             )}
@@ -282,11 +363,17 @@ export default function Layout() {
           </div>
         </header>
 
-        {/* Page */}
-        <main className="flex-1 overflow-y-auto" style={{ background: 'var(--az-black)' }}>
+        <main className="flex-1 overflow-y-auto" style={{ background: 'var(--sn-black)' }}>
           <Outlet />
         </main>
       </div>
+
+      {/* Phone Preview Modal */}
+      <AnimatePresence>
+        {showPhonePreview && bizProfile && (
+          <PhonePreview business={bizProfile} onClose={() => setShowPhonePreview(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

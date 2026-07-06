@@ -13,7 +13,7 @@ export const BUSINESS_TYPES = {
     icon: 'Bus',
     color: '#4f8ef7',
     category: 'LOGISTICS',
-    navItems: ['transit', 'reservations', 'checkin', 'seatMap', 'guests', 'marketing', 'finance'],
+    navItems: ['transit', 'reservations', 'manifests', 'seatMap', 'fleet', 'drivers', 'guests', 'finance'],
     description: 'Manage trips, seat maps, bookings, and passenger check-ins',
   },
   RESTAURANT: {
@@ -21,7 +21,7 @@ export const BUSINESS_TYPES = {
     icon: 'UtensilsCrossed',
     color: '#f59e0b',
     category: 'FOOD_BEVERAGE',
-    navItems: ['reservations', 'checkin', 'dineIn', 'tables', 'guests', 'marketing', 'finance'],
+    navItems: ['reservations', 'dineIn', 'kitchen', 'tables', 'guests', 'marketing', 'finance'],
     description: 'Manage reservations, table availability, dine-in tabs, and guest check-ins',
   },
   HOTEL: {
@@ -29,7 +29,7 @@ export const BUSINESS_TYPES = {
     icon: 'Building2',
     color: '#a78bfa',
     category: 'REAL_ESTATE',
-    navItems: ['reservations', 'checkin', 'rooms', 'showcase', 'guests', 'marketing', 'finance'],
+    navItems: ['reservations', 'checkin', 'frontdesk', 'rooms', 'housekeeping', 'guests', 'marketing', 'finance'],
     description: 'Manage room bookings, showcase gallery, availability, and guest check-ins',
   },
   RETAIL: {
@@ -94,12 +94,24 @@ export const MARKETPLACE_NAV = {
   reservations: { label: 'Reservations', icon: 'CalendarCheck', to: '/reservations' },
   checkin: { label: 'Check-In', icon: 'QrCode', to: '/checkin' },
   reviews: { label: 'Reviews', icon: 'Star', to: '/reviews' },
-  tables: { label: 'Tables', icon: 'Grid3x3', to: '/locations' },
-  rooms: { label: 'Rooms', icon: 'BedDouble', to: '/locations' },
   dineIn: { label: 'Dine-In Tabs', icon: 'Utensils', to: '/dine-in' },
   marketing: { label: 'Marketing', icon: 'Megaphone', to: '/marketing' },
   finance: { label: 'Finance', icon: 'Wallet', to: '/finance' },
   showcase: { label: 'Showcase', icon: 'showcase', to: '/showcase' },
   seatMap: { label: 'Seat Map Editor', icon: 'seatMap', to: '/seat-map' },
   guests: { label: 'Guests', icon: 'guests', to: '/guests' },
+  
+  // Hotel Ops
+  rooms: { label: 'Room Status', icon: 'BedDouble', to: '/hotel-rooms' },
+  housekeeping: { label: 'Housekeeping', icon: 'Sparkles', to: '/hotel-housekeeping' },
+  frontdesk: { label: 'Front Desk', icon: 'BellConcierge', to: '/hotel-front-desk' },
+  
+  // Restaurant Ops
+  kitchen: { label: 'Kitchen (KDS)', icon: 'ChefHat', to: '/restaurant-kitchen' },
+  tables: { label: 'Table Map', icon: 'LayoutDashboard', to: '/restaurant-tables' },
+  
+  // Transit Ops
+  fleet: { label: 'Fleet Status', icon: 'CarFront', to: '/transit-fleet' },
+  drivers: { label: 'Drivers', icon: 'SteeringWheel', to: '/transit-drivers' },
+  manifests: { label: 'Manifests', icon: 'FileSpreadsheet', to: '/transit-manifests' },
 };

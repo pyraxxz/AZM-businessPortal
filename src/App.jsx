@@ -36,6 +36,8 @@ const qc = new QueryClient({
   },
 });
 
+import { ToastProvider } from '@/components/ui/Toast';
+
 function AppRoutes() {
   const { authed, loading, bizProfile, isAdmin } = useAuth();
 
@@ -83,17 +85,34 @@ function AppRoutes() {
         <Route path="/settings"       element={<Settings />} />
         
         {/* Marketplace Routes */}
-        <Route path="/transit"        element={<TransitTrips />} />
-        <Route path="/reservations"   element={<Reservations />} />
-        <Route path="/checkin"        element={<CheckIn />} />
-        <Route path="/reviews"        element={<Reviews />} />
+        <Route path="/transit"              element={<TransitTrips />} />
+        <Route path="/reservations"         element={<Reservations />} />
+        <Route path="/checkin"              element={<CheckIn />} />
+        <Route path="/reviews"              element={<Reviews />} />
         
-        <Route path="/dine-in"        element={<DineIn />} />
-        <Route path="/guests"         element={<Guests />} />
-        <Route path="/marketing"      element={<Marketing />} />
-        <Route path="/finance"        element={<Finance />} />
-        <Route path="/seat-map"       element={<SeatMapEditor />} />
-        <Route path="/showcase"       element={<Showcase />} />
+        <Route path="/dine-in"              element={<DineIn />} />
+        <Route path="/guests"               element={<Guests />} />
+        <Route path="/marketing"            element={<Marketing />} />
+        <Route path="/finance"              element={<FinanceV2 />} />
+        <Route path="/seat-map"             element={<SeatMapEditor />} />
+        <Route path="/showcase"             element={<Showcase />} />
+        
+        {/* Employee Management */}
+        <Route path="/employees"            element={<Employees />} />
+        
+        {/* Hotel Operations */}
+        <Route path="/hotel-rooms"          element={<HotelRooms />} />
+        <Route path="/hotel-housekeeping"   element={<HotelHousekeeping />} />
+        <Route path="/hotel-front-desk"     element={<HotelFrontDesk />} />
+        
+        {/* Restaurant Operations */}
+        <Route path="/restaurant-kitchen"   element={<RestaurantKitchen />} />
+        <Route path="/restaurant-tables"    element={<RestaurantTables />} />
+        
+        {/* Transit Operations */}
+        <Route path="/transit-fleet"        element={<TransitFleet />} />
+        <Route path="/transit-drivers"      element={<TransitDrivers />} />
+        <Route path="/transit-manifests"    element={<TransitManifests />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
@@ -109,14 +128,18 @@ export default function App() {
         <Router>
           <AppRoutes />
         </Router>
-        <Toaster
-          richColors
-          position="top-right"
+        <Toaster 
+          richColors 
+          position="top-center" 
+          expand={true}
           toastOptions={{
+            className: 'sentry-toast',
             style: {
-              background: '#13131e',
-              border: '1px solid #2a2a3e',
-              color: '#e8e8f0',
+              background: 'var(--sn-card)',
+              border: '1px solid var(--sn-border)',
+              color: 'var(--sn-text-primary)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: 'var(--sn-shadow)',
             },
           }}
         />
