@@ -514,10 +514,15 @@ function SeatMapEditor({ trip, onClose }) {
   );
 }
 
+// trip.seatLayout / trip.totalSeats aren't real TransitTrip fields (the
+// actual seat count comes from the vehicle's capacity, and layout is a
+// fixed 2-2 default until a real seat map is saved) — fall back to the
+// vehicle actually assigned to this trip instead of a hardcoded guess.
 function generateDefaultSeats(trip) {
+  const totalSeats = trip.vehicle?.capacity || trip.totalSeats || 30;
   const [left, right] = (trip.seatLayout || '2-2').split('-').map(Number);
   const perRow = left + right;
-  const rows = Math.ceil((trip.totalSeats || 30) / perRow);
+  const rows = Math.ceil(totalSeats / perRow);
   const seats = [];
   let num = 1;
   for (let r = 1; r <= rows; r++) {
@@ -530,7 +535,7 @@ function generateDefaultSeats(trip) {
         tier: 'ECONOMY',
         status: 'AVAILABLE',
       });
-      if (num++ >= (trip.totalSeats || 30)) break;
+      if (num++ >= totalSeats) break;
     }
   }
   return seats;
