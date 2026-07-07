@@ -1,18 +1,23 @@
 import { request } from './apiCore';
 
 export const transit = {
-  // Backend: GET /api/marketplace/transit/trips
+  // Backend: GET /api/marketplace/business/trips — scoped to the caller's
+  // own business (NOT the customer-facing browse endpoint, which mixed in
+  // every business's trips).
   list: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/api/marketplace/transit/trips${qs ? `?${qs}` : ''}`);
+    return request(`/api/marketplace/business/trips${qs ? `?${qs}` : ''}`);
   },
   // Backend: no single-trip GET exists, use list with id filter
-  get: (id) => request(`/api/marketplace/transit/trips?id=${id}`),
-  // Backend: POST /api/marketplace/business/trips
+  get: (id) => request(`/api/marketplace/business/trips?id=${id}`),
+  // Backend: POST /api/marketplace/business/trips — requires vehicleId
   create: (data) => request('/api/marketplace/business/trips', { method: 'POST', body: JSON.stringify(data) }),
-  // Backend: no PATCH endpoint yet - use businessOS route
-  update: (id, data) => request(`/api/business-os/transit/manifests/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-  remove: (id) => request(`/api/marketplace/transit/trips/${id}`, { method: 'DELETE' }),
+  // Backend: PATCH /api/marketplace/business/trips/:id — ownership-checked,
+  // partial update. vehicleId is intentionally immutable after creation.
+  update: (id, data) => request(`/api/marketplace/business/trips/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  // Backend: DELETE /api/marketplace/business/trips/:id — ownership-checked,
+  // blocked (400) if the trip already has seat bookings.
+  remove: (id) => request(`/api/marketplace/business/trips/${id}`, { method: 'DELETE' }),
   // Backend: GET /api/marketplace-seat-map/:tripId
   getSeatMap: (tripId) => request(`/api/marketplace-seat-map/${tripId}`),
   // Backend: PUT /api/marketplace-seat-map/:tripId — expects { layout, rows, cols, tierFares } at top level

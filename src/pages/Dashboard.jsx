@@ -298,7 +298,7 @@ export default function Dashboard() {
           </Widget>
           <Widget title="Seats Sold" icon={Users} iconColor="var(--sn-purple)">
             <WidgetStat
-              value={fmt(trips.reduce((s, t) => s + (t.bookedSeats || 0), 0), 0)}
+              value={fmt(trips.reduce((s, t) => s + (t._count?.seats || 0), 0), 0)}
               label="All trips"
               color="var(--sn-purple)"
             />
@@ -308,7 +308,7 @@ export default function Dashboard() {
           </Widget>
           <Widget title="Transit Revenue" icon={DollarSign} iconColor="var(--sn-purple)">
             <WidgetStat
-              value={fmtUSDC(trips.reduce((s, t) => s + (t.bookedSeats || 0) * (Number(t.fareUsdc) || 0), 0))}
+              value={fmtUSDC(trips.reduce((s, t) => s + (t._count?.seats || 0) * (Number(t.fareUsdc) || 0), 0))}
               label="From seat bookings"
               color="var(--sn-purple)"
             />
@@ -410,11 +410,11 @@ export default function Dashboard() {
             <div className="space-y-0 max-h-[240px] overflow-y-auto">
               {trips
                 .filter(t => ['SCHEDULED', 'BOARDING'].includes(t.status))
-                .sort((a, b) => new Date(a.departureTime) - new Date(b.departureTime))
+                .sort((a, b) => new Date(a.departureAt) - new Date(b.departureAt))
                 .slice(0, 5)
                 .map(trip => {
-                  const booked = trip.bookedSeats || 0;
-                  const total = trip.totalSeats || 0;
+                  const booked = trip._count?.seats || 0;
+                  const total = trip.vehicle?.capacity || 0;
                   const pct = total > 0 ? (booked / total) * 100 : 0;
                   return (
                     <WidgetRow

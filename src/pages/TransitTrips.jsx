@@ -7,7 +7,7 @@
  */
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { transit as transitApi } from '@/lib/marketplaceApi';
+import { transit as transitApi, transitOpsApi } from '@/lib/marketplaceApi';
 import { Widget, WidgetStat, WidgetRow } from '@/components/ui/Widget';
 import { DataTable } from '@/components/ui/DataTable';
 import { Button, Badge, Input, Select, Modal, Empty, Skeleton } from '@/components/ui';
@@ -30,28 +30,12 @@ const BLANK_TRIP = {
   routeName: '',
   origin: '',
   destination: '',
-  departureTime: '',
-  vehiclePlate: '',
-  vehicleType: 'BUS',
-  totalSeats: 30,
-  seatLayout: '2-2',
+  departureAt: '',
+  arrivalAt: '',
+  vehicleId: '',
   fareUsdc: '',
   status: 'SCHEDULED',
 };
-
-const VEHICLE_TYPES = [
-  { value: 'BUS', label: 'Bus' },
-  { value: 'MINIVAN', label: 'Minivan' },
-  { value: 'COACH', label: 'Coach' },
-  { value: 'TAXI', label: 'Taxi' },
-];
-
-const SEAT_LAYOUTS = [
-  { value: '2-2', label: '2-2 (4 per row)', seats: 40 },
-  { value: '2-1', label: '2-1 (3 per row)', seats: 30 },
-  { value: '3-2', label: '3-2 (5 per row)', seats: 45 },
-  { value: '1-1', label: '1-1 (2 per row)', seats: 20 },
-];
 
 export default function TransitTrips() {
   const qc = useQueryClient();
@@ -66,10 +50,17 @@ export default function TransitTrips() {
   });
   const trips = tripsData?.trips || [];
 
-  const { data: statsData } = useQuery({
-    queryKey: ['transit-stats'],
-    queryFn: () => transitApi.list({ stats: true }),
+  // Backend: GET /api/business-os/transit/fleet -> { success, fleet: [...] }
+  const { data: fleetData } = useQuery({
+    queryKey: ['fleet-vehicles'],
+    queryFn: () => transitOpsApi.fleet(),
   });
+  const vehicles = fleetData?.fleet || [];
+  const vehicleOptions = vehicles.map(v => ({
+    value: v.id,
+    label: `${v.make || ''} ${v.model || ''}`.trim() || v.type,
+    sub: `${v.licensePlate || 'No plate'} · ${v.capacity} seats`,
+  }));
 
   const createMut = useMutation({
     mutationFn: (d) => transitApi.create(d),
@@ -95,11 +86,9 @@ export default function TransitTrips() {
       routeName: t.routeName || '',
       origin: t.origin || '',
       destination: t.destination || '',
-      departureTime: t.departureTime ? t.departureTime.slice(0, 16) : '',
-      vehiclePlate: t.vehiclePlate || '',
-      vehicleType: t.vehicleType || 'BUS',
-      totalSeats: t.totalSeats || 30,
-      seatLayout: t.seatLayout || '2-2',
+      departureAt: t.departureAt ? t.departureAt.slice(0, 16) : '',
+      arrivalAt: t.arrivalAt ? t.arrivalAt.slice(0, 16) : '',
+      vehicleId: t.vehicleId || t.vehicle?.id || '',
       fareUsdc: String(t.fareUsdc || ''),
       status: t.status || 'SCHEDULED',
     });
@@ -110,25 +99,37 @@ export default function TransitTrips() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.routeName || !form.origin || !form.destination || !form.departureTime || !form.fareUsdc) {
+    if (!form.routeName || !form.origin || !form.destination || !form.departureAt || !form.fareUsdc) {
       setFormError('Please fill in all required fields');
       return;
     }
+    if (modal === 'create' && !form.vehicleId) {
+      setFormError('Please select a vehicle');
+      return;
+    }
     const payload = {
-      ...form,
+      routeName: form.routeName,
+      origin: form.origin,
+      destination: form.destination,
+      departureAt: new Date(form.departureAt).toISOString(),
+      arrivalAt: form.arrivalAt ? new Date(form.arrivalAt).toISOString() : null,
       fareUsdc: Number(form.fareUsdc),
-      totalSeats: Number(form.totalSeats),
-      departureTime: new Date(form.departureTime).toISOString(),
+      status: form.status,
     };
-    if (modal === 'create') createMut.mutate(payload);
-    else updateMut.mutate({ id: modal.id, data: payload });
+    if (modal === 'create') {
+      // vehicleId is only accepted on create — it's immutable afterwards
+      // (the seat map + any bookings are keyed to the original vehicle).
+      createMut.mutate({ ...payload, vehicleId: form.vehicleId });
+    } else {
+      updateMut.mutate({ id: modal.id, data: payload });
+    }
   };
 
   // Stats
   const totalTrips = trips.length;
   const activeTrips = trips.filter(t => ['SCHEDULED', 'BOARDING'].includes(t.status)).length;
-  const totalBookings = trips.reduce((sum, t) => sum + (t.bookedSeats || 0), 0);
-  const totalRevenue = trips.reduce((sum, t) => sum + (t.bookedSeats || 0) * (Number(t.fareUsdc) || 0), 0);
+  const totalBookings = trips.reduce((sum, t) => sum + (t._count?.seats || 0), 0);
+  const totalRevenue = trips.reduce((sum, t) => sum + (t._count?.seats || 0) * (Number(t.fareUsdc) || 0), 0);
 
   const columns = [
     {
@@ -152,11 +153,11 @@ export default function TransitTrips() {
       key: 'departure',
       label: 'Departure',
       sortable: true,
-      sortValue: (r) => new Date(r.departureTime).getTime(),
+      sortValue: (r) => new Date(r.departureAt).getTime(),
       render: (r) => (
         <div className="flex flex-col">
-          <span className="text-[var(--sn-text)] font-medium">{formatDateTime(r.departureTime)}</span>
-          <span className="text-[var(--sn-text-muted)] text-[10px]">{r.vehiclePlate} · {r.vehicleType}</span>
+          <span className="text-[var(--sn-text)] font-medium">{formatDateTime(r.departureAt)}</span>
+          <span className="text-[var(--sn-text-muted)] text-[10px]">{r.vehicle?.licensePlate || 'No plate'} · {r.vehicle?.type || '—'}</span>
         </div>
       ),
     },
@@ -164,10 +165,10 @@ export default function TransitTrips() {
       key: 'seats',
       label: 'Seats',
       sortable: true,
-      sortValue: (r) => r.bookedSeats || 0,
+      sortValue: (r) => r._count?.seats || 0,
       render: (r) => {
-        const booked = r.bookedSeats || 0;
-        const total = r.totalSeats || 0;
+        const booked = r._count?.seats || 0;
+        const total = r.vehicle?.capacity || 0;
         const pct = total > 0 ? (booked / total) * 100 : 0;
         return (
           <div className="flex flex-col gap-1">
@@ -313,51 +314,48 @@ export default function TransitTrips() {
             <Input
               label="Departure Time *"
               type="datetime-local"
-              value={form.departureTime}
-              onChange={(e) => setForm({ ...form, departureTime: e.target.value })}
+              value={form.departureAt}
+              onChange={(e) => setForm({ ...form, departureAt: e.target.value })}
             />
             <Input
-              label="Fare (USDC) *"
-              type="number"
-              step="0.01"
-              placeholder="25.00"
-              value={form.fareUsdc}
-              onChange={(e) => setForm({ ...form, fareUsdc: e.target.value })}
+              label="Arrival Time"
+              type="datetime-local"
+              value={form.arrivalAt}
+              onChange={(e) => setForm({ ...form, arrivalAt: e.target.value })}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Vehicle Plate"
-              placeholder="e.g. GT-1234-22"
-              value={form.vehiclePlate}
-              onChange={(e) => setForm({ ...form, vehiclePlate: e.target.value })}
-            />
-            <Select
-              label="Vehicle Type"
-              value={form.vehicleType}
-              onChange={(e) => setForm({ ...form, vehicleType: e.target.value })}
-              options={VEHICLE_TYPES}
-            />
-          </div>
+          <Input
+            label="Fare (USDC) *"
+            type="number"
+            step="0.01"
+            placeholder="25.00"
+            value={form.fareUsdc}
+            onChange={(e) => setForm({ ...form, fareUsdc: e.target.value })}
+          />
 
-          <div className="grid grid-cols-2 gap-3">
-            <Select
-              label="Seat Layout"
-              value={form.seatLayout}
-              onChange={(e) => {
-                const layout = SEAT_LAYOUTS.find(l => l.value === e.target.value);
-                setForm({ ...form, seatLayout: e.target.value, totalSeats: layout?.seats || 30 });
-              }}
-              options={SEAT_LAYOUTS}
-            />
-            <Input
-              label="Total Seats"
-              type="number"
-              value={form.totalSeats}
-              onChange={(e) => setForm({ ...form, totalSeats: e.target.value })}
-            />
-          </div>
+          {modal === 'create' ? (
+            vehicles.length > 0 ? (
+              <Select
+                label="Vehicle *"
+                value={form.vehicleId}
+                onChange={(e) => setForm({ ...form, vehicleId: e.target.value })}
+                options={[{ value: '', label: 'Select a vehicle...' }, ...vehicleOptions.map(v => ({ value: v.value, label: `${v.label} — ${v.sub}` }))]}
+              />
+            ) : (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--sn-amber-subtle,rgba(245,158,11,0.12))] border border-[var(--sn-amber)]">
+                <AlertCircle className="w-4 h-4 text-[var(--sn-amber)] flex-shrink-0" />
+                <p className="text-xs text-[var(--sn-amber)]">Add a vehicle in Fleet Management first — a trip needs one.</p>
+              </div>
+            )
+          ) : (
+            <div className="p-3 rounded-xl bg-[var(--sn-border)]">
+              <p className="text-xs text-[var(--sn-text-muted)]">Vehicle (fixed after creation)</p>
+              <p className="text-sm text-[var(--sn-text)] font-medium mt-0.5">
+                {modal?.vehicle ? `${modal.vehicle.make || ''} ${modal.vehicle.model || ''} — ${modal.vehicle.licensePlate || 'No plate'}`.trim() : '—'}
+              </p>
+            </div>
+          )}
 
           <Select
             label="Status"

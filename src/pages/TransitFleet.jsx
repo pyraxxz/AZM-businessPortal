@@ -17,14 +17,30 @@ export default function TransitFleet() {
         transitOpsApi.fleet(),
         transitOpsApi.maintenance({ status: 'SCHEDULED' }),
       ]);
-      setVehicles(vehRes.data?.vehicles || []);
+      // Backend returns { success, fleet: [...] } — NOT `vehicles`. This key
+      // was wrong before, so the fleet list silently always rendered empty.
+      setVehicles(vehRes.data?.fleet || []);
       setMaintenance(maintRes.data?.records || []);
     } catch { toast.error('Failed to load fleet data'); }
   };
   useEffect(() => { load(); }, []);
 
   const handleAdd = async () => {
-    try { await transitOpsApi.createVehicle(form); toast.success('Vehicle added'); setAddOpen(false); load(); }
+    try {
+      // year/capacity are Int columns on the backend — the form holds them
+      // as strings, so they must be coerced before submit or Prisma rejects
+      // the write entirely.
+      const payload = {
+        ...form,
+        year: form.year ? Number(form.year) : undefined,
+        capacity: form.capacity ? Number(form.capacity) : undefined,
+      };
+      await transitOpsApi.createVehicle(payload);
+      toast.success('Vehicle added');
+      setAddOpen(false);
+      setForm({ make: '', model: '', year: '', licensePlate: '', capacity: '', type: 'BUS' });
+      load();
+    }
     catch { toast.error('Failed to add vehicle'); }
   };
 
