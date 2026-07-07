@@ -98,7 +98,7 @@ export const MARKETPLACE_NAV = {
   marketing: { label: 'Marketing', icon: 'Megaphone', to: '/marketing' },
   finance: { label: 'Finance', icon: 'Wallet', to: '/finance' },
   showcase: { label: 'Showcase', icon: 'showcase', to: '/showcase' },
-  seatMap: { label: 'Seat Map Editor', icon: 'seatMap', to: '/seat-map' },
+  seatMap: { label: 'Seat Map Editor', icon: 'seatMap', to: '/transit' },
   inventory: { label: 'Inventory', icon: 'Package', to: '/restaurant-inventory' },
   guests: { label: 'Guests', icon: 'guests', to: '/guests' },
   

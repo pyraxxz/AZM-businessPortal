@@ -384,19 +384,39 @@ export default function TransitTrips() {
 }
 
 // ── Seat Map Editor ──────────────────────────────────────────────────────────
+const SEAT_TIERS = ['ECONOMY', 'STANDARD', 'VIP'];
+const TIER_COLORS = {
+  ECONOMY:  { bg: 'var(--sn-purple-subtle)', border: 'var(--sn-purple)', text: 'var(--sn-purple)' },
+  STANDARD: { bg: 'var(--sn-blue-subtle, rgba(59,130,246,0.15))', border: 'var(--sn-blue, #3b82f6)', text: 'var(--sn-blue, #3b82f6)' },
+  VIP:      { bg: 'var(--sn-amber-subtle, rgba(245,158,11,0.15))', border: 'var(--sn-amber)', text: 'var(--sn-amber)' },
+};
+
 function SeatMapEditor({ trip, onClose }) {
   const qc = useQueryClient();
   const [seats, setSeats] = useState([]);
+  const [tierFares, setTierFares] = useState({});
+  const [flatFareUsdc, setFlatFareUsdc] = useState(trip.fareUsdc ?? 0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Load seat map
+  // Load seat map — real response shape is { seatMap, bookedSeats, rows, cols, tierFares, fareUsdc }
   useQuery({
     queryKey: ['seat-map', trip.id],
     queryFn: async () => {
       try {
         const data = await transitApi.getSeatMap(trip.id);
-        setSeats(data.seats || generateDefaultSeats(trip));
+        const layout = data.seatMap?.layout;
+        const bookedIds = new Set((data.bookedSeats || []).map(b => b.seatId));
+        if (Array.isArray(layout) && layout.length) {
+          setSeats(layout.map(s => ({
+            ...s,
+            status: bookedIds.has(s.seatId) ? 'OCCUPIED' : (s.status === 'BLOCKED' ? 'BLOCKED' : 'AVAILABLE'),
+          })));
+        } else {
+          setSeats(generateDefaultSeats(trip));
+        }
+        setTierFares(data.tierFares || {});
+        if (data.fareUsdc != null) setFlatFareUsdc(data.fareUsdc);
       } catch {
         setSeats(generateDefaultSeats(trip));
       }
@@ -405,12 +425,31 @@ function SeatMapEditor({ trip, onClose }) {
     },
   });
 
+  // Click cycle: ECONOMY -> STANDARD -> VIP -> BLOCKED -> ECONOMY. Occupied seats are locked.
+  const cycleTier = (seatId) => {
+    setSeats(prev => prev.map(s => {
+      if (s.seatId !== seatId || s.status === 'OCCUPIED') return s;
+      if (s.status === 'BLOCKED') {
+        return { ...s, status: 'AVAILABLE', tier: 'ECONOMY' };
+      }
+      const cur = SEAT_TIERS.indexOf(s.tier || 'ECONOMY');
+      if (cur === SEAT_TIERS.length - 1) {
+        return { ...s, status: 'BLOCKED' };
+      }
+      return { ...s, status: 'AVAILABLE', tier: SEAT_TIERS[cur + 1] };
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      await transitApi.updateSeatMap(trip.id, seats);
+      const rows = Math.max(...seats.map(s => s.row || 1), 1);
+      const cols = Math.max(...seats.map(s => s.col || 1), 1);
+      // Backend expects { layout, rows, cols, tierFares } — layout is the seat array itself.
+      await transitApi.updateSeatMap(trip.id, { layout: seats, rows, cols, tierFares });
       toast.success('Seat map saved');
       qc.invalidateQueries(['transit-trips']);
+      qc.invalidateQueries(['seat-map', trip.id]);
       onClose();
     } catch (e) {
       toast.error(e.message);
@@ -426,17 +465,32 @@ function SeatMapEditor({ trip, onClose }) {
         {/* Legend */}
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-lg bg-[var(--sn-purple-subtle)] border border-[var(--sn-purple)]" />
-            <span className="text-xs text-[var(--sn-text-muted)]">Available</span>
-          </div>
-          <div className="flex items-center gap-1.5">
             <div className="w-5 h-5 rounded-lg bg-[var(--sn-amber)] border border-[var(--sn-amber)]" />
-            <span className="text-xs text-[var(--sn-text-muted)]">Occupied</span>
+            <span className="text-xs text-[var(--sn-text-muted)]">Occupied (locked)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-5 h-5 rounded-lg bg-[var(--sn-red)] border border-[var(--sn-red)]" />
             <span className="text-xs text-[var(--sn-text-muted)]">Blocked</span>
           </div>
+          <span className="text-xs text-[var(--sn-text-muted)] ml-auto">Click a seat to cycle its tier · click legend below to block/unblock</span>
+        </div>
+
+        {/* Tier legend / fare inputs */}
+        <div className="rounded-lg border bg-card p-3 flex flex-wrap items-center gap-4">
+          {SEAT_TIERS.map(tier => (
+            <div key={tier} className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-lg" style={{ background: TIER_COLORS[tier].bg, border: `1px solid ${TIER_COLORS[tier].border}` }} />
+              <span className="text-xs font-medium text-foreground">{tier}</span>
+              <input
+                type="number" min="0" step="0.01"
+                placeholder={String(flatFareUsdc)}
+                value={tierFares[tier] ?? ''}
+                onChange={(e) => setTierFares(prev => ({ ...prev, [tier]: e.target.value === '' ? undefined : parseFloat(e.target.value) }))}
+                className="w-20 px-2 py-1 rounded border border-input text-xs"
+              />
+              <span className="text-[10px] text-muted-foreground">USDC</span>
+            </div>
+          ))}
         </div>
 
         {/* Bus outline */}
@@ -449,7 +503,7 @@ function SeatMapEditor({ trip, onClose }) {
           </div>
           {/* Seats grid */}
           <div className="space-y-2">
-            {renderSeatGrid(seats, trip.seatLayout, setSeats)}
+            {renderSeatGrid(seats, trip.seatLayout, setSeats, cycleTier)}
           </div>
         </div>
 
@@ -475,6 +529,7 @@ function generateDefaultSeats(trip) {
         row: r,
         col: c,
         type: c <= left ? 'WINDOW' : 'AISLE',
+        tier: 'ECONOMY',
         status: 'AVAILABLE',
       });
       if (num++ >= (trip.totalSeats || 30)) break;
@@ -483,7 +538,7 @@ function generateDefaultSeats(trip) {
   return seats;
 }
 
-function renderSeatGrid(seats, layout, setSeats) {
+function renderSeatGrid(seats, layout, setSeats, cycleTier) {
   const [left, right] = (layout || '2-2').split('-').map(Number);
   const perRow = left + right;
   const rows = Math.ceil(seats.length / perRow);
@@ -494,11 +549,11 @@ function renderSeatGrid(seats, layout, setSeats) {
     grid.push(
       <div key={r} className="flex items-center justify-center gap-1.5">
         {rowSeats.slice(0, left).map((s, i) => (
-          <SeatButton key={`${r}-${i}`} seat={s} onClick={() => toggleSeat(s, seats, setSeats)} />
+          <SeatButton key={`${r}-${i}`} seat={s} onClick={() => cycleTier(s.seatId)} />
         ))}
         <div className="w-3" /> {/* Aisle */}
         {rowSeats.slice(left).map((s, i) => (
-          <SeatButton key={`${r}-${i + left}`} seat={s} onClick={() => toggleSeat(s, seats, setSeats)} />
+          <SeatButton key={`${r}-${i + left}`} seat={s} onClick={() => cycleTier(s.seatId)} />
         ))}
       </div>
     );
@@ -506,30 +561,21 @@ function renderSeatGrid(seats, layout, setSeats) {
   return grid;
 }
 
-function toggleSeat(seat, seats, setSeats) {
-  const next = seats.map(s => {
-    if (s.seatId === seat.seatId) {
-      const status = s.status === 'AVAILABLE' ? 'BLOCKED' : 'AVAILABLE';
-      return { ...s, status };
-    }
-    return s;
-  });
-  setSeats(next);
-}
-
 function SeatButton({ seat, onClick }) {
-  const colors = {
-    AVAILABLE: { bg: 'var(--sn-purple-subtle)', border: 'var(--sn-purple)', text: 'var(--sn-purple)' },
-    OCCUPIED: { bg: 'var(--sn-amber)', border: 'var(--sn-amber)', text: 'var(--sn-amber)' },
-    BLOCKED: { bg: 'var(--sn-red)', border: 'var(--sn-red)', text: 'var(--sn-red)' },
-  };
-  const c = colors[seat.status] || colors.AVAILABLE;
+  const isOccupied = seat.status === 'OCCUPIED';
+  const isBlocked = seat.status === 'BLOCKED';
+  const c = isOccupied
+    ? { bg: 'var(--sn-amber)', border: 'var(--sn-amber)', text: 'var(--sn-amber)' }
+    : isBlocked
+      ? { bg: 'var(--sn-red)', border: 'var(--sn-red)', text: 'var(--sn-red)' }
+      : (TIER_COLORS[seat.tier || 'ECONOMY'] || TIER_COLORS.ECONOMY);
   return (
     <button
       onClick={onClick}
-      className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all hover:scale-110"
+      disabled={isOccupied}
+      className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all ${isOccupied ? 'cursor-not-allowed opacity-80' : 'hover:scale-110'}`}
       style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.text }}
-      title={`${seat.seatId} — ${seat.status}`}
+      title={`${seat.seatId} — ${isOccupied ? 'Occupied' : isBlocked ? 'Blocked' : (seat.tier || 'ECONOMY')} (click to cycle tier: Economy → Standard → VIP → Blocked)`}
     >
       {seat.seatId}
     </button>

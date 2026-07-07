@@ -25,7 +25,6 @@ import Guests from '@/pages/Guests';
 import Marketing from '@/pages/Marketing';
 import FinanceV2 from '@/pages/FinanceV2';
 import Showcase from '@/pages/Showcase';
-import SeatMapEditor from '@/pages/SeatMapEditor';
 import Employees from '@/pages/employees/Employees';
 import HotelRooms from '@/pages/HotelRooms';
 import HotelHousekeeping from '@/pages/HotelHousekeeping';
@@ -98,7 +97,7 @@ function AppRoutes() {
         <Route path="/guests"               element={<Guests />} />
         <Route path="/marketing"            element={<Marketing />} />
         <Route path="/finance"              element={<FinanceV2 />} />
-        <Route path="/seat-map"             element={<SeatMapEditor />} />
+        <Route path="/seat-map"             element={<Navigate to="/transit" replace />} />
         <Route path="/showcase"             element={<Showcase />} />
         <Route path="/employees"            element={<Employees />} />
         <Route path="/hotel-rooms"          element={<HotelRooms />} />

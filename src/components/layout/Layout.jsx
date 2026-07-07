@@ -53,7 +53,7 @@ const ADMIN_ALL_NAV = [
   { label: 'Marketing',       icon: Megaphone,     to: '/marketing' },
   { label: 'Finance',         icon: Wallet,        to: '/finance' },
   { label: 'Showcase',        icon: ImageIcon,     to: '/showcase' },
-  { label: 'Seat Map Editor', icon: Grid3x3,       to: '/seat-map' },
+  { label: 'Seat Map Editor', icon: Grid3x3,       to: '/transit' },
   { label: 'Guests',          icon: Users,         to: '/guests' },
   { label: 'Reviews',         icon: Star,          to: '/reviews' },
   // Hotel operations

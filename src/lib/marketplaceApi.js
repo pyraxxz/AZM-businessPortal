@@ -15,8 +15,8 @@ export const transit = {
   remove: (id) => request(`/api/marketplace/transit/trips/${id}`, { method: 'DELETE' }),
   // Backend: GET /api/marketplace-seat-map/:tripId
   getSeatMap: (tripId) => request(`/api/marketplace-seat-map/${tripId}`),
-  // Backend: PUT /api/marketplace-seat-map/:tripId
-  updateSeatMap: (tripId, seats) => request(`/api/marketplace-seat-map/${tripId}`, { method: 'PUT', body: JSON.stringify({ seats }) }),
+  // Backend: PUT /api/marketplace-seat-map/:tripId — expects { layout, rows, cols, tierFares } at top level
+  updateSeatMap: (tripId, payload) => request(`/api/marketplace-seat-map/${tripId}`, { method: 'PUT', body: JSON.stringify(payload) }),
   // Backend: GET /api/marketplace/transit/trips/:id/book (not quite - check)
   bookings: (tripId) => request(`/api/marketplace/transit/trips/${tripId}/book`),
 };
