@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { business as businessApi, locations as locApi } from '@/lib/api';
 import { marketplaceApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, Button, Input, Textarea, Select, Badge, Switch } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
-import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode, Wallet, ImagePlus, Palette, RotateCcw } from 'lucide-react';
+import { Building2, Save, CheckCircle2, Copy, Eye, BadgeCheck, QrCode, Wallet, ImagePlus, Palette, RotateCcw, Loader2, Camera } from 'lucide-react';
 import { uploadImageToCloudinary, isCloudinaryConfigured, validateImageFile } from '@/lib/cloudinary';
 import { toast } from 'sonner';
 import PublicProfilePreview from '@/components/PublicProfilePreview';
@@ -27,6 +27,188 @@ const CATEGORIES = [
   { value: 'OTHER',              label: 'Other' },
 ];
 
+// ---------------------------------------------------------------------------
+// ImageUploadField
+// A reusable component: shows current image (or a placeholder), a click-to-
+// upload zone, and an optional manual URL input as a fallback.
+// ---------------------------------------------------------------------------
+function ImageUploadField({ label, hint, value, onChange, aspectClass = 'aspect-[3/1]', folder = 'azaman' }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef(null);
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    const err = validateImageFile(file);
+    if (err) { toast.error(err); return; }
+
+    setUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file, folder);
+      onChange(url);
+      toast.success(`${label} updated`);
+    } catch (e) {
+      toast.error('Upload failed: ' + e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    handleFile(file);
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold text-[var(--sn-text-muted)]">{label}</label>
+      {hint && <p className="text-xs text-[var(--sn-text-muted)] -mt-0.5">{hint}</p>}
+
+      {/* Upload zone */}
+      <div
+        className={`relative w-full ${aspectClass} rounded-xl border-2 border-dashed border-[var(--sn-border)] overflow-hidden group cursor-pointer transition-colors hover:border-[var(--sn-purple)]`}
+        onClick={() => !uploading && inputRef.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+      >
+        {/* Current image */}
+        {value
+          ? <img src={value} alt={label} className="w-full h-full object-cover" />
+          : (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-[var(--az-black)]">
+              <ImagePlus className="w-7 h-7 text-[var(--sn-text-muted)]" />
+              <span className="text-xs text-[var(--sn-text-muted)]">Click or drag to upload</span>
+            </div>
+          )
+        }
+
+        {/* Overlay on hover */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+          {uploading
+            ? <Loader2 className="w-6 h-6 text-white animate-spin" />
+            : <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                <Camera className="w-5 h-5" /> Change photo
+              </div>
+          }
+        </div>
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          disabled={uploading}
+          onChange={(e) => handleFile(e.target.files?.[0])}
+        />
+      </div>
+
+      {/* Manual URL fallback — useful if Cloudinary isn't configured */}
+      {!isCloudinaryConfigured() && (
+        <input
+          type="url"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://res.cloudinary.com/..."
+          className="w-full text-xs rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] px-3 py-2 text-[var(--sn-text)] placeholder:text-[var(--sn-text-muted)] focus:border-[var(--sn-purple)] outline-none"
+        />
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// LogoUploadField
+// Square, shows initials when empty. Same click-to-upload pattern.
+// ---------------------------------------------------------------------------
+function LogoUploadField({ value, onChange, businessName }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef(null);
+
+  const initials = (businessName || 'B').trim().charAt(0).toUpperCase();
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    const err = validateImageFile(file);
+    if (err) { toast.error(err); return; }
+
+    setUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(file, 'azaman-logos');
+      onChange(url);
+      toast.success('Logo updated');
+    } catch (e) {
+      toast.error('Upload failed: ' + e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold text-[var(--sn-text-muted)]">Business Logo</label>
+      <p className="text-xs text-[var(--sn-text-muted)] -mt-0.5">
+        Shown as your profile picture in the Azaman app. Square image recommended.
+      </p>
+      <div className="flex items-end gap-4">
+        {/* Avatar preview */}
+        <div
+          className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-dashed border-[var(--sn-border)] group cursor-pointer hover:border-[var(--sn-purple)] transition-colors"
+          onClick={() => !uploading && inputRef.current?.click()}
+        >
+          {value
+            ? <img src={value} alt="logo" className="w-full h-full object-cover" />
+            : (
+              <div className="w-full h-full flex items-center justify-center bg-[var(--sn-purple-subtle)]">
+                <span className="text-2xl font-black text-[var(--sn-purple)]">{initials}</span>
+              </div>
+            )
+          }
+          {/* Hover overlay */}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">
+            {uploading
+              ? <Loader2 className="w-5 h-5 text-white animate-spin" />
+              : <Camera className="w-5 h-5 text-white" />
+            }
+          </div>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => handleFile(e.target.files?.[0])}
+          />
+        </div>
+
+        <div className="flex-1 space-y-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => inputRef.current?.click()}
+            loading={uploading}
+            disabled={uploading}
+          >
+            <ImagePlus className="w-4 h-4 mr-1.5" /> Upload Logo
+          </Button>
+          {/* URL fallback if Cloudinary not configured */}
+          {!isCloudinaryConfigured() && (
+            <input
+              type="url"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="https://res.cloudinary.com/..."
+              className="w-full text-xs rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] px-3 py-2 text-[var(--sn-text)] placeholder:text-[var(--sn-text-muted)] focus:border-[var(--sn-purple)] outline-none"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Settings Page
+// ---------------------------------------------------------------------------
 export default function Settings() {
   const { bizProfile, user, refreshProfile } = useAuth();
   const qc = useQueryClient();
@@ -51,11 +233,11 @@ export default function Settings() {
   const [penaltyLoading, setPenaltyLoading] = useState(false);
 
   useEffect(() => {
-      if (bizProfile?.id) {
-          marketplaceApi.getPenaltyPolicy(bizProfile.id)
-              .then(data => setPenaltyPolicy(data.policy))
-              .catch(() => {});
-      }
+    if (bizProfile?.id) {
+      marketplaceApi.getPenaltyPolicy(bizProfile.id)
+        .then(data => setPenaltyPolicy(data.policy))
+        .catch(() => {});
+    }
   }, [bizProfile?.id]);
 
   const { data: locsData } = useQuery({
@@ -87,8 +269,8 @@ export default function Settings() {
         country:      bizProfile.country       || '',
         category:     bizProfile.category      || '',
         logoUrl:      bizProfile.logoUrl        || '',
-        coverPhotoUrl: bizProfile.coverPhotoUrl   || '',
-        adAccentColor: bizProfile.adAccentColor   || '',
+        coverPhotoUrl: bizProfile.coverPhotoUrl || '',
+        adAccentColor: bizProfile.adAccentColor || '',
       });
     }
   }, [bizProfile]);
@@ -104,7 +286,10 @@ export default function Settings() {
     onError: (e) => toast.error(e.message),
   });
 
+  // Generic setter for text inputs (e.target.value pattern)
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
+  // Direct value setter — used by image upload callbacks
+  const setUrl = (key) => (url) => setForm(f => ({ ...f, [key]: url }));
 
   const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
   const isValidHex = (v) => v === '' || HEX_RE.test(v);
@@ -203,13 +388,10 @@ export default function Settings() {
 
         {bizProfile?.bizId ? (
           <div className="space-y-3">
-            {/* Business-level QR */}
             <QrCodePanel
               label={`${bizProfile?.businessName || 'Business'} — Main`}
               url={`azaman://business/${bizProfile.bizId}`}
             />
-
-            {/* Per-location QRs */}
             {locs.filter(l => l.isActive).map(loc => (
               <QrCodePanel
                 key={loc.id}
@@ -217,8 +399,6 @@ export default function Settings() {
                 url={`azaman://business/${bizProfile.bizId}/location/${loc.id}`}
               />
             ))}
-
-            {/* Per-table QRs */}
             {locs.filter(l => l.isActive).map(loc =>
               (loc.tables || []).filter(t => t.isActive).map(tbl => (
                 <QrCodePanel
@@ -243,7 +423,7 @@ export default function Settings() {
             label="Business Name"
             value={form.businessName}
             onChange={set('businessName')}
-            placeholder="Acme Ltd."
+            placeholder="Your business name"
           />
           <Select
             label="Category"
@@ -269,86 +449,70 @@ export default function Settings() {
         </div>
 
         <Input label="Address" value={form.address} onChange={set('address')} placeholder="Business address" />
-        <Input label="Logo URL (Cloudinary)" value={form.logoUrl} onChange={set('logoUrl')} placeholder="https://res.cloudinary.com/..." />
 
-            {/* Cover Photo */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)]">Cover Photo</label>
-              {form.coverPhotoUrl && (
-                <img src={form.coverPhotoUrl} alt="Cover" className="w-full h-32 object-cover rounded-lg border border-[var(--sn-border)]" />
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = 'image/*';
-                  input.onchange = async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    if (!validateImageFile(file)) return;
-                    try {
-                      const url = await uploadImageToCloudinary(file);
-                      set({ coverPhotoUrl: url });
-                    } catch (err) {
-                      alert('Upload failed: ' + err.message);
-                    }
-                  };
-                  input.click();
-                }}
-              >
-                <ImagePlus className="w-4 h-4 mr-2" /> Upload Cover
-              </Button>
-              <Input label="" value={form.coverPhotoUrl} onChange={set('coverPhotoUrl')} placeholder="https://res.cloudinary.com/..." />
-            </div>
+        {/* ── Logo Upload ───────────────────────────────────────────────── */}
+        <LogoUploadField
+          value={form.logoUrl}
+          onChange={setUrl('logoUrl')}
+          businessName={form.businessName}
+        />
 
-            {/* Ad Appearance */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5" /> Ad Appearance
-              </label>
-              <p className="text-xs text-[var(--sn-text-muted)] -mt-1">
-                Pick an accent color for your collapsed marketplace card. Leave blank to use the default color for your category.
-              </p>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-lg border border-[var(--sn-border)] flex-shrink-0 overflow-hidden relative"
-                  style={{ background: isValidHex(form.adAccentColor) && form.adAccentColor ? form.adAccentColor : 'var(--az-black)' }}
-                >
-                  <input
-                    type="color"
-                    value={isValidHex(form.adAccentColor) && form.adAccentColor ? form.adAccentColor : '#6C4CE0'}
-                    onChange={(e) => setForm(f => ({ ...f, adAccentColor: e.target.value.toUpperCase() }))}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    aria-label="Pick ad accent color"
-                  />
-                </div>
-                <Input
-                  label=""
-                  value={form.adAccentColor}
-                  onChange={(e) => setForm(f => ({ ...f, adAccentColor: e.target.value }))}
-                  placeholder="#FFAA00"
-                  maxLength={7}
-                  className="flex-1"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, adAccentColor: '' }))}
-                  disabled={!form.adAccentColor}
-                  className="flex-shrink-0"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" /> Reset
-                </Button>
-              </div>
-              {!isValidHex(form.adAccentColor) && (
-                <p className="text-xs text-[var(--sn-destructive,#e05555)]">
-                  Enter a 6-digit hex color like #FFAA00, or leave it blank.
-                </p>
-              )}
+        {/* ── Cover Photo ───────────────────────────────────────────────── */}
+        <ImageUploadField
+          label="Cover Photo"
+          hint="Shown as the hero banner on your public profile and the card background in the marketplace feed."
+          value={form.coverPhotoUrl}
+          onChange={setUrl('coverPhotoUrl')}
+          aspectClass="aspect-[3/1]"
+          folder="azaman-covers"
+        />
+
+        {/* ── Ad Appearance ─────────────────────────────────────────────── */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-[var(--sn-text-muted)] flex items-center gap-1.5">
+            <Palette className="w-3.5 h-3.5" /> Ad Appearance
+          </label>
+          <p className="text-xs text-[var(--sn-text-muted)] -mt-1">
+            Pick an accent color for your collapsed marketplace card. Leave blank to use the default color for your category.
+          </p>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-lg border border-[var(--sn-border)] flex-shrink-0 overflow-hidden relative"
+              style={{ background: isValidHex(form.adAccentColor) && form.adAccentColor ? form.adAccentColor : 'var(--az-black)' }}
+            >
+              <input
+                type="color"
+                value={isValidHex(form.adAccentColor) && form.adAccentColor ? form.adAccentColor : '#6C4CE0'}
+                onChange={(e) => setForm(f => ({ ...f, adAccentColor: e.target.value.toUpperCase() }))}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                aria-label="Pick ad accent color"
+              />
             </div>
+            <Input
+              label=""
+              value={form.adAccentColor}
+              onChange={(e) => setForm(f => ({ ...f, adAccentColor: e.target.value }))}
+              placeholder="#FFAA00"
+              maxLength={7}
+              className="flex-1"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setForm(f => ({ ...f, adAccentColor: '' }))}
+              disabled={!form.adAccentColor}
+              className="flex-shrink-0"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Reset
+            </Button>
+          </div>
+          {!isValidHex(form.adAccentColor) && (
+            <p className="text-xs text-[var(--sn-destructive,#e05555)]">
+              Enter a 6-digit hex color like #FFAA00, or leave it blank.
+            </p>
+          )}
+        </div>
 
         <div className="flex items-center gap-3 pt-2">
           {saved && (
@@ -367,78 +531,71 @@ export default function Settings() {
         </div>
       </Card>
 
+      {/* Penalty Policy */}
       <Card className="space-y-4">
         <div>
-            <h3 className="text-sm font-bold text-[var(--sn-text)]">Penalty Policy</h3>
-            <p className="text-xs text-[var(--sn-text-muted)] mt-1">
-                Configure how no-shows are penalized for your business.
-            </p>
+          <h3 className="text-sm font-bold text-[var(--sn-text)]">Penalty Policy</h3>
+          <p className="text-xs text-[var(--sn-text-muted)] mt-1">
+            Configure how no-shows are penalized for your business.
+          </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Customer Penalty %</label>
-                <input
-                    type="number"
-                    min="0"
-                    max="50"
-                    step="1"
-                    value={penaltyPolicy?.customerPenaltyPct ? Number(penaltyPolicy.customerPenaltyPct) * 100 : 10}
-                    onChange={(e) => setPenaltyPolicy({
-                        ...penaltyPolicy,
-                        customerPenaltyPct: Number(e.target.value) / 100,
-                    })}
-                    className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
-                />
-            </div>
-            <div>
-                <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Business Penalty %</label>
-                <input
-                    type="number"
-                    min="0"
-                    max="50"
-                    step="1"
-                    value={penaltyPolicy?.businessPenaltyPct ? Number(penaltyPolicy.businessPenaltyPct) * 100 : 10}
-                    onChange={(e) => setPenaltyPolicy({
-                        ...penaltyPolicy,
-                        businessPenaltyPct: Number(e.target.value) / 100,
-                    })}
-                    className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
-                />
-            </div>
-            <div>
-                <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Grace Period (mins)</label>
-                <input
-                    type="number"
-                    min="0"
-                    step="5"
-                    value={penaltyPolicy?.gracePeriodMins || 30}
-                    onChange={(e) => setPenaltyPolicy({
-                        ...penaltyPolicy,
-                        gracePeriodMins: Number(e.target.value),
-                    })}
-                    className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
-                />
-            </div>
+          <div>
+            <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Customer Penalty %</label>
+            <input
+              type="number"
+              min="0"
+              max="50"
+              step="1"
+              value={penaltyPolicy?.customerPenaltyPct ? Number(penaltyPolicy.customerPenaltyPct) * 100 : 10}
+              onChange={(e) => setPenaltyPolicy({ ...penaltyPolicy, customerPenaltyPct: Number(e.target.value) / 100 })}
+              className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Business Penalty %</label>
+            <input
+              type="number"
+              min="0"
+              max="50"
+              step="1"
+              value={penaltyPolicy?.businessPenaltyPct ? Number(penaltyPolicy.businessPenaltyPct) * 100 : 10}
+              onChange={(e) => setPenaltyPolicy({ ...penaltyPolicy, businessPenaltyPct: Number(e.target.value) / 100 })}
+              className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-[var(--sn-text-muted)] font-semibold mb-1 block">Grace Period (mins)</label>
+            <input
+              type="number"
+              min="0"
+              step="5"
+              value={penaltyPolicy?.gracePeriodMins || 30}
+              onChange={(e) => setPenaltyPolicy({ ...penaltyPolicy, gracePeriodMins: Number(e.target.value) })}
+              className="w-full rounded-lg border border-[var(--sn-border)] bg-[var(--az-black)] p-2 text-sm text-[var(--sn-text)] focus:border-[var(--sn-purple)] outline-none"
+            />
+          </div>
         </div>
         <Button
-            onClick={async () => {
-                setPenaltyLoading(true);
-                try {
-                    await marketplaceApi.updatePenaltyPolicy(bizProfile.id, penaltyPolicy);
-                    toast.success('Penalty policy updated.');
-                } catch (e) {
-                    toast.error(e.message);
-                } finally {
-                    setPenaltyLoading(false);
-                }
-            }}
-            loading={penaltyLoading}
-            variant="outline"
+          onClick={async () => {
+            setPenaltyLoading(true);
+            try {
+              await marketplaceApi.updatePenaltyPolicy(bizProfile.id, penaltyPolicy);
+              toast.success('Penalty policy updated.');
+            } catch (e) {
+              toast.error(e.message);
+            } finally {
+              setPenaltyLoading(false);
+            }
+          }}
+          loading={penaltyLoading}
+          variant="outline"
         >
-            Save Penalty Policy
+          Save Penalty Policy
         </Button>
       </Card>
 
+      {/* Payroll & Smart Routing */}
       <Card className="space-y-4">
         <div>
           <h3 className="text-sm font-bold text-[var(--sn-text)] flex items-center gap-2">
@@ -449,7 +606,6 @@ export default function Settings() {
             Configure how payroll is disbursed to employees. Smart Routing allows employees to auto-split their salaries into USDC savings.
           </p>
         </div>
-        
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
             <div>
@@ -458,7 +614,6 @@ export default function Settings() {
             </div>
             <Switch defaultChecked />
           </div>
-          
           <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
             <div>
               <p className="text-sm font-semibold text-[var(--sn-text)]">Auto-Approve Time Off</p>
