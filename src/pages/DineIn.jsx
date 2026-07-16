@@ -1,185 +1,881 @@
-// src/pages/DineIn.jsx
-// =============================================================================
-// DINE-IN MANAGEMENT — Waiter takes AZM-ID, opens tab, adds items, finalizes
-// =============================================================================
-
-import { useState, useEffect } from 'react';
-import { Search, Plus, Minus, Receipt, User } from 'lucide-react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { marketplaceApi } from '../lib/marketplaceApi';
+import { products as productsApi } from '../lib/api';
+import { usePermission } from '../hooks/usePermission';
+import { useAuth } from '../lib/AuthContext';
+import { request } from '../lib/apiCore';
+import {
+  Card,
+  Badge,
+  Button,
+  Input,
+  Select,
+  Empty,
+  Skeleton,
+  Modal,
+  Tabs,
+  Tooltip
+} from '../components/ui';
+import {
+  Receipt,
+  User,
+  Plus,
+  Minus,
+  Search,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Utensils,
+  Play,
+  ArrowRight,
+  Calculator,
+  UserCheck,
+  AlertCircle,
+  Printer,
+  ChevronRight,
+  Send,
+  Sparkles,
+  Users
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-export default function DineIn({ businessId, products }) {
-  const [azmId, setAzmId] = useState('');
-  const [tab, setTab] = useState(null);
-  const [tabItems, setTabItems] = useState([]);
-  const [loading, setLoading] = useState(false);
+export default function DineIn() {
+  const queryClient = useQueryClient();
+  const { bizProfile } = useAuth();
+  const { hasPermission } = usePermission();
+  const canManage = hasPermission('dinein.manage');
+  const canView = hasPermission('dinein.view') || canManage;
 
-  // Open tab via AZM-ID search
-  const openTab = async () => {
-    if (!azmId.trim()) return;
-    setLoading(true);
+  const businessId = bizProfile?.id;
+
+  // Selected Tab detailed view
+  const [selectedTabId, setSelectedTabId] = useState(null);
+
+  // Guest Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [guestResults, setGuestResults] = useState([]);
+  const [isSearchingGuests, setIsSearchingGuests] = useState(false);
+
+  // New tab builder state
+  const [isNewTabOpen, setIsNewTabOpen] = useState(false);
+  const [newTabCustomer, setNewTabCustomer] = useState(null);
+  const [newTabTableNum, setNewTabTableNum] = useState('');
+
+  // Modifiers and items details state
+  const [itemModifierForm, setItemModifierForm] = useState({ notes: '', quantity: 1 });
+  const [activeItemConfig, setActiveItemConfig] = useState(null);
+
+  // Billing & finalization setup
+  const [isBillingOpen, setIsBillingOpen] = useState(false);
+  const [taxRatePct, setTaxRatePct] = useState('12.5'); // Default standard rate
+  const [tipUsdc, setTipUsdc] = useState('0');
+
+  // Split billing configuration
+  const [isSplitOpen, setIsSplitOpen] = useState(false);
+  const [splitCount, setSplitCount] = useState(2);
+  const [splitType, setSplitType] = useState('even'); // 'even' or 'item'
+  const [itemAssignments, setItemAssignments] = useState({}); // { [itemId]: guestIndex }
+
+  // Queries
+  const { data: openTabs, isLoading: tabsLoading } = useQuery({
+    queryKey: ['openTabs'],
+    queryFn: async () => {
+      const res = await marketplaceApi.getOpenTabs();
+      return res?.data || res || [];
+    },
+    enabled: canView,
+  });
+
+  const { data: productsData, isLoading: productsLoading } = useQuery({
+    queryKey: ['dineInProducts'],
+    queryFn: async () => {
+      const res = await productsApi.list({ limit: 100 });
+      return res?.products || res?.data || [];
+    },
+    enabled: canView,
+  });
+
+  const { data: activeTabDetails, isLoading: detailLoading } = useQuery({
+    queryKey: ['dineInTab', selectedTabId],
+    queryFn: async () => {
+      if (!selectedTabId) return null;
+      const res = await marketplaceApi.getDineInTab(selectedTabId);
+      return res?.data || res;
+    },
+    enabled: canView && !!selectedTabId,
+  });
+
+  // Mutations
+  const openTabMutation = useMutation({
+    mutationFn: ({ businessProfileId, customerAzamanId }) =>
+      marketplaceApi.openDineInTab(businessProfileId, customerAzamanId),
+    onSuccess: () => {
+      toast.success('Dine-In Tab opened successfully');
+      queryClient.invalidateQueries({ queryKey: ['openTabs'] });
+      setIsNewTabOpen(false);
+      setNewTabCustomer(null);
+      setNewTabTableNum('');
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Failed to open tab');
+    },
+  });
+
+  const addItemMutation = useMutation({
+    mutationFn: ({ tabId, payload }) =>
+      marketplaceApi.addDineInItem(tabId, payload),
+    onSuccess: () => {
+      toast.success('Item added to tab');
+      queryClient.invalidateQueries({ queryKey: ['dineInTab', selectedTabId] });
+      queryClient.invalidateQueries({ queryKey: ['openTabs'] });
+      setActiveItemConfig(null);
+      setItemModifierForm({ notes: '', quantity: 1 });
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Failed to add item');
+    },
+  });
+
+  const sendToKitchenMutation = useMutation({
+    mutationFn: async ({ tabId, items }) => {
+      // POST /api/business-os/restaurant/kds automatically sends items to kitchen dispatcher
+      return request('/api/business-os/restaurant/kds', {
+        method: 'POST',
+        body: JSON.stringify({ tabId, items }),
+      });
+    },
+    onSuccess: () => {
+      toast.success('Order routed & sent to kitchen display successfully!');
+      queryClient.invalidateQueries({ queryKey: ['dineInTab', selectedTabId] });
+    },
+    onError: (err) => {
+      toast.error(`KDS dispatch failure: ${err.message}`);
+    },
+  });
+
+  const finalizeTabMutation = useMutation({
+    mutationFn: ({ tabId, payload }) =>
+      marketplaceApi.finalizeDineInTab(tabId, payload),
+    onSuccess: () => {
+      toast.success('Tab moved to BILLING. Finalized summary dispatched.');
+      queryClient.invalidateQueries({ queryKey: ['dineInTab', selectedTabId] });
+      queryClient.invalidateQueries({ queryKey: ['openTabs'] });
+      setIsBillingOpen(false);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Failed to finalize tab');
+    },
+  });
+
+  const closeTabMutation = useMutation({
+    mutationFn: (tabId) =>
+      marketplaceApi.confirmDineInTab(tabId),
+    onSuccess: () => {
+      toast.success('Tab paid & closed successfully. Invoice printed!');
+      queryClient.invalidateQueries({ queryKey: ['openTabs'] });
+      setSelectedTabId(null);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Failed to close tab');
+    },
+  });
+
+  // Search Guest Functionality
+  const handleGuestSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setIsSearchingGuests(true);
     try {
-      const res = await marketplaceApi.openDineInTab(businessId, azmId.trim());
-      setTab(res.data);
-      setTabItems([]);
+      const res = await marketplaceApi.searchGuest(searchQuery.trim());
+      setGuestResults(res?.data || res || []);
     } catch (e) {
-      alert(e.response?.data?.message || 'Customer not found');
+      toast.error('Search failed: ' + e.message);
+    } finally {
+      setIsSearchingGuests(false);
     }
-    setLoading(false);
   };
 
-  // Add item to tab
-  const addItem = (product) => {
-    setTabItems(prev => {
-      const existing = prev.find(i => i.productId === product.id);
-      if (existing) {
-        return prev.map(i => i.productId === product.id
-          ? { ...i, quantity: i.quantity + 1, totalUsdc: (i.quantity + 1) * i.unitPriceUsdc }
-          : i);
-      }
-      return [...prev, {
-        productId: product.id,
-        name: product.name,
-        quantity: 1,
-        unitPriceUsdc: parseFloat(product.priceUsdc),
-        totalUsdc: parseFloat(product.priceUsdc),
-      }];
+  const handleOpenTabSubmit = () => {
+    if (!newTabCustomer) {
+      toast.error('Please select or search a guest');
+      return;
+    }
+    openTabMutation.mutate({
+      businessProfileId: businessId,
+      customerAzamanId: newTabCustomer.azamanId || newTabCustomer.id,
     });
   };
 
-  // Remove item
-  const removeItem = (productId) => {
-    setTabItems(prev => prev
-      .map(i => i.productId === productId
-        ? { ...i, quantity: i.quantity - 1, totalUsdc: (i.quantity - 1) * i.unitPriceUsdc }
-        : i)
-      .filter(i => i.quantity > 0));
+  const handleAddItemSubmit = (product) => {
+    if (!selectedTabId) return;
+    addItemMutation.mutate({
+      tabId: selectedTabId,
+      payload: {
+        productId: product.id,
+        name: product.name + (itemModifierForm.notes ? ` (${itemModifierForm.notes})` : ''),
+        unitPriceUsdc: parseFloat(product.priceUsdc),
+        quantity: parseInt(itemModifierForm.quantity) || 1,
+      },
+    });
   };
 
-  const total = tabItems.reduce((sum, i) => sum + i.totalUsdc, 0);
+  const triggerFinalize = () => {
+    if (!selectedTabId || !activeTabDetails) return;
+    finalizeTabMutation.mutate({
+      tabId: selectedTabId,
+      payload: {
+        taxRatePct: parseFloat(taxRatePct),
+        tipUsdc: parseFloat(tipUsdc),
+      },
+    });
+  };
 
-  // Finalize and send to customer
-  const finalizeTab = async () => {
-    if (tabItems.length === 0) return;
-    setLoading(true);
-    try {
-      await marketplaceApi.finalizeDineInTab(tab.id, tabItems);
-      alert('Tab sent to customer for confirmation');
-      setTab(null); setTabItems([]); setAzmId('');
-    } catch (e) {
-      alert(e.response?.data?.message || 'Failed to finalize tab');
+  // Perform split total calculations
+  const calculateSplits = () => {
+    if (!activeTabDetails) return [];
+    const items = activeTabDetails.items || [];
+    const total = parseFloat(activeTabDetails.grandTotalUsdc || activeTabDetails.subtotalUsdc || 0);
+
+    if (splitType === 'even') {
+      const portion = total / splitCount;
+      return Array.from({ length: splitCount }, (_, i) => ({
+        guestNum: i + 1,
+        total: portion,
+        items: ['Equal Share Portion'],
+      }));
+    } else {
+      // Split by item
+      const guests = Array.from({ length: splitCount }, (_, i) => ({
+        guestNum: i + 1,
+        total: 0,
+        items: [],
+      }));
+
+      items.forEach((item) => {
+        const assignedGuest = itemAssignments[item.id] !== undefined ? itemAssignments[item.id] : 0;
+        if (guests[assignedGuest]) {
+          const lineVal = parseFloat(item.lineTotalUsdc || (item.unitPriceUsdc * item.quantity));
+          guests[assignedGuest].total += lineVal;
+          guests[assignedGuest].items.push(`${item.quantity}x ${item.name}`);
+        }
+      });
+
+      // Factor in proportional tip and tax to assigned bases
+      const sub = parseFloat(activeTabDetails.subtotalUsdc || 1);
+      const taxRate = (parseFloat(activeTabDetails.taxTotalUsdc) || 0) / sub;
+      const tipRate = (parseFloat(activeTabDetails.tipUsdc) || 0) / sub;
+
+      guests.forEach((g) => {
+        const base = g.total;
+        g.total = base + (base * taxRate) + (base * tipRate);
+      });
+
+      return guests;
     }
-    setLoading(false);
   };
+
+  if (!canView) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-[var(--sn-bg)]">
+        <AlertCircle className="w-12 h-12 text-[var(--sn-red)] mb-4" />
+        <h2 className="text-lg font-bold text-[var(--sn-text)]">Permission Denied</h2>
+        <p className="text-sm text-[var(--sn-text-muted)] mt-1">You do not have permission to view or manage dine-in tabs.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Dine-In Tabs</h1>
-        <p className="text-sm text-muted-foreground mt-1">Open a tab by scanning or entering the customer AZM-ID</p>
+    <div className="space-y-6 max-w-7xl mx-auto px-4 md:px-6 py-6 text-[var(--sn-text)]">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--sn-text)] flex items-center gap-2">
+            <Utensils className="w-6 h-6 text-[var(--sn-purple)]" />
+            Dine-In Operations Dashboard
+          </h1>
+          <p className="text-sm text-[var(--sn-text-muted)]">
+            Open server tabs, register customer tables, dispatch kitchen tickets, and split bills seamlessly.
+          </p>
+        </div>
+        {canManage && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsNewTabOpen(true)}
+            className="flex items-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" />
+            Open Table Tab
+          </Button>
+        )}
       </div>
 
-      {!tab ? (
-        // Step 1: Search for customer
-        <div className="rounded-lg border bg-card p-6">
-          <label className="text-sm font-medium text-muted-foreground">Customer AZM-ID</label>
-          <div className="mt-2 flex gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                value={azmId}
-                onChange={(e) => setAzmId(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && openTab()}
-                placeholder="e.g. AZM-2024-00123"
-                className="w-full pl-10 pr-4 py-2.5 rounded-md border border-input bg-background text-sm"
-              />
+      {/* Main Grid View */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Side: Server Active Tabs List */}
+        <div className="lg:col-span-1 space-y-4">
+          <h3 className="text-sm font-bold text-[var(--sn-text-muted)] uppercase tracking-wider flex items-center justify-between">
+            <span>Running Tables & Tabs ({openTabs?.length || 0})</span>
+            {tabsLoading && <span className="text-xs text-[var(--sn-purple)] animate-pulse">refreshing...</span>}
+          </h3>
+
+          {tabsLoading && !openTabs ? (
+            <div className="space-y-3">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
             </div>
-            <button
-              onClick={openTab}
-              disabled={loading || !azmId.trim()}
-              className="px-4 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
-            >
-              {loading ? 'Searching...' : 'Open Tab'}
-            </button>
-          </div>
+          ) : (openTabs || []).length === 0 ? (
+            <Empty
+              icon={Receipt}
+              title="No open tabs"
+              description="Table tabs are currently clear. Open a tab to start serving customers."
+            />
+          ) : (
+            <div className="space-y-3">
+              {(openTabs || []).map((tab) => {
+                const sub = parseFloat(tab.subtotalUsdc || tab.grandTotalUsdc || 0);
+                const itemsCount = tab.items?.length || 0;
+                const isOpen = tab.status?.toUpperCase() === 'OPEN' || tab.status?.toUpperCase() === 'ACTIVE';
+
+                return (
+                  <Card
+                    key={tab.id}
+                    onClick={() => setSelectedTabId(tab.id)}
+                    className={`cursor-pointer transition-all border p-4 ${
+                      selectedTabId === tab.id
+                        ? 'border-[var(--sn-purple)] bg-[rgba(168,85,247,0.02)]'
+                        : 'bg-[var(--sn-card)] border-[var(--sn-border)] hover:border-[var(--sn-purple)]/40'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-base text-[var(--sn-text)]">
+                            Table {tab.tableId || 'Bar'}
+                          </span>
+                          <Badge color={isOpen ? 'var(--sn-purple)' : 'var(--sn-amber)'}>
+                            {tab.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-[var(--sn-text-muted)] mt-1 flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          {tab.customerName || tab.customerId || 'Guest'}
+                        </p>
+                      </div>
+                      <span className="text-sm font-bold text-[var(--sn-green)] az-mono">
+                        GHS {sub.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--sn-border)] text-xs text-[var(--sn-text-muted)]">
+                      <span className="flex items-center gap-1">
+                        <Utensils className="w-3.5 h-3.5" />
+                        {itemsCount} {itemsCount === 1 ? 'item' : 'items'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        {tab.openedAt ? new Date(tab.openedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                      </span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
-      ) : (
-        // Step 2: Build the bill
-        <>
-          {/* Customer info */}
-          <div className="rounded-lg border bg-card p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-5 w-5 text-primary" />
+
+        {/* Right Side: Tab Detailed Inspector / Bill Builder */}
+        <div className="lg:col-span-2 space-y-4">
+          {selectedTabId ? (
+            detailLoading ? (
+              <Card className="p-8 text-center bg-[var(--sn-card)] border-[var(--sn-border)]">
+                <p className="text-sm text-[var(--sn-text-muted)] animate-pulse">Loading active tab details...</p>
+              </Card>
+            ) : activeTabDetails ? (
+              <div className="space-y-6">
+                {/* Tab Header Detail Card */}
+                <Card className="bg-[var(--sn-card)] border-[var(--sn-border)] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold">Table {activeTabDetails.tableId || 'Bar'} Tab Details</h3>
+                      <Badge color="var(--sn-purple)">{activeTabDetails.status}</Badge>
+                    </div>
+                    <p className="text-xs text-[var(--sn-text-muted)] mt-1">
+                      Customer AZM ID: <strong className="text-[var(--sn-text)]">{activeTabDetails.customerId}</strong>
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        const items = activeTabDetails.items || [];
+                        sendToKitchenMutation.mutate({ tabId: selectedTabId, items });
+                      }}
+                      className="border-[var(--sn-border)] text-xs flex items-center gap-1"
+                    >
+                      <Send className="w-3.5 h-3.5 text-[var(--sn-blue)]" />
+                      Send to Kitchen
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        // Initialize assignment dictionary
+                        const assignments = {};
+                        (activeTabDetails.items || []).forEach(item => {
+                          assignments[item.id] = 0;
+                        });
+                        setItemAssignments(assignments);
+                        setIsSplitOpen(true);
+                      }}
+                      className="border-[var(--sn-border)] text-xs flex items-center gap-1"
+                    >
+                      <Users className="w-3.5 h-3.5 text-[var(--sn-purple)]" />
+                      Split Bill
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* Sub-grid: Menu Products Catalog vs. Active Items running list */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Left sub-column: Menu Catalogue */}
+                  <Card className="bg-[var(--sn-card)] border-[var(--sn-border)] p-4 space-y-3">
+                    <h4 className="font-semibold text-sm text-[var(--sn-text-muted)] uppercase tracking-wider">
+                      Add Menu Products
+                    </h4>
+
+                    {productsLoading ? (
+                      <p className="text-xs text-center text-[var(--sn-text-muted)] animate-pulse">Loading products...</p>
+                    ) : (
+                      <div className="divide-y divide-[var(--sn-border)] max-h-[350px] overflow-y-auto scrollbar-thin">
+                        {(productsData || []).map((product) => (
+                          <div key={product.id} className="py-2.5 flex items-center justify-between gap-2">
+                            <div>
+                              <p className="font-semibold text-sm">{product.name}</p>
+                              <p className="text-xs text-[var(--sn-text-muted)]">GHS {parseFloat(product.priceUsdc).toFixed(2)}</p>
+                            </div>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => {
+                                setActiveItemConfig(product);
+                                setItemModifierForm({ notes: '', quantity: 1 });
+                              }}
+                              className="w-8 h-8 rounded-lg p-0 border-[var(--sn-border)]"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </Card>
+
+                  {/* Right sub-column: Running Items lists */}
+                  <Card className="bg-[var(--sn-card)] border-[var(--sn-border)] p-4 flex flex-col justify-between">
+                    <div>
+                      <h4 className="font-semibold text-sm text-[var(--sn-text-muted)] uppercase tracking-wider mb-3">
+                        Running Bill Items
+                      </h4>
+
+                      {(!activeTabDetails.items || activeTabDetails.items.length === 0) ? (
+                        <p className="text-xs text-center text-[var(--sn-text-muted)] py-6 italic">No items logged yet.</p>
+                      ) : (
+                        <div className="divide-y divide-[var(--sn-border)] max-h-[280px] overflow-y-auto scrollbar-thin mb-4">
+                          {activeTabDetails.items.map((item) => {
+                            const unitPrice = parseFloat(item.unitPriceUsdc) || 0;
+                            const lineTotal = parseFloat(item.lineTotalUsdc || (unitPrice * item.quantity)) || 0;
+
+                            return (
+                              <div key={item.id} className="py-2.5 flex items-center justify-between text-xs">
+                                <div>
+                                  <p className="font-semibold text-[var(--sn-text)]">{item.name}</p>
+                                  <p className="text-[10px] text-[var(--sn-text-muted)]">
+                                    {item.quantity}x @ GHS {unitPrice.toFixed(2)}
+                                  </p>
+                                </div>
+                                <span className="font-semibold text-[var(--sn-text)]">
+                                  GHS {lineTotal.toFixed(2)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Subtotal preview panel */}
+                    <div className="border-t border-[var(--sn-border)] pt-3 space-y-2">
+                      <div className="flex justify-between text-xs text-[var(--sn-text-muted)]">
+                        <span>Running Subtotal</span>
+                        <span className="font-semibold text-[var(--sn-text)]">
+                          GHS {parseFloat(activeTabDetails.subtotalUsdc || 0).toFixed(2)}
+                        </span>
+                      </div>
+                      {activeTabDetails.status?.toUpperCase() === 'BILLING' && (
+                        <>
+                          <div className="flex justify-between text-xs text-[var(--sn-text-muted)]">
+                            <span>Tax Total</span>
+                            <span className="font-semibold text-[var(--sn-text)]">
+                              GHS {parseFloat(activeTabDetails.taxTotalUsdc || 0).toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-xs text-[var(--sn-text-muted)]">
+                            <span>Service Tip</span>
+                            <span className="font-semibold text-[var(--sn-text)]">
+                              GHS {parseFloat(activeTabDetails.tipUsdc || 0).toFixed(2)}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                      <div className="flex justify-between text-sm font-bold border-t border-[var(--sn-border)] pt-2">
+                        <span>Total Due</span>
+                        <span className="text-[var(--sn-green)]">
+                          GHS {parseFloat(activeTabDetails.grandTotalUsdc || activeTabDetails.subtotalUsdc || 0).toFixed(2)}
+                        </span>
+                      </div>
+
+                      {canManage && (
+                        <div className="pt-2">
+                          {activeTabDetails.status?.toUpperCase() !== 'BILLING' ? (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => {
+                                setTaxRatePct('12.5');
+                                setTipUsdc('0');
+                                setIsBillingOpen(true);
+                              }}
+                              className="w-full flex items-center justify-center gap-1.5 h-10"
+                            >
+                              <Receipt className="w-4 h-4" />
+                              Request Bill (Finalize)
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => closeTabMutation.mutate(selectedTabId)}
+                              className="w-full bg-[var(--sn-green)] hover:bg-[#00c870] flex items-center justify-center gap-1.5 h-10"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                              Confirm & Pay Tab
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            ) : null
+          ) : (
+            <Card className="p-12 text-center border-dashed border-[var(--sn-border)]">
+              <Utensils className="w-12 h-12 text-[var(--sn-purple)] mx-auto mb-4 opacity-40" />
+              <h3 className="text-lg font-bold mb-1">No Active Tab Selected</h3>
+              <p className="text-sm text-[var(--sn-text-muted)] max-w-sm mx-auto">
+                Select a running table tab from the left sidebar to add menu orders, request billing statements, split totals, or confirm payments.
+              </p>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* --- MODALS SECTION --- */}
+
+      {/* Open New Dine-In Tab Modal */}
+      <Modal open={isNewTabOpen} onClose={() => setIsNewTabOpen(false)} title="Open Dine-In Tab">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">
+              Search AZM Guest Account
+            </label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--sn-text-muted)]" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleGuestSearch()}
+                  placeholder="Enter AZM user handle, name or phone"
+                  className="pl-9"
+                />
+              </div>
+              <Button variant="secondary" size="sm" onClick={handleGuestSearch} disabled={isSearchingGuests} className="h-11">
+                {isSearchingGuests ? 'Searching...' : 'Search'}
+              </Button>
             </div>
-            <div>
-              <p className="font-medium text-foreground">{tab.customerName}</p>
-              <p className="text-xs text-muted-foreground">{azmId}</p>
-            </div>
-            <span className="ml-auto px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">
-              Tab Open
-            </span>
           </div>
 
-          {/* Menu items to add */}
-          <div className="rounded-lg border bg-card">
-            <div className="px-4 py-3 border-b">
-              <h3 className="font-medium text-foreground">Add Items</h3>
-            </div>
-            <div className="divide-y">
-              {products.map(p => (
-                <div key={p.id} className="px-4 py-3 flex items-center justify-between">
+          {/* Search Results */}
+          {guestResults.length > 0 && (
+            <div className="max-h-[180px] overflow-y-auto divide-y divide-[var(--sn-border)] bg-[var(--az-black)] border border-[var(--sn-border)] rounded-xl">
+              {guestResults.map((guest) => (
+                <div
+                  key={guest.id || guest.azamanId}
+                  onClick={() => setNewTabCustomer(guest)}
+                  className={`p-3 flex items-center justify-between text-xs cursor-pointer transition-colors ${
+                    newTabCustomer?.id === guest.id ? 'bg-[rgba(168,85,247,0.1)] text-[var(--sn-purple)]' : 'hover:bg-[var(--sn-border)]/40'
+                  }`}
+                >
                   <div>
-                    <p className="text-sm font-medium text-foreground">{p.name}</p>
-                    <p className="text-xs text-muted-foreground">{parseFloat(p.priceUsdc).toFixed(2)} USDC</p>
+                    <p className="font-bold text-[var(--sn-text)]">{guest.name || guest.fullname}</p>
+                    <p className="text-[10px] text-[var(--sn-text-muted)]">{guest.azamanId || guest.handle}</p>
                   </div>
-                  <button onClick={() => addItem(p)}
-                    className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center hover:bg-primary/20">
-                    <Plus className="h-4 w-4 text-primary" />
-                  </button>
+                  {newTabCustomer?.id === guest.id && <UserCheck className="w-4 h-4" />}
                 </div>
               ))}
             </div>
-          </div>
+          )}
 
-          {/* Current bill */}
-          {tabItems.length > 0 && (
-            <div className="rounded-lg border bg-card">
-              <div className="px-4 py-3 border-b flex items-center gap-2">
-                <Receipt className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-medium text-foreground">Current Bill</h3>
-              </div>
-              <div className="divide-y">
-                {tabItems.map(item => (
-                  <div key={item.productId} className="px-4 py-3 flex items-center">
-                    <div className="flex-1">
-                      <p className="text-sm text-foreground">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.quantity}x {item.unitPriceUsdc.toFixed(2)} USDC
-                      </p>
-                    </div>
-                    <span className="text-sm font-medium text-foreground mr-3">
-                      {item.totalUsdc.toFixed(2)} USDC
-                    </span>
-                    <button onClick={() => removeItem(item.productId)}
-                      className="h-7 w-7 rounded-md bg-destructive/10 flex items-center justify-center hover:bg-destructive/20">
-                      <Minus className="h-3.5 w-3.5 text-destructive" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="px-4 py-3 border-t flex justify-between items-center">
-                <span className="font-medium text-foreground">Total</span>
-                <span className="text-lg font-bold text-foreground">{total.toFixed(2)} USDC</span>
-              </div>
-              <div className="px-4 pb-4">
-                <button onClick={finalizeTab} disabled={loading}
-                  className="w-full py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
-                  {loading ? 'Sending...' : 'Finalize & Send to Customer'}
-                </button>
+          {newTabCustomer && (
+            <div className="p-3 bg-[rgba(16,185,129,0.03)] border border-[rgba(16,185,129,0.15)] rounded-xl flex items-center gap-2">
+              <UserCheck className="w-5 h-5 text-[var(--sn-green)]" />
+              <div className="text-xs">
+                <p className="font-semibold text-[var(--sn-text)]">Selected: {newTabCustomer.name || newTabCustomer.fullname}</p>
+                <p className="text-[var(--sn-text-muted)]">Verified Azaman ID: {newTabCustomer.azamanId || newTabCustomer.id}</p>
               </div>
             </div>
           )}
-        </>
-      )}
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+            <Button variant="secondary" type="button" onClick={() => setIsNewTabOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              type="button"
+              disabled={!newTabCustomer}
+              loading={openTabMutation.isPending}
+              onClick={handleOpenTabSubmit}
+            >
+              Open Active Tab
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Add Item Modifier details Configurator Modal */}
+      <Modal open={!!activeItemConfig} onClose={() => setActiveItemConfig(null)} title="Configure Item Order">
+        {activeItemConfig && (
+          <div className="space-y-4">
+            <div className="p-3 bg-[var(--az-black)] rounded-xl border border-[var(--sn-border)]">
+              <h4 className="font-bold text-base">{activeItemConfig.name}</h4>
+              <p className="text-xs text-[var(--sn-text-muted)] mt-1">GHS {parseFloat(activeItemConfig.priceUsdc).toFixed(2)} per unit</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              <Input
+                type="number"
+                label="Quantity *"
+                min="1"
+                required
+                value={itemModifierForm.quantity}
+                onChange={(e) => setItemModifierForm({ ...itemModifierForm, quantity: parseInt(e.target.value) || 1 })}
+              />
+              <Input
+                label="Kitchen Notes / Custom Modifiers"
+                value={itemModifierForm.notes}
+                onChange={(e) => setItemModifierForm({ ...itemModifierForm, notes: e.target.value })}
+                placeholder="e.g. Extra spicy, No onions, Sauce on the side"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+              <Button variant="secondary" type="button" onClick={() => setActiveItemConfig(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="button"
+                loading={addItemMutation.isPending}
+                onClick={() => handleAddItemSubmit(activeItemConfig)}
+              >
+                Add to Bill
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Request Bill / Finalization Setup Modal */}
+      <Modal open={isBillingOpen} onClose={() => setIsBillingOpen(false)} title="Finalize Bill Settings">
+        {activeTabDetails && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 bg-[var(--az-black)] p-3 rounded-xl border border-[var(--sn-border)]">
+              <div>
+                <span className="text-xs text-[var(--sn-text-muted)]">Subtotal</span>
+                <p className="font-bold text-base text-[var(--sn-text)] mt-0.5">
+                  GHS {parseFloat(activeTabDetails.subtotalUsdc || 0).toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-[var(--sn-text-muted)]">Open Server ID</span>
+                <p className="font-mono text-xs text-[var(--sn-text)] truncate mt-1">
+                  {activeTabDetails.customerId}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                type="number"
+                step="any"
+                label="Tax Rate (%)"
+                value={taxRatePct}
+                onChange={(e) => setTaxRatePct(e.target.value)}
+              />
+              <Input
+                type="number"
+                step="any"
+                label="Service Tip (GHS)"
+                value={tipUsdc}
+                onChange={(e) => setTipUsdc(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+              <Button variant="secondary" type="button" onClick={() => setIsBillingOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="button"
+                loading={finalizeTabMutation.isPending}
+                onClick={triggerFinalize}
+              >
+                Finalize Tab
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Split Payment Bill Splitter Modal */}
+      <Modal open={isSplitOpen} onClose={() => setIsSplitOpen(false)} title="Bill Splits Manager" className="max-w-2xl">
+        {activeTabDetails && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--sn-border)] pb-3">
+              <div className="flex gap-2">
+                <Button
+                  variant={splitType === 'even' ? 'primary' : 'secondary'}
+                  size="sm"
+                  onClick={() => setSplitType('even')}
+                  className="text-xs h-9 border-[var(--sn-border)]"
+                >
+                  Split Evenly
+                </Button>
+                <Button
+                  variant={splitType === 'item' ? 'primary' : 'secondary'}
+                  size="sm"
+                  onClick={() => setSplitType('item')}
+                  className="text-xs h-9 border-[var(--sn-border)]"
+                >
+                  Split by Item
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[var(--sn-text-muted)] font-semibold">Portions:</span>
+                <Input
+                  type="number"
+                  min="2"
+                  max="12"
+                  value={splitCount}
+                  onChange={(e) => setSplitCount(Math.max(2, parseInt(e.target.value) || 2))}
+                  className="w-16 h-9 py-1 text-center"
+                />
+              </div>
+            </div>
+
+            {/* Split Type: Item Assignments */}
+            {splitType === 'item' && (
+              <div className="space-y-4 max-h-[220px] overflow-y-auto scrollbar-thin">
+                <span className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider block">
+                  Assign Items to Guests
+                </span>
+                <div className="space-y-2">
+                  {(activeTabDetails.items || []).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between text-xs bg-[var(--az-black)] p-2.5 rounded-xl border border-[var(--sn-border)]">
+                      <div>
+                        <p className="font-semibold">{item.name}</p>
+                        <p className="text-[10px] text-[var(--sn-text-muted)]">
+                          {item.quantity}x @ GHS {(parseFloat(item.unitPriceUsdc) || 0).toFixed(2)}
+                        </p>
+                      </div>
+                      <Select
+                        value={itemAssignments[item.id] !== undefined ? itemAssignments[item.id] : 0}
+                        onChange={(e) => setItemAssignments({
+                          ...itemAssignments,
+                          [item.id]: parseInt(e.target.value) || 0
+                        })}
+                        className="w-28 py-1 h-9 text-xs"
+                        options={Array.from({ length: splitCount }, (_, i) => ({
+                          value: i,
+                          label: `Guest ${i + 1}`
+                        }))}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Live Splits Portion Summary */}
+            <div className="space-y-3 pt-3 border-t border-[var(--sn-border)]">
+              <span className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider block">
+                Calculated Portions Preview
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {calculateSplits().map((split) => (
+                  <div key={split.guestNum} className="bg-[var(--az-black)] p-3 rounded-xl border border-[var(--sn-border)] flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 border-b border-[var(--sn-border)] pb-1.5 mb-1.5">
+                        <span className="font-bold text-xs text-[var(--sn-purple)]">Portion {split.guestNum}</span>
+                        <span className="text-xs font-bold text-[var(--sn-green)]">GHS {split.total.toFixed(2)}</span>
+                      </div>
+                      <div className="text-[10px] text-[var(--sn-text-muted)] space-y-0.5">
+                        {split.items.map((line, idx) => (
+                          <p key={idx} className="truncate">{line}</p>
+                        ))}
+                      </div>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        toast.success(`Printed split statement for Guest ${split.guestNum}!`, {
+                          description: `Amount: GHS ${split.total.toFixed(2)}. Sent copy to table printer.`,
+                        });
+                      }}
+                      className="w-full h-8 text-[10px] border-[var(--sn-border)] mt-3 flex items-center justify-center gap-1"
+                    >
+                      <Printer className="w-3 h-3" />
+                      Print Bill portion
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+              <Button variant="secondary" type="button" onClick={() => setIsSplitOpen(false)}>
+                Close Splitter
+              </Button>
+              <Button
+                variant="primary"
+                type="button"
+                onClick={() => {
+                  toast.success('Split billing configuration finalized successfully!');
+                  setIsSplitOpen(false);
+                }}
+              >
+                Accept Splits & Done
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

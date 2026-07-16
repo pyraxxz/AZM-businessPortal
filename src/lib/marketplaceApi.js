@@ -340,6 +340,25 @@ export const restaurantOpsApi = {
   // 86'd Items
   get86edItems: () => request('/api/business-os/restaurant/86ed-items'),
   toggle86: (data) => request('/api/business-os/restaurant/toggle-86', { method: 'POST', body: JSON.stringify(data) }),
+
+  // ── Waitlist (Module 04) ────────────────────────────────────────────────
+  getWaitlist: (status) => {
+    const qs = status ? `?status=${status}` : '';
+    return request(`/api/business-os/restaurant/waitlist${qs}`);
+  },
+  addWaitlist: (data) => request('/api/business-os/restaurant/waitlist', { method: 'POST', body: JSON.stringify(data) }),
+  updateWaitlist: (id, data) => request(`/api/business-os/restaurant/waitlist/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  removeWaitlist: (id) => request(`/api/business-os/restaurant/waitlist/${id}`, { method: 'DELETE' }),
+
+  // ── Table metadata / floor plan (Module 04) ───────────────────────────
+  updateTableMetadata: (tableId, metadata) => request(`/api/business-os/restaurant/tables/${tableId}/metadata`, { method: 'PATCH', body: JSON.stringify({ metadata }) }),
+
+  // ── Catalog sections (Module 04) ──────────────────────────────────────
+  getSections: () => request('/api/business/catalog/sections'),
+  createSection: (data) => request('/api/business/catalog/sections', { method: 'POST', body: JSON.stringify(data) }),
+  updateSection: (id, data) => request(`/api/business/catalog/sections/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteSection: (id) => request(`/api/business/catalog/sections/${id}`, { method: 'DELETE' }),
+  reorderSections: (orderedIds) => request('/api/business-os/restaurant/sections/reorder', { method: 'PATCH', body: JSON.stringify({ orderedIds }) }),
 };
 
 export const transitOpsApi = {
