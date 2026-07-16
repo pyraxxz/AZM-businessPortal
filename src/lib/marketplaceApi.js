@@ -298,6 +298,22 @@ export const hotelOpsApi = {
   arrivals: (date) => hotelOpsApi.getFrontDesk({ type: 'arrivals', date }),
   departures: (date) => hotelOpsApi.getFrontDesk({ type: 'departures', date }),
   inHouse: () => hotelOpsApi.getFrontDesk({ type: 'inhouse' }),
+
+  // Rate Calendar
+  getRateCalendar: (days = 14) => request(`/api/business-os/hotel/rate-calendar?days=${days}`),
+  upsertRateOverride: (data) => request('/api/business-os/hotel/rate-calendar', { method: 'POST', body: JSON.stringify(data) }),
+  deleteRateOverride: (id) => request(`/api/business-os/hotel/rate-calendar/${id}`, { method: 'DELETE' }),
+  // Room Block
+  blockRoom: (roomId, data) => request(`/api/business-os/hotel/rooms/${roomId}/block`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteRoomBlock: (blockId) => request(`/api/business-os/hotel/rooms/block/${blockId}`, { method: 'DELETE' }),
+  // Room CRUD
+  updateRoom: (id, data) => request(`/api/business-os/hotel/rooms/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  bulkCreateRooms: (data) => request('/api/business-os/hotel/rooms/bulk', { method: 'POST', body: JSON.stringify(data) }),
+  // Front Desk extended
+  walkIn: (data) => request('/api/business-os/hotel/front-desk/walk-in', { method: 'POST', body: JSON.stringify(data) }),
+  moveRoom: (reservationId, data) => request(`/api/business-os/hotel/front-desk/${reservationId}/move-room`, { method: 'POST', body: JSON.stringify(data) }),
+  // Housekeeping create
+  createTask: (data) => request('/api/business-os/hotel/housekeeping', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export const restaurantOpsApi = {
