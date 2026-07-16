@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { locations as locApi } from '@/lib/api';
+import { locations as locApi, businessOS } from '@/lib/api';
 import { uploadImageToCloudinary, isCloudinaryConfigured, validateImageFile } from '@/lib/cloudinary';
 import { Card, Button, Input, Badge, Empty, Skeleton, Modal } from '@/components/ui';
-import { MapPin, Plus, Pencil, Trash2, Clock, ChevronDown, ChevronUp, Image } from 'lucide-react';
+import { MapPin, Plus, Pencil, Trash2, Clock, ChevronDown, ChevronUp, Image, CalendarDays, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const DAYS = ["mon","tue","wed","thu","fri","sat","sun"];
@@ -230,6 +230,138 @@ export default function Locations() {
   );
 }
 
+
+// ── Holiday / Exception Hours sub-component ──────────────────────────────────
+// Shows existing exceptions for a location, lets you add new ones, and delete.
+function HolidayHours({ locId }) {
+  const qc = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
+  const [newExc, setNewExc] = useState({ date: '', isClosed: false, openTime: '09:00', closeTime: '17:00', note: '' });
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['hours-exceptions', locId],
+    queryFn: () => businessOS.getHoursExceptions(locId),
+  });
+  const exceptions = data?.exceptions || [];
+
+  const addMut = useMutation({
+    mutationFn: (data) => businessOS.addHoursException(locId, data),
+    onSuccess: () => {
+      toast.success('Exception added');
+      qc.invalidateQueries(['hours-exceptions', locId]);
+      setNewExc({ date: '', isClosed: false, openTime: '09:00', closeTime: '17:00', note: '' });
+      setShowForm(false);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const delMut = useMutation({
+    mutationFn: (excId) => businessOS.deleteHoursException(locId, excId),
+    onSuccess: () => {
+      toast.success('Exception removed');
+      qc.invalidateQueries(['hours-exceptions', locId]);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wide">
+          Holiday / Exception Hours
+        </span>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="text-xs text-[var(--sn-purple)] hover:underline"
+        >
+          {showForm ? 'Cancel' : '+ Add Exception'}
+        </button>
+      </div>
+
+      {/* Existing exceptions */}
+      {isLoading ? (
+        <p className="text-xs text-[var(--sn-text-muted)]">Loading...</p>
+      ) : exceptions.length === 0 ? (
+        <p className="text-xs text-[var(--sn-text-muted)]">No holiday exceptions set.</p>
+      ) : (
+        <div className="space-y-1.5">
+          {exceptions.map(exc => (
+            <div key={exc.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--az-black)] border border-[var(--sn-border)] text-xs">
+              <CalendarDays className="w-3.5 h-3.5 text-[var(--sn-purple)] flex-shrink-0" />
+              <span className="text-[var(--sn-text)] font-medium">
+                {new Date(exc.date).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
+              {exc.isClosed ? (
+                <Badge color="var(--sn-red)" className="text-xs">Closed</Badge>
+              ) : (
+                <span className="text-[var(--sn-text-muted)]">{exc.openTime} – {exc.closeTime}</span>
+              )}
+              {exc.note && <span className="text-[var(--sn-text-muted)] truncate">· {exc.note}</span>}
+              <button
+                onClick={() => delMut.mutate(exc.id)}
+                className="ml-auto text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add exception form */}
+      {showForm && (
+        <div className="space-y-2 p-3 rounded-lg border border-[var(--sn-border)] bg-[var(--sn-card)]">
+          <input
+            type="date"
+            value={newExc.date}
+            onChange={e => setNewExc({ ...newExc, date: e.target.value })}
+            className="w-full bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-3 py-2 text-xs text-[var(--sn-text)] outline-none focus:border-[var(--sn-purple)]"
+          />
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 cursor-pointer text-xs text-[var(--sn-text)]">
+              <input
+                type="checkbox"
+                checked={newExc.isClosed}
+                onChange={e => setNewExc({ ...newExc, isClosed: e.target.checked })}
+                className="accent-[var(--sn-purple)]"
+              />
+              Closed all day
+            </label>
+            {!newExc.isClosed && (
+              <div className="flex items-center gap-2">
+                <input type="time" value={newExc.openTime}
+                  onChange={e => setNewExc({ ...newExc, openTime: e.target.value })}
+                  className="bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-2 py-1 text-xs text-[var(--sn-text)]" />
+                <span className="text-xs text-[var(--sn-text-muted)]">to</span>
+                <input type="time" value={newExc.closeTime}
+                  onChange={e => setNewExc({ ...newExc, closeTime: e.target.value })}
+                  className="bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-2 py-1 text-xs text-[var(--sn-text)]" />
+              </div>
+            )}
+          </div>
+          <input
+            type="text"
+            placeholder="Note (e.g. Christmas Eve — half day)"
+            value={newExc.note}
+            onChange={e => setNewExc({ ...newExc, note: e.target.value })}
+            className="w-full bg-[var(--az-black)] border border-[var(--sn-border)] rounded-lg px-3 py-2 text-xs text-[var(--sn-text)] placeholder:text-[var(--sn-text-muted)] outline-none focus:border-[var(--sn-purple)]"
+          />
+          <Button
+            size="sm"
+            onClick={() => {
+              if (!newExc.date) { toast.error('Date is required'); return; }
+              addMut.mutate(newExc);
+            }}
+            loading={addMut.isPending}
+            className="w-full"
+          >
+            <Plus className="w-3.5 h-3.5" /> Save Exception
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
 function LocationCard({ loc, onEdit, onDelete, expandedTables, setExpandedTables, newTableLabel, setNewTableLabel, createTableMut }) {
   const qc = useQueryClient();
   const expanded = !!expandedTables[loc.id];
@@ -306,6 +438,13 @@ function LocationCard({ loc, onEdit, onDelete, expandedTables, setExpandedTables
       </div>
 
       {/* Tables sub-panel */}
+      {/* Holiday / Exception Hours */}
+      {expanded && (
+        <div className="mt-1 pt-3 border-t border-[var(--sn-border)]">
+          <HolidayHours locId={loc.id} />
+        </div>
+      )}
+
       {expanded && (
         <div className="mt-1 pt-3 border-t border-[var(--sn-border)] space-y-2">
           {tables.length === 0 ? (

@@ -15,7 +15,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { usePermission } from '@/hooks/usePermission';
 import { Card, Button, Input, Textarea, Badge, Switch, Tabs } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
-import { Building2, Save, Eye, BadgeCheck, QrCode, Wallet, ImagePlus, Palette, Shield, Bell, History, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Building2, Save, Eye, BadgeCheck, QrCode, Wallet, ImagePlus, Palette, Shield, Bell, History, AlertTriangle, CheckCircle2, Users } from 'lucide-react';
 import { uploadImageToCloudinary, isCloudinaryConfigured, validateImageFile } from '@/lib/cloudinary';
 import { toast } from 'sonner';
 import PublicProfilePreview from '@/components/PublicProfilePreview';
@@ -24,6 +24,8 @@ import RolesPermissions from '@/pages/settings/RolesPermissions';
 import NotificationPrefs from '@/pages/settings/NotificationPrefs';
 import ActivityLog from '@/pages/settings/ActivityLog';
 import DangerZone from '@/pages/settings/DangerZone';
+import TeamAccess from '@/pages/settings/TeamAccess';
+import BusinessMeta from '@/pages/settings/BusinessMeta';
 
 const CATEGORIES = [
   { value: 'LOGISTICS',          label: 'Transit & Transport' },
@@ -50,6 +52,7 @@ export default function Settings() {
     businessName: '', description: '', website: '', phoneNumber: '',
     contactEmail: '', address: '', country: '', category: '',
     logoUrl: '', coverPhotoUrl: '', adAccentColor: '',
+    businessMeta: {},
   });
   const [showPreview, setShowPreview] = useState(false);
 
@@ -67,6 +70,7 @@ export default function Settings() {
         logoUrl:       bizProfile.logoUrl      || '',
         coverPhotoUrl: bizProfile.coverPhotoUrl || '',
         adAccentColor: bizProfile.adAccentColor || '',
+        businessMeta: bizProfile.businessMeta || {},
       });
     }
   }, [bizProfile]);
@@ -93,6 +97,7 @@ export default function Settings() {
       logoUrl:      form.logoUrl,
       coverPhotoUrl: form.coverPhotoUrl,
       adAccentColor: form.adAccentColor || null,
+      businessMeta: form.businessMeta,
     });
   };
 
@@ -207,6 +212,14 @@ export default function Settings() {
         </div>
       </Card>
 
+      {/* Category-specific fields */}
+      <BusinessMeta
+        meta={form.businessMeta}
+        setMeta={(m) => setForm({ ...form, businessMeta: m })}
+        category={form.category}
+        canManage={canManage}
+      />
+
       {/* Save + Preview buttons */}
       <div className="flex items-center gap-3 justify-end">
         <Button variant="ghost" onClick={() => setShowPreview(!showPreview)}>
@@ -247,6 +260,7 @@ export default function Settings() {
   const tabs = [
     { label: 'Profile', icon: Building2, content: profileContent },
     { label: 'Roles & Permissions', icon: Shield, content: <RolesPermissions /> },
+    { label: "Team Access", icon: Users, content: <TeamAccess /> },
     { label: 'Notifications', icon: Bell, content: <NotificationPrefs /> },
     { label: 'Activity Log', icon: History, content: <ActivityLog /> },
     { label: 'Danger Zone', icon: AlertTriangle, content: <DangerZone /> },
