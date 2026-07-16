@@ -13,7 +13,8 @@ import {
   LayoutDashboard, Package, ShoppingBag, Receipt, Settings, Bell, LogOut,
   ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight, MapPin, Bus, UtensilsCrossed,
   Building2, Briefcase, Store, CalendarCheck, QrCode, BedDouble, FileCheck,
-  AlertCircle, CheckCircle2, Users, Wallet, Megaphone, Image as ImageIcon,
+  AlertCircle, CheckCircle2, Users, CalendarDays, Wallet,
+  Megaphone, Image as ImageIcon,
   Grid3x3, Star, Utensils, Smartphone, Search, LayoutGrid, Wrench, LineChart,
   Sparkles, ConciergeBell, ChefHat, LayoutDashboard as TableIcon, CarFront, ShipWheel, FileSpreadsheet,
 } from 'lucide-react';
@@ -34,6 +35,9 @@ const COMMERCE_NAV = [
   { label: 'Invoices',  icon: Receipt,     to: '/invoices' },
   { label: 'Locations', icon: MapPin,      to: '/locations' },
   { label: 'Employees', icon: Users,       to: '/employees' },
+  { label: 'Scheduling',  icon: CalendarDays, to: '/scheduling' },
+  { label: 'Payroll',     icon: Wallet,       to: '/payroll' },
+  { label: 'Time Off',    icon: CalendarCheck, to: '/time-off' },
   { label: 'Finance',   icon: LineChart,   to: '/finance' },
 ];
 

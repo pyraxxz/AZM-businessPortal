@@ -134,14 +134,123 @@ export const marketplaceApi = {
 // ── Employee Management ──────────────────────────────────────────────────
 // All endpoints are under /api/business-os/ and use the request() function already imported at top of file
 
+// ── Workforce API ────────────────────────────────────────────────────────────
 export const employeeApi = {
+  // Employee CRUD
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/employees${qs ? `?${qs}` : ''}`);
+  },
   getEmployees: () => request('/api/business-os/employees'),
+  getEmployee: (id) => request(`/api/business-os/employees/${id}`),
   addEmployee: (data) => request('/api/business-os/employees', { method: 'POST', body: JSON.stringify(data) }),
+  create: (data) => request('/api/business-os/employees', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => request(`/api/business-os/employees/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  terminate: (id, reason) => request(`/api/business-os/employees/${id}/terminate`, { method: 'POST', body: JSON.stringify({ reason }) }),
   terminateEmployee: (id, reason) => request(`/api/business-os/employees/${id}/terminate`, { method: 'POST', body: JSON.stringify({ reason }) }),
-  getShifts: (start, end) => request(`/api/business-os/shifts?startDate=${start}&endDate=${end}`),
-  createShift: (data) => request('/api/business-os/shifts', { method: 'POST', body: JSON.stringify(data) }),
+  remove: (id) => request(`/api/business-os/employees/${id}`, { method: 'DELETE' }),
+  updatePermissions: (id, permissions) => request(`/api/business-os/employees/${id}/permissions`, { method: 'POST', body: JSON.stringify({ permissions }) }),
+  // Self-service (employee's own data)
+  me: () => request('/api/business-os/employees/me'),
+  dashboard: () => request('/api/business-os/employees/my-dashboard'),
+  myShifts: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/employees/my-shifts${qs ? `?${qs}` : ''}`);
+  },
+  getShifts: (params = {}) => {
+    if (typeof params === 'string') return request(`/api/business-os/employees/my-shifts?week=${params}`);
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/employees/my-shifts${qs ? `?${qs}` : ''}`);
+  },
+  myTeam: () => request('/api/business-os/employees/my-team'),
+  myPayroll: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/employees/my-payroll${qs ? `?${qs}` : ''}`);
+  },
+  myEarnings: () => request('/api/business-os/employees/my-earnings'),
+  ewaRequest: (data) => request('/api/business-os/employees/my-ewa-request', { method: 'POST', body: JSON.stringify(data) }),
+  myFeedback: () => request('/api/business-os/employees/my-feedback'),
+  // Open shifts for swap
+  openShifts: () => request('/api/business-os/employees/shifts/open'),
+  clockIn: (shiftId) => request(`/api/business-os/employees/shifts/${shiftId}/clock-in`, { method: 'POST' }),
+  clockOut: (shiftId) => request(`/api/business-os/employees/shifts/${shiftId}/clock-out`, { method: 'POST' }),
+  requestSwap: (shiftId, data) => request(`/api/business-os/employees/shifts/${shiftId}/request-swap`, { method: 'POST', body: JSON.stringify(data) }),
+  swapRequests: () => request('/api/business-os/shifts/swaps'),
+  claimSwap: (id) => request(`/api/business-os/shifts/swaps/${id}/claim`, { method: 'POST' }),
+  // Time-off (self)
   requestTimeOff: (data) => request('/api/business-os/time-off', { method: 'POST', body: JSON.stringify(data) }),
+  timeOff: () => request('/api/business-os/employees/my-time-off'),
+  myTimeOff: () => request('/api/business-os/time-off/my-requests'),
+};
+
+export const shiftApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/shifts${qs ? `?${qs}` : ''}`);
+  },
+  getShifts: (params = {}) => shiftApi.list(params),
+  create: (data) => request('/api/business-os/shifts', { method: 'POST', body: JSON.stringify(data) }),
+  createShift: (data) => request('/api/business-os/shifts', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => request(`/api/business-os/shifts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove: (id) => request(`/api/business-os/shifts/${id}`, { method: 'DELETE' }),
+  clockIn: (id) => request(`/api/business-os/shifts/${id}/clock-in`, { method: 'POST' }),
+  clockOut: (id) => request(`/api/business-os/shifts/${id}/clock-out`, { method: 'POST' }),
+  markNoShow: (id) => request(`/api/business-os/shifts/${id}/no-show`, { method: 'POST' }),
+  teamOnDuty: () => request('/api/business-os/shifts/team/on-duty'),
+  teamUpcoming: () => request('/api/business-os/shifts/team/upcoming'),
+  mySchedule: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/shifts/my-schedule${qs ? `?${qs}` : ''}`);
+  },
+  createRotation: (data) => request('/api/business-os/shifts/rotation', { method: 'POST', body: JSON.stringify(data) }),
+  // Swaps
+  createSwap: (data) => request('/api/business-os/shifts/swaps', { method: 'POST', body: JSON.stringify(data) }),
+  claimSwap: (id) => request(`/api/business-os/shifts/swaps/${id}/claim`, { method: 'POST' }),
+  approveSwap: (id) => request(`/api/business-os/shifts/swaps/${id}/approve`, { method: 'POST' }),
+  rejectSwap: (id, note) => request(`/api/business-os/shifts/swaps/${id}/reject`, { method: 'POST', body: JSON.stringify({ managerNote: note }) }),
+  listSwaps: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/shifts/swaps${qs ? `?${qs}` : ''}`);
+  },
+};
+
+export const timeOffApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/time-off${qs ? `?${qs}` : ''}`);
+  },
+  create: (data) => request('/api/business-os/time-off', { method: 'POST', body: JSON.stringify(data) }),
+  approve: (id) => request(`/api/business-os/time-off/${id}/approve`, { method: 'POST' }),
+  reject: (id, note) => request(`/api/business-os/time-off/${id}/reject`, { method: 'POST', body: JSON.stringify({ managerNote: note }) }),
+  myRequests: () => request('/api/business-os/time-off/my-requests'),
+};
+
+export const payrollApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/payroll${qs ? `?${qs}` : ''}`);
+  },
+  summary: (period) => request(`/api/business-os/payroll/summary${period ? `?period=${period}` : ''}`),
+  process: (data) => request('/api/business-os/payroll/process', { method: 'POST', body: JSON.stringify(data) }),
   processPayroll: (data) => request('/api/business-os/payroll/process', { method: 'POST', body: JSON.stringify(data) }),
+  disburse: (data) => request('/api/business-os/payroll/disburse', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+export const ewaApi = {
+  eligibility: (employeeId) => request(`/api/business-os/ewa/eligibility/${employeeId}`),
+  withdraw: (data) => request('/api/business-os/ewa/withdraw', { method: 'POST', body: JSON.stringify(data) }),
+  history: (employeeId) => request(`/api/business-os/ewa/history/${employeeId}`),
+  summary: () => request('/api/business-os/ewa/summary'),
+};
+
+export const feedbackApi = {
+  list: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/feedback${qs ? `?${qs}` : ''}`);
+  },
+  give: (data) => request('/api/business-os/feedback', { method: 'POST', body: JSON.stringify(data) }),
+  forEmployee: (employeeId) => request(`/api/business-os/feedback/for/${employeeId}`),
+  byEmployee: (employeeId) => request(`/api/business-os/feedback/by/${employeeId}`),
 };
 
 export const financeApi = {
