@@ -109,3 +109,48 @@ export const kyb = {
   submit: (documents) =>
     request('/api/business/kyb/submit', { method: 'POST', body: JSON.stringify({ documents }) }),
 };
+
+// ── Business OS (Governance, Workforce, Operations) ──────────────────────────
+// All endpoints are mounted under /api/business-os/
+export const businessOS = {
+  // Permission Templates
+  getPermissionTemplates: () => request('/api/business-os/permission-templates'),
+  savePermissionTemplate: (data) =>
+    request('/api/business-os/permission-templates', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Audit Log
+  getAuditLog: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/audit-log${qs ? `?${qs}` : ''}`);
+  },
+
+  // Notification Preferences
+  getNotificationPrefs: () => request('/api/business-os/notification-preferences'),
+  updateNotificationPrefs: (preferences) =>
+    request('/api/business-os/notification-preferences', { method: 'PATCH', body: JSON.stringify({ preferences }) }),
+
+  // Location Hours Exceptions
+  getHoursExceptions: (locationId) => request(`/api/business-os/locations/${locationId}/hours-exceptions`),
+  addHoursException: (locationId, data) =>
+    request(`/api/business-os/locations/${locationId}/hours-exceptions`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteHoursException: (locationId, exceptionId) =>
+    request(`/api/business-os/locations/${locationId}/hours-exceptions/${exceptionId}`, { method: 'DELETE' }),
+
+  // Business Pause
+  togglePause: (paused) =>
+    request('/api/business-os/pause', { method: 'PATCH', body: JSON.stringify({ paused }) }),
+};
+
+// ── Employees (Business OS) ──────────────────────────────────────────────────
+export const businessOSEmployees = {
+  me:         ()    => request('/api/business-os/employees/me'),
+  list:       (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/employees${qs ? `?${qs}` : ''}`);
+  },
+  create:     (data) => request('/api/business-os/employees', { method: 'POST', body: JSON.stringify(data) }),
+  update:     (id, data) => request(`/api/business-os/employees/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove:     (id) => request(`/api/business-os/employees/${id}`, { method: 'DELETE' }),
+  setPermissions: (id, permissions) =>
+    request(`/api/business-os/employees/${id}/permissions`, { method: 'POST', body: JSON.stringify({ permissions }) }),
+};
