@@ -26,6 +26,9 @@ import Marketing from '@/pages/Marketing';
 import FinanceV2 from '@/pages/FinanceV2';
 import Showcase from '@/pages/Showcase';
 import Employees from '@/pages/employees/Employees';
+import Scheduling from '@/pages/employees/Scheduling';
+import Payroll from '@/pages/employees/Payroll';
+import TimeOff from '@/pages/employees/TimeOff';
 import HotelRooms from '@/pages/HotelRooms';
 import HotelHousekeeping from '@/pages/HotelHousekeeping';
 import HotelFrontDesk from '@/pages/HotelFrontDesk';
@@ -100,6 +103,9 @@ function AppRoutes() {
         <Route path="/seat-map"             element={<Navigate to="/transit" replace />} />
         <Route path="/showcase"             element={<Showcase />} />
         <Route path="/employees"            element={<Employees />} />
+        <Route path="/scheduling"         element={<Scheduling />} />
+        <Route path="/payroll"            element={<Payroll />} />
+        <Route path="/time-off"           element={<TimeOff />} />
         <Route path="/hotel-rooms"          element={<HotelRooms />} />
         <Route path="/hotel-housekeeping"   element={<HotelHousekeeping />} />
         <Route path="/hotel-front-desk"     element={<HotelFrontDesk />} />
