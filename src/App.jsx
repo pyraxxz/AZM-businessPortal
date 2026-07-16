@@ -37,6 +37,7 @@ import RestaurantTables from '@/pages/RestaurantTables';
 import TransitFleet from '@/pages/TransitFleet';
 import TransitDrivers from '@/pages/TransitDrivers';
 import TransitManifests from '@/pages/TransitManifests';
+import TransitCargo from '@/pages/TransitCargo';
 import RestaurantInventory from '@/pages/RestaurantInventory';
 
 const qc = new QueryClient({
@@ -114,6 +115,7 @@ function AppRoutes() {
         <Route path="/transit-fleet"        element={<TransitFleet />} />
         <Route path="/transit-drivers"      element={<TransitDrivers />} />
         <Route path="/transit-manifests"    element={<TransitManifests />} />
+        <Route path="/transit-cargo"         element={<TransitCargo />} />
         <Route path="/restaurant-inventory" element={<RestaurantInventory />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />

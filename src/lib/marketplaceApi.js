@@ -399,6 +399,18 @@ export const transitOpsApi = {
 
   // Routes — use transit trips endpoint
   routes: () => request('/api/business/transit/trips'),
+
+  // Module 05: Route Templates
+  routeTemplates: () => request('/api/business-os/transit/routes'),
+  createRouteTemplate: (data) => request('/api/business-os/transit/routes', { method: 'POST', body: JSON.stringify(data) }),
+  deleteRouteTemplate: (id) => request(`/api/business-os/transit/routes/${id}`, { method: 'DELETE' }),
+  generateTrips: (data) => request('/api/business-os/transit/routes/generate-trips', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Module 05: Trip Cancel
+  cancelTrip: (tripId) => request(`/api/business-os/transit/trips/${tripId}/cancel`, { method: 'POST', body: JSON.stringify({}) }),
+
+  // Module 05: Maintenance Overdue
+  maintenanceOverdue: () => request('/api/business-os/transit/maintenance/overdue'),
 };
 
 
@@ -412,6 +424,9 @@ export const cargoApi = {
   updateStatus: (id, status) => request(`/api/business-os/transit/cargo/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   remove: (id) => request(`/api/business-os/transit/cargo/${id}`, { method: 'DELETE' }),
   reassign: (data) => request('/api/business-os/transit/irops/reassign', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Module 05: Proof of Delivery
+  attachProof: (id, url) => request(`/api/business-os/transit/cargo/${id}/proof`, { method: 'PATCH', body: JSON.stringify({ proofOfDeliveryUrl: url }) }),
 };
 
 // ── Restaurant: Inventory & Recipes ────────────────────────────────────────────
