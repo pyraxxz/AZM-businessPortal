@@ -23,6 +23,7 @@ import { getTypeConfig } from '@/lib/businessTypes';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { motion } from 'framer-motion';
+import OnboardingChecklist from '@/components/ui/OnboardingChecklist';
 import {
   ShoppingBag, TrendingUp, Clock, CheckCircle2,
   AlertTriangle, ArrowRight, Package, FileCheck,
@@ -228,6 +229,7 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-6 space-y-6 animate-fade-in">
+        <OnboardingChecklist />
       {/* Employee Summary Widget with motion stagger */}
       <motion.div 
         variants={containerVariants}

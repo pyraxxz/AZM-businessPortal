@@ -41,6 +41,7 @@ import TransitCargo from '@/pages/TransitCargo';
 import RestaurantInventory from '@/pages/RestaurantInventory';
 import Messages from '@/pages/Messages';
 import { AppBackground } from '@/components/AppBackground';
+import Analytics from '@/pages/Analytics';
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -120,6 +121,7 @@ function AppRoutes() {
         <Route path="/transit-manifests"    element={<TransitManifests />} />
         <Route path="/transit-cargo"         element={<TransitCargo />} />
         <Route path="/restaurant-inventory" element={<RestaurantInventory />} />
+        <Route path="/analytics"            element={<Analytics />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
