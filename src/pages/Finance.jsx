@@ -994,27 +994,27 @@ function DashboardSkeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-32 rounded-2xl border border-[var(--az-border)] sn-shimmer" />
+          <div key={i} className="h-32 rounded-2xl border border-[var(--az-border)] skeleton-sentry" />
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="h-64 rounded-2xl border border-[var(--az-border)] sn-shimmer" />
-        <div className="h-64 rounded-2xl border border-[var(--az-border)] sn-shimmer" />
+        <div className="h-64 rounded-2xl border border-[var(--az-border)] skeleton-sentry" />
+        <div className="h-64 rounded-2xl border border-[var(--az-border)] skeleton-sentry" />
       </div>
     </div>
   );
 }
 
 function PnLSkeleton() {
-  return <div className="h-96 rounded-2xl border border-[var(--az-border)] sn-shimmer" />;
+  return <div className="h-96 rounded-2xl border border-[var(--az-border)] skeleton-sentry" />;
 }
 
 function ExpensesSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="h-10 w-48 rounded-lg sn-shimmer" />
-      <div className="h-64 rounded-2xl border border-[var(--az-border)] sn-shimmer" />
-      <div className="h-32 rounded-2xl border border-[var(--az-border)] sn-shimmer" />
+      <div className="h-10 w-48 rounded-lg skeleton-sentry" />
+      <div className="h-64 rounded-2xl border border-[var(--az-border)] skeleton-sentry" />
+      <div className="h-32 rounded-2xl border border-[var(--az-border)] skeleton-sentry" />
     </div>
   );
 }
@@ -1023,7 +1023,7 @@ function PayrollSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-28 rounded-2xl border border-[var(--az-border)] sn-shimmer" />
+        <div key={i} className="h-28 rounded-2xl border border-[var(--az-border)] skeleton-sentry" />
       ))}
     </div>
   );

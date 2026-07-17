@@ -151,17 +151,17 @@ export default function App() {
               <AppRoutes />
             </Router>
             <Toaster 
-              richColors 
+              expanded 
               position="top-center" 
               expand={true}
               toastOptions={{
                 className: 'sentry-toast',
                 style: {
-                  background: 'var(--sn-card)',
-                  border: '1px solid var(--sn-border)',
-                  color: 'var(--sn-text-primary)',
+                  background: 'var(--az-surface-solid)',
+                  border: '1px solid var(--az-border)',
+                  color: 'var(--az-text)',
                   backdropFilter: 'blur(12px)',
-                  boxShadow: 'var(--sn-shadow)',
+                  boxShadow: '0 4px 20px rgba(17,17,17,0.08)',
                 },
               }}
             />

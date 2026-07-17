@@ -5,10 +5,10 @@
 
 @layer base {
   :root {
-    /* ── Phase 2 Design System: Light liquid glass aesthetic (DEFAULT) ── */
+    /* ── Phase 3 Design System: Light liquid glass aesthetic (DEFAULT) ── */
     --az-bg:            #F7F5F2;
     --az-bg-alt:        #FBFAF8;
-    --az-surface:       #FFFFFF;
+    --az-surface:       rgba(255, 255, 255, 0.72);
     --az-surface-solid: #FFFFFF;
     --az-border:        rgba(17, 17, 17, 0.08);
     --az-border-strong: rgba(17, 17, 17, 0.14);
@@ -29,40 +29,12 @@
     --az-danger-subtle:  rgba(225, 83, 97, 0.10);
     --az-info:           #3D74DB;
 
-    /* ── Sentry v3 tokens — mapped to light mode equivalents for safety ── */
-    --sn-black:          var(--az-bg);
-    --sn-surface:        var(--az-bg-alt);
-    --sn-elevated:       var(--az-surface-solid);
-    --sn-hover:          rgba(17, 17, 17, 0.04);
-    --sn-card:           var(--az-surface);
-    --sn-card-hover:     rgba(255, 255, 255, 0.9);
-    --sn-border:         var(--az-border);
-    --sn-border-hover:   var(--az-border-strong);
-    --sn-border-bright:  var(--az-border-strong);
-    --sn-text:           var(--az-text);
-    --sn-text-secondary: var(--az-text-secondary);
-    --sn-text-muted:     var(--az-text-muted);
-    --sn-purple:         var(--az-accent);
-    --sn-purple-h:       var(--az-accent-hover);
-    --sn-purple-subtle:  var(--az-accent-subtle);
-    --sn-purple-border:  var(--az-accent-border);
-    --sn-blue:           var(--az-info);
-    --sn-blue-subtle:    rgba(61, 116, 219, 0.1);
-    --sn-green:          var(--az-success);
-    --sn-green-subtle:   var(--az-success-subtle);
-    --sn-red:            var(--az-danger);
-    --sn-red-subtle:     var(--az-danger-subtle);
-    --sn-amber:          var(--az-warning);
-    --sn-amber-subtle:   var(--az-warning-subtle);
-
-    /* Legacy aliases mapped to light theme custom properties */
+    /* Legacy aliases */
     --az-black:          var(--az-surface-solid);
     --az-card:           var(--az-surface-solid);
     --az-card-elevated:  var(--az-surface-solid);
     --az-border-bright:  var(--az-border-strong);
     --az-text-primary:   var(--az-text);
-    --az-text-secondary: var(--az-text-secondary);
-    --az-text-muted:     var(--az-text-muted);
     --az-emerald:        var(--az-success);
     --az-emerald-dim:    var(--az-success-subtle);
     --az-emerald-glow:   rgba(31, 163, 122, 0.15);
@@ -124,51 +96,24 @@
     --az-danger-subtle:  rgba(225, 83, 97, 0.12);
     --az-info:           #3D74DB;
 
-    /* Sentry v3 compatibility in Dark Mode */
-    --sn-black:          #16141c;
-    --sn-surface:        #1a1822;
-    --sn-elevated:       #211f2a;
-    --sn-hover:          #272531;
-    --sn-card:           #1e1c26;
-    --sn-card-hover:     #25232f;
-    --sn-border:         #2a2732;
-    --sn-border-hover:   #36333f;
-    --sn-border-bright:  #3d3a47;
-    --sn-text:           #f0f0f5;
-    --sn-text-secondary: #c6bdcf;
-    --sn-text-muted:     #776589;
-    --sn-purple:         #6C5FC7;
-    --sn-purple-h:       #7B70D4;
-    --sn-purple-subtle:  rgba(108, 95, 199, 0.1);
-    --sn-purple-border:  rgba(108, 95, 199, 0.25);
-    --sn-blue:           #3D74DB;
-    --sn-blue-subtle:    rgba(61, 116, 219, 0.1);
-    --sn-green:          #33BF9E;
-    --sn-green-subtle:   rgba(51, 191, 158, 0.1);
-    --sn-red:            #F55459;
-    --sn-red-subtle:     rgba(245, 84, 89, 0.1);
-    --sn-amber:          #FFC227;
-    --sn-amber-subtle:   rgba(255, 194, 39, 0.1);
-
-    --az-black:          var(--sn-black);
-    --az-card:           var(--sn-card);
-    --az-card-elevated:  var(--sn-elevated);
-    --az-border-bright:  var(--sn-border-bright);
-    --az-text-primary:   var(--sn-text);
-    --az-text-secondary: var(--sn-text-secondary);
-    --az-text-muted:     var(--sn-text-muted);
-    --az-emerald:        var(--sn-green);
-    --az-emerald-dim:    var(--sn-green-subtle);
+    /* Legacy aliases in dark mode */
+    --az-black:          #16141c;
+    --az-card:           #1e1c26;
+    --az-card-elevated:  #211f2a;
+    --az-border-bright:  #3d3a47;
+    --az-text-primary:   var(--az-text);
+    --az-emerald:        #33BF9E;
+    --az-emerald-dim:    rgba(51, 191, 158, 0.1);
     --az-emerald-glow:   rgba(51, 191, 158, 0.2);
-    --az-blue:           var(--sn-blue);
-    --az-blue-dim:       var(--sn-blue-subtle);
-    --az-purple:         var(--sn-purple);
-    --az-amber:          var(--sn-amber);
-    --az-amber-dim:      var(--sn-amber-subtle);
-    --az-red:            var(--sn-red);
-    --az-red-dim:        var(--sn-red-subtle);
-    --az-cyan:           var(--sn-blue);
-    --az-cyan-dim:       var(--sn-blue-subtle);
+    --az-blue:           var(--az-info);
+    --az-blue-dim:       rgba(61, 116, 219, 0.1);
+    --az-purple:         var(--az-accent);
+    --az-amber:          var(--az-warning);
+    --az-amber-dim:      var(--az-warning-subtle);
+    --az-red:            var(--az-danger);
+    --az-red-dim:        var(--az-danger-subtle);
+    --az-cyan:           var(--az-info);
+    --az-cyan-dim:       rgba(61, 116, 219, 0.1);
 
     --background:          var(--az-bg);
     --foreground:          var(--az-text);
@@ -259,10 +204,10 @@
     transform: none;
   }
   .btn-sentry-primary {
-    @apply btn-sentry bg-[var(--az-accent)] text-white;
+    @apply btn-sentry bg-az-accent text-white;
   }
   .btn-sentry-primary:hover {
-    @apply bg-[var(--az-accent-hover)];
+    @apply bg-az-accent-hover;
   }
 
   /* Light-theme aware enterprise helpers */
@@ -274,18 +219,18 @@
     @apply btn-az bg-az-accent text-white hover:bg-az-accent-hover focus:ring-2 focus:ring-az-accent/20;
   }
 
-  /* ── Sentry-style nav item ── */
+  /* ── Nav item ── */
   .nav-sentry {
     @apply flex items-center gap-2.5 px-3 py-2 rounded-md text-sm relative transition-colors duration-150;
   }
   .nav-sentry.active {
-    @apply font-semibold text-[var(--az-accent)];
+    @apply font-semibold text-az-accent;
   }
   .nav-sentry:hover:not(.active) {
-    @apply bg-az-accent-subtle text-[var(--az-text-secondary)];
+    @apply bg-az-accent-subtle text-az-text-secondary;
   }
 
-  /* ── Sentry tooltip ── */
+  /* ── Tooltip ── */
   .tooltip-sentry {
     background: var(--az-surface-solid);
     border: 1px solid var(--az-border-strong);
