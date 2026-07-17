@@ -12,6 +12,7 @@ import {
   Globe, QrCode, Eye, Download, ExternalLink, CheckCircle2,
   Copy, Check, Zap, Info, Image as ImageIcon, RefreshCw
 } from 'lucide-react';
+import { QRCodeSVG as QRCode } from 'qrcode.react';
 
 const PUBLIC_ORDER_BASE = 'https://order.azaman.app';
 
@@ -23,28 +24,6 @@ function CopyBtn({ text }) {
       style={{ color: copied ? 'var(--az-success)' : 'var(--az-text-muted)' }}>
       {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
     </button>
-  );
-}
-
-function QRPlaceholder({ value, size = 100, color = '#6C4FD1' }) {
-  return (
-    <svg viewBox="0 0 100 100" width={size} height={size}>
-      <rect width="100" height="100" fill="white" />
-      <rect x={1} y={1} width={28} height={28} rx={3} fill={color} />
-      <rect x={4} y={4} width={22} height={22} rx={2} fill="white" />
-      <rect x={7} y={7} width={16} height={16} rx={1} fill={color} />
-      <rect x={71} y={1} width={28} height={28} rx={3} fill={color} />
-      <rect x={74} y={4} width={22} height={22} rx={2} fill="white" />
-      <rect x={77} y={7} width={16} height={16} rx={1} fill={color} />
-      <rect x={1} y={71} width={28} height={28} rx={3} fill={color} />
-      <rect x={4} y={74} width={22} height={22} rx={2} fill="white" />
-      <rect x={7} y={77} width={16} height={16} rx={1} fill={color} />
-      {[20,35,50,65,80].map(x => [20,35,50,65,80].map(y =>
-        (x < 30 && y < 30) || (x > 70 && y < 30) || (x < 30 && y > 70) ? null : (
-          <rect key={`${x}-${y}`} x={x} y={y} width={8} height={8} rx={1} fill={color} opacity={0.6} />
-        )
-      ))}
-    </svg>
   );
 }
 
@@ -189,7 +168,7 @@ export default function WebOrdering() {
                   <div key={item.id} className="flex flex-col items-center gap-2 p-4 rounded-2xl border group transition-all hover:shadow-md"
                     style={{ borderColor: 'var(--az-border)', background: 'white' }}>
                     <div className="rounded-xl overflow-hidden border-4 border-white shadow">
-                      <QRPlaceholder value={item.url} size={80} color={accentColor} />
+                      <QRCode value={item.url} size={80} fgColor={accentColor} bgColor="#ffffff" level="M" includeMargin={false} />
                     </div>
                     <p className="text-xs font-semibold" style={{ color: 'var(--az-text)' }}>{item.label}</p>
                     <button onClick={() => toast.success(`QR for ${item.label} ready`)}
