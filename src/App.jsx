@@ -39,6 +39,7 @@ import TransitDrivers from '@/pages/TransitDrivers';
 import TransitManifests from '@/pages/TransitManifests';
 import TransitCargo from '@/pages/TransitCargo';
 import RestaurantInventory from '@/pages/RestaurantInventory';
+import Messages from '@/pages/Messages';
 import { AppBackground } from '@/components/AppBackground';
 
 const qc = new QueryClient({
@@ -93,6 +94,7 @@ function AppRoutes() {
         <Route path="/locations"      element={<Locations />} />
         <Route path="/kyb"            element={<KYB />} />
         <Route path="/notifications"  element={<Notifications />} />
+        <Route path="/messages"       element={<Messages />} />
         <Route path="/settings"       element={<Settings />} />
         <Route path="/transit"              element={<TransitTrips />} />
         <Route path="/reservations"         element={<Reservations />} />

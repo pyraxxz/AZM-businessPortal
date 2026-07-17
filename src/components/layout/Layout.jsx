@@ -10,6 +10,7 @@ import { getTypeConfig } from '@/lib/businessTypes';
 import NotificationBell from './NotificationBell';
 import { BusinessSelector } from './BusinessSelector';
 import { PhonePreview } from '../PhonePreview';
+import { CommandPalette } from '../CommandPalette';
 import {
   LayoutDashboard,
   Bell,
@@ -47,6 +48,8 @@ import {
   CarFront,
   ShipWheel,
   FileSpreadsheet,
+  MessageSquare,
+  ShoppingCart,
 } from 'lucide-react';
 
 const SECTION_HEADERS = {
@@ -63,6 +66,7 @@ const ALL_NAVIGATION_ITEMS = [
   // Overview
   { label: 'Dashboard', icon: LayoutDashboard, to: '/', section: 'overview', perm: null },
   { label: 'Notifications', icon: Bell, to: '/notifications', section: 'overview', perm: null },
+  { label: 'Messages', icon: MessageSquare, to: '/messages', section: 'overview', perm: null },
 
   // Bookings & Orders
   { label: 'Reservations', icon: CalendarCheck, to: '/reservations', section: 'bookings', perm: 'reservations.view' },
@@ -77,6 +81,7 @@ const ALL_NAVIGATION_ITEMS = [
   { label: 'Tables', icon: TableIcon, to: '/restaurant-tables', section: 'ops', perm: 'restaurant.view' },
   { label: 'Inventory', icon: Package, to: '/inventory', section: 'ops', perm: 'inventory.view' },
   { label: 'Dine-In', icon: Utensils, to: '/dine-in', section: 'ops', perm: 'restaurant.view' },
+  { label: 'POS', icon: ShoppingCart, to: '/dine-in', section: 'ops', perm: 'restaurant.view' },
   { label: 'Transit Fleet', icon: CarFront, to: '/transit-fleet', section: 'ops', perm: 'transit.view' },
   { label: 'Trips', icon: Bus, to: '/transit', section: 'ops', perm: 'transit.view' },
   { label: 'Drivers', icon: ShipWheel, to: '/transit-drivers', section: 'ops', perm: 'transit.view' },
@@ -113,11 +118,24 @@ export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [showPhonePreview, setShowPhonePreview] = useState(false);
+  const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const profileRef = useRef(null);
 
   useBizNotifications();
+
+  // Handle Ctrl+K / Cmd+K globally
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdPaletteOpen(v => !v);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Save sidebar toggle state
   useEffect(() => {
@@ -138,8 +156,14 @@ export default function Layout() {
   // Check if current user is owner (always bypasses permission filtering)
   const isOwner = user?.role === 'owner' || user?.role === 'admin';
 
-  // Filter items by permission
+  // Filter items by permission & businessType rules
   const filteredNavItems = ALL_NAVIGATION_ITEMS.filter(item => {
+    // POS is only visible for restaurant/hotel businesses
+    if (item.label === 'POS') {
+      const isFoodOrHotel = ['RESTAURANT', 'HOTEL', 'DINE_IN', 'CAFE'].includes(bizProfile?.businessType?.toUpperCase());
+      if (!isFoodOrHotel) return false;
+    }
+
     if (!item.perm) return true;
     if (isOwner) return true;
     return hasPermission(item.perm);
@@ -240,6 +264,9 @@ export default function Layout() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-az-bg text-az-text font-sans">
       
+      {/* Command Palette Mount */}
+      <CommandPalette isOpen={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} />
+
       {/* ── Desktop Sidebar ── */}
       <motion.aside
         animate={{ width: sidebarExpanded ? 240 : 64 }}
@@ -388,6 +415,13 @@ export default function Layout() {
           {/* Top Bar Actions (Right) */}
           <div className="flex items-center gap-3">
             
+            {/* Cmd+K Hint Badge */}
+            <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded bg-az-bg-alt border border-az-border text-az-text-muted text-[10px] font-medium tracking-wide">
+              <span>Cmd</span>
+              <span>+</span>
+              <span>K</span>
+            </div>
+
             {/* Sync / Connection Status */}
             <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full bg-az-bg-alt border border-az-border text-xs text-az-text-secondary font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
