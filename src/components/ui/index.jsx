@@ -6,7 +6,7 @@ export { GlassPanel } from './GlassPanel';
 export { AnimatedNumber } from './AnimatedNumber';
 
 // ── Badge ─────────────────────────────────────────────────────────────────────
-export function Badge({ children, color = 'var(--sn-purple)', bg, className }) {
+export function Badge({ children, color = 'var(--az-accent)', bg, className }) {
   const bgColor = bg || `${color}1a`;
   return (
     <span
@@ -22,11 +22,11 @@ export function Badge({ children, color = 'var(--sn-purple)', bg, className }) {
 export function Button({ children, variant = 'primary', size = 'md', loading, disabled, className, ...props }) {
   const base = 'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed select-none';
   const variants = {
-    primary:   'bg-[var(--sn-purple)] text-[var(--az-black)] hover:bg-[#00c870] active:scale-[0.98] az-glow-emerald',
-    secondary: 'bg-[var(--sn-card)] border border-[var(--sn-border)] text-[var(--sn-text)] hover:bg-[var(--sn-border)] hover:border-[#3a3a5a]',
-    ghost:     'text-[var(--sn-text-muted)] hover:bg-[var(--sn-card)] hover:text-[var(--sn-text)]',
-    danger:    'bg-[var(--sn-red)] border border-[var(--sn-red)] text-[var(--sn-red)] hover:bg-[var(--sn-red)]',
-    outline:   'border border-[var(--sn-border)] text-[var(--sn-text-muted)] hover:border-[var(--sn-purple)] hover:text-[var(--sn-purple)]',
+    primary:   'bg-[var(--az-accent)] text-white hover:bg-[var(--az-accent-hover)] active:scale-[0.98] shadow-sm',
+    secondary: 'bg-white border border-[var(--az-border)] text-[var(--az-text)] hover:bg-[var(--az-bg-alt)] hover:border-[var(--az-border-strong)]',
+    ghost:     'text-[var(--az-text-muted)] hover:bg-[var(--az-bg-alt)] hover:text-[var(--az-text)]',
+    danger:    'bg-[var(--az-danger-subtle)] border border-[var(--az-danger)] text-[var(--az-danger)] hover:bg-[var(--az-danger)] hover:text-white',
+    outline:   'border border-[var(--az-border)] text-[var(--az-text-muted)] hover:border-[var(--az-accent)] hover:text-[var(--az-accent)]',
   };
   const sizes = {
     sm: 'px-3 py-1.5 text-xs',
@@ -187,7 +187,7 @@ export function Modal({ open, onClose, title, children, className }) {
 }
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
-export function StatCard({ label, value, sub, icon: Icon, color = 'var(--sn-purple)', loading }) {
+export function StatCard({ label, value, sub, icon: Icon, color = 'var(--az-accent)', loading }) {
   if (loading) return <Skeleton className="h-28" />;
   return (
     <Card>

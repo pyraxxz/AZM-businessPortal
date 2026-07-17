@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary, { SectionBoundary } from '@/components/ErrorBoundary';
 import { ToastProvider } from '@/components/ui/Toast';
 import Layout from '@/components/layout/Layout';
 import Login from '@/pages/Login';
@@ -62,10 +62,10 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--az-black)' }}>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--az-bg, #F7F5F2)' }}>
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-[#1e1e2e] border-t-[#00d97e] rounded-full animate-spin" />
-          <p className="text-sm text-[#4a4a6a]">Loading your portal...</p>
+          <div className="w-10 h-10 border-2 border-az-border-strong border-t-az-accent rounded-full animate-spin" />
+          <p className="text-sm text-az-text-muted">Loading your portal...</p>
         </div>
       </div>
     );

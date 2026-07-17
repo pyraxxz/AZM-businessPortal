@@ -220,6 +220,7 @@ export default function Layout() {
                   key={item.to}
                   to={item.to}
                   onClick={onLinkClick}
+                  aria-label={item.label}
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all relative rounded-az-md group',
                     active
