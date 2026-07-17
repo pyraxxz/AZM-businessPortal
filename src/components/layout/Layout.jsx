@@ -50,7 +50,7 @@ import {
   FileSpreadsheet,
   MessageSquare,
   ShoppingCart,
-  BarChart2, Code2, Globe, Layers } from 'lucide-react';
+  BarChart2, Code2, Globe, Layers, Moon, Sun } from 'lucide-react';
 
 const SECTION_HEADERS = {
   overview: 'Overview',
@@ -122,6 +122,18 @@ export default function Layout() {
   
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('az-dark-mode');
+    if (saved !== null) return JSON.parse(saved);
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // Apply / remove .dark class on <html>
+  useEffect(() => {
+    const html = document.documentElement;
+    if (darkMode) { html.classList.add('dark'); } else { html.classList.remove('dark'); }
+    localStorage.setItem('az-dark-mode', JSON.stringify(darkMode));
+  }, [darkMode]);
   const [showPhonePreview, setShowPhonePreview] = useState(false);
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
   const location = useLocation();
@@ -454,6 +466,17 @@ export default function Layout() {
             ) : (
               <BusinessSelector />
             )}
+
+            {/* Dark mode toggle */}
+            <button
+              onClick={() => setDarkMode(v => !v)}
+              className="w-9 h-9 rounded-full border flex items-center justify-center transition-colors hover:bg-az-bg-alt"
+              style={{ borderColor: 'var(--az-border)', color: 'var(--az-text-muted)' }}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={darkMode ? 'Light mode' : 'Dark mode'}
+            >
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
 
             {/* Notification Bell */}
             <NotificationBell />
