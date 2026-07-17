@@ -8,6 +8,7 @@ import {
   PiggyBank, Shield, ArrowRight, Clock, CheckCircle2
 } from 'lucide-react';
 import { financeApi, employeeApi } from '@/lib/marketplaceApi';
+import { fmtUSDC, fmtUSDC as fmtUsd } from '@/lib/utils';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
@@ -38,15 +39,7 @@ const SOURCE_BADGES = {
   AD_SPEND:            { color: 'var(--sn-pink)',    label: 'Ad Spend' },
 };
 
-function fmtUsd(n, opts = {}) {
-  if (n == null || isNaN(n)) return '$0.00';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: opts.decimals ?? 2,
-    maximumFractionDigits: opts.decimals ?? 2,
-  }).format(Number(n));
-}
+// fmtUsd and fmtUSDC imported from @/lib/utils
 
 function fmtPct(n) {
   if (n == null || isNaN(n)) return '0%';

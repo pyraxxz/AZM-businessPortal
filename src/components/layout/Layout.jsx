@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { KYB_STATUS_META } from '@/lib/utils';
 import { useBizNotifications } from '@/hooks/useBizNotifications';
+import { usePermission } from '@/hooks/usePermission';
 import { getTypeConfig } from '@/lib/businessTypes';
 import NotificationBell from './NotificationBell';
 import { BusinessSelector } from './BusinessSelector';
@@ -78,8 +79,8 @@ export default function Layout() {
       label: 'Overview',
       icon: LayoutDashboard,
       items: [
-        { label: 'Dashboard', icon: LayoutDashboard, to: '/' },
-        { label: 'Notifications', icon: Bell, to: '/notifications' },
+        { label: 'Dashboard', icon: LayoutDashboard, to: '/', perm: null },
+        { label: 'Notifications', icon: Bell, to: '/notifications', perm: null },
       ],
     },
     {
@@ -87,9 +88,9 @@ export default function Layout() {
       label: 'Bookings & Orders',
       icon: CalendarCheck,
       items: [
-        { label: 'Reservations', icon: CalendarCheck, to: '/reservations' },
-        { label: 'Orders', icon: ShoppingBag, to: '/orders' },
-        { label: 'Invoices', icon: Receipt, to: '/invoices' },
+        { label: 'Reservations', icon: CalendarCheck, to: '/reservations', perm: 'reservations.view' },
+        { label: 'Orders', icon: ShoppingBag, to: '/orders', perm: 'orders.view' },
+        { label: 'Invoices', icon: Receipt, to: '/invoices', perm: 'invoices.view' },
       ],
     },
     {
@@ -97,17 +98,17 @@ export default function Layout() {
       label: 'Vertical Ops',
       icon: LayoutGrid,
       items: [
-        { label: 'Hotel Rooms', icon: BedDouble, to: '/hotel-rooms' },
-        { label: 'Front Desk', icon: ConciergeBell, to: '/hotel-front-desk' },
-        { label: 'Housekeeping', icon: Sparkles, to: '/hotel-housekeeping' },
-        { label: 'Restaurant Kitchen', icon: ChefHat, to: '/restaurant-kitchen' },
-        { label: 'Tables', icon: TableIcon, to: '/restaurant-tables' },
-        { label: 'Inventory', icon: Package, to: '/inventory' },
-        { label: 'Dine-In', icon: Utensils, to: '/dine-in' },
-        { label: 'Transit Fleet', icon: CarFront, to: '/transit-fleet' },
-        { label: 'Trips', icon: Bus, to: '/transit' },
-        { label: 'Drivers', icon: ShipWheel, to: '/transit-drivers' },
-        { label: 'Cargo', icon: FileSpreadsheet, to: '/transit-manifests' },
+        { label: 'Hotel Rooms', icon: BedDouble, to: '/hotel-rooms', perm: 'hotel.view' },
+        { label: 'Front Desk', icon: ConciergeBell, to: '/hotel-front-desk', perm: 'hotel.view' },
+        { label: 'Housekeeping', icon: Sparkles, to: '/hotel-housekeeping', perm: 'hotel.view' },
+        { label: 'Restaurant Kitchen', icon: ChefHat, to: '/restaurant-kitchen', perm: 'restaurant.view' },
+        { label: 'Tables', icon: TableIcon, to: '/restaurant-tables', perm: 'restaurant.view' },
+        { label: 'Inventory', icon: Package, to: '/inventory', perm: 'inventory.view' },
+        { label: 'Dine-In', icon: Utensils, to: '/dine-in', perm: 'restaurant.view' },
+        { label: 'Transit Fleet', icon: CarFront, to: '/transit-fleet', perm: 'transit.view' },
+        { label: 'Trips', icon: Bus, to: '/transit', perm: 'transit.view' },
+        { label: 'Drivers', icon: ShipWheel, to: '/transit-drivers', perm: 'transit.view' },
+        { label: 'Cargo', icon: FileSpreadsheet, to: '/transit-manifests', perm: 'transit.view' },
       ],
     },
     {
@@ -115,10 +116,10 @@ export default function Layout() {
       label: 'Workforce',
       icon: Users,
       items: [
-        { label: 'Employees', icon: Users, to: '/employees' },
-        { label: 'Scheduling', icon: CalendarDays, to: '/scheduling' },
-        { label: 'Payroll', icon: Wallet, to: '/payroll' },
-        { label: 'Time Off', icon: CalendarCheck, to: '/time-off' },
+        { label: 'Employees', icon: Users, to: '/employees', perm: 'employees.view' },
+        { label: 'Scheduling', icon: CalendarDays, to: '/scheduling', perm: 'shifts.view' },
+        { label: 'Payroll', icon: Wallet, to: '/payroll', perm: 'payroll.view' },
+        { label: 'Time Off', icon: CalendarCheck, to: '/time-off', perm: 'employees.view' },
       ],
     },
     {
@@ -126,7 +127,7 @@ export default function Layout() {
       label: 'Finance',
       icon: LineChart,
       items: [
-        { label: 'Finance', icon: LineChart, to: '/finance' },
+        { label: 'Finance', icon: LineChart, to: '/finance', perm: 'finance.view' },
       ],
     },
     {
@@ -134,9 +135,9 @@ export default function Layout() {
       label: 'Marketing',
       icon: Megaphone,
       items: [
-        { label: 'Marketing', icon: Megaphone, to: '/marketing' },
-        { label: 'Reviews', icon: Star, to: '/reviews' },
-        { label: 'Showcase', icon: ImageIcon, to: '/showcase' },
+        { label: 'Marketing', icon: Megaphone, to: '/marketing', perm: 'marketing.view' },
+        { label: 'Reviews', icon: Star, to: '/reviews', perm: 'reviews.view' },
+        { label: 'Showcase', icon: ImageIcon, to: '/showcase', perm: 'marketing.view' },
       ],
     },
     {
@@ -144,23 +145,31 @@ export default function Layout() {
       label: 'Settings',
       icon: Settings,
       items: [
-        { label: 'Settings', icon: Settings, to: '/settings' },
-        { label: 'Locations', icon: MapPin, to: '/locations' },
+        { label: 'Settings', icon: Settings, to: '/settings', perm: null },
+        { label: 'Locations', icon: MapPin, to: '/locations', perm: 'locations.view' },
       ],
     },
   ];
 
+  // Filter nav sections by permission — hide items the user can't access
+  const visibleSections = railSections
+    .map(s => ({
+      ...s,
+      items: (s.items || []).filter(item => !item.perm || hasPermission(item.perm)),
+    }))
+    .filter(s => s.items.length > 0);
+
   // Determine active section from route
-  const activeSection = railSections.find(s =>
+  const activeSection = visibleSections.find(s =>
     s.items?.some(i => location.pathname === i.to || (i.to !== '/' && location.pathname.startsWith(i.to)))
-  ) || railSections[0];
+  ) || visibleSections[0];
 
   // Sync pinned section to active route when route changes
   useEffect(() => {
     if (activeSection) setPinnedSectionKey(activeSection.key);
   }, [activeSection?.key]);
 
-  const displaySection = railSections.find(s => s.key === pinnedSectionKey) || activeSection;
+  const displaySection = visibleSections.find(s => s.key === pinnedSectionKey) || activeSection;
 
   const handleRailClick = (section) => {
     if (paneCollapsed) {
@@ -222,7 +231,7 @@ export default function Layout() {
 
           {/* Nav Rail Buttons */}
           <nav className="flex flex-col gap-2 w-full px-2">
-            {railSections.map((section) => {
+            {visibleSections.map((section) => {
               const active = displaySection.key === section.key;
               return (
                 <button
