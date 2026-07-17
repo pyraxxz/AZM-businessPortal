@@ -44,6 +44,8 @@ import { AppBackground } from '@/components/AppBackground';
 import Analytics from '@/pages/Analytics';
 import Developer from '@/pages/settings/Developer';
 import BusinessGroups from '@/pages/BusinessGroups';
+import MessagingChannels from '@/pages/settings/MessagingChannels';
+import WebOrdering from '@/pages/marketing/WebOrdering';
 import POS from '@/pages/POS';
 
 const qc = new QueryClient({
@@ -128,6 +130,8 @@ function AppRoutes() {
         <Route path="/pos"                   element={<POS />} />
         <Route path="/settings/developer"   element={<Developer />} />
         <Route path="/groups"               element={<BusinessGroups />} />
+        <Route path="/settings/messaging"  element={<MessagingChannels />} />
+        <Route path="/marketing/web-ordering" element={<WebOrdering />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
