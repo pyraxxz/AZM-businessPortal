@@ -15,7 +15,7 @@ import {
   Building2, TrendingUp, Users, ShoppingBag, DollarSign,
   Plus, Star, ArrowUpRight, ArrowDownRight, BarChart3,
   Globe, ChevronRight, Check, AlertTriangle, MapPin,
-  Layers, RefreshCw
+  Layers, RefreshCw, AlertCircle
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -27,8 +27,6 @@ const BIZ_TYPE_COLORS = {
   RETAIL: '#6C4FD1', DEFAULT: '#9A96A3',
 };
 
-const DELTA_MOCK = [12, -3, 7, 24, -8, 15]; // random positive/negative for demo
-
 export default function BusinessGroups() {
   const { adminBusinesses, bizProfile, isAdmin, selectedBusinessId, selectBusiness } = useAuth();
   const [activeMetric, setActiveMetric] = useState('revenue');
@@ -39,44 +37,18 @@ export default function BusinessGroups() {
     ? adminBusinesses
     : bizProfile ? [bizProfile] : [];
 
-  // Fetch order stats per business (parallel queries would be ideal; for now summarize)
-  const { data: groupStats, isLoading } = useQuery({
+  // Fetch real group stats from backend
+  const { data: groupStats, isLoading, isError, refetch } = useQuery({
     queryKey: ['group-stats'],
     queryFn: async () => {
-      try {
-        const res = await request('/api/admin/group-stats');
-        return res;
-      } catch {
-        // Graceful fallback: mock aggregate data
-        return {
-          totalRevenue: 284600,
-          totalOrders: 1842,
-          totalEmployees: 47,
-          avgRating: 4.3,
-          businesses: businesses.map((b, i) => ({
-            id: b.id || b._id,
-            name: b.businessName || b.name,
-            type: b.businessType || 'DEFAULT',
-            revenue: Math.floor(Math.random() * 80000 + 20000),
-            orders: Math.floor(Math.random() * 400 + 100),
-            employees: Math.floor(Math.random() * 15 + 3),
-            rating: (Math.random() * 1.5 + 3.5).toFixed(1),
-            delta: DELTA_MOCK[i % DELTA_MOCK.length],
-            location: b.city || b.address || 'Accra',
-          })),
-        };
-      }
+      const res = await request('/api/business-os/group-stats');
+      return res;
     },
     staleTime: 2 * 60_000,
+    retry: 1,
   });
 
-  const bizList = groupStats?.businesses || businesses.map((b, i) => ({
-    id: b.id || b._id || String(i),
-    name: b.businessName || b.name || 'Business',
-    type: (b.businessType || 'DEFAULT').toUpperCase(),
-    revenue: 0, orders: 0, employees: 0, rating: 0, delta: 0,
-    location: b.city || 'Accra',
-  }));
+  const bizList = groupStats?.businesses || [];
 
   const METRICS = [
     { id: 'revenue', label: 'Revenue', icon: DollarSign, format: fmtShort, prefix: 'GHS ' },
@@ -84,7 +56,7 @@ export default function BusinessGroups() {
     { id: 'employees', label: 'Staff', icon: Users, format: String },
   ];
 
-  const chartData = bizList.map(b => ({ name: b.name.substring(0, 12), value: b[activeMetric] || 0, color: BIZ_TYPE_COLORS[b.type] || BIZ_TYPE_COLORS.DEFAULT }));
+  const chartData = bizList.map(b => ({ name: b.name?.substring(0, 12) || 'N/A', value: b[activeMetric] || 0, color: BIZ_TYPE_COLORS[b.type] || BIZ_TYPE_COLORS.DEFAULT }));
 
   const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
   const itemVariants = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
@@ -103,6 +75,28 @@ export default function BusinessGroups() {
         <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background: 'var(--az-accent)' }}>
           <Plus className="w-4 h-4" /> Register another business to get started
         </div>
+      </div>
+    );
+  }
+
+  // Error state — no mock data fallback
+  if (isError && !groupStats) {
+    return (
+      <div className="max-w-2xl mx-auto p-6 flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'var(--az-danger-subtle, rgba(239,68,68,0.1))' }}>
+          <AlertCircle className="w-8 h-8" style={{ color: 'var(--az-danger)' }} />
+        </div>
+        <h2 className="text-xl font-bold" style={{ color: 'var(--az-text)' }}>Couldn't load group stats</h2>
+        <p className="text-sm max-w-sm" style={{ color: 'var(--az-text-muted)' }}>
+          There was a problem fetching your business group data. Please try again.
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ background: 'var(--az-accent)' }}
+        >
+          <RefreshCw className="w-4 h-4" /> Retry
+        </button>
       </div>
     );
   }
@@ -161,7 +155,7 @@ export default function BusinessGroups() {
               ))}
             </div>
           </div>
-          {chartData.length > 0 && (
+          {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={chartData} barCategoryGap="30%">
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--az-text-muted)' }} />
@@ -177,6 +171,11 @@ export default function BusinessGroups() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[220px] gap-2">
+              <BarChart3 className="w-8 h-8" style={{ color: 'var(--az-text-muted)' }} />
+              <p className="text-sm" style={{ color: 'var(--az-text-muted)' }}>No business data yet</p>
+            </div>
           )}
         </GlassPanel>
 

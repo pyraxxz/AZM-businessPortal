@@ -12,8 +12,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import {
-  MessageSquare, Phone, CheckCircle2, XCircle, AlertTriangle,
-  Send, Settings, Eye, EyeOff, RefreshCw, Plus, Trash2,
+  MessageSquare, Phone, CheckCircle2, XCircle, AlertTriangle, RefreshCw,
+  Send, Settings, Eye, EyeOff, Plus, Trash2,
   Bell, ShoppingBag, CalendarCheck, Star, DollarSign,
   ChevronRight, Info, Zap, Globe, Copy, Check
 } from 'lucide-react';
@@ -84,8 +84,13 @@ export default function MessagingChannels() {
     return defaults;
   });
 
-  // Monthly cost (mock)
-  const [monthlyCost] = useState({ whatsapp: 4.20, sms: 12.80, messages: 341 });
+  // Monthly messaging cost — fetched from backend
+  const { data: monthlyCost, isLoading: costLoading } = useQuery({
+    queryKey: ['messaging-stats'],
+    queryFn: async () => { const r = await request('/api/business-os/messaging-stats'); return r; },
+    staleTime: 5 * 60_000,
+    retry: 1,
+  });
 
   const handleConnectWA = async () => {
     if (!waNumber || !waApiKey) { toast.error('Enter phone number and API key'); return; }
@@ -251,20 +256,33 @@ export default function MessagingChannels() {
         <GlassPanel className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold" style={{ color: 'var(--az-text)' }}>This Month's Messaging Cost</h3>
-            <span className="text-xs px-2 py-1 rounded-md" style={{ background: 'var(--az-bg)', color: 'var(--az-text-muted)', border: '1px solid var(--az-border)' }}>July 2026</span>
+            <span className="text-xs px-2 py-1 rounded-md" style={{ background: 'var(--az-bg)', color: 'var(--az-text-muted)', border: '1px solid var(--az-border)' }}>
+              {new Date().toLocaleDateString('en-GH', { month: 'long', year: 'numeric' })}
+            </span>
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: 'WhatsApp', value: `GHS ${monthlyCost.whatsapp.toFixed(2)}`, color: '#25D366' },
-              { label: 'SMS', value: `GHS ${monthlyCost.sms.toFixed(2)}`, color: 'var(--az-info)' },
-              { label: 'Total Messages', value: monthlyCost.messages.toString(), color: 'var(--az-accent)' },
-            ].map(item => (
-              <div key={item.label} className="text-center p-3 rounded-xl border" style={{ borderColor: 'var(--az-border)', background: 'var(--az-bg)' }}>
-                <div className="text-xl font-bold tabular-nums" style={{ color: item.color }}>{item.value}</div>
-                <div className="text-xs mt-1" style={{ color: 'var(--az-text-muted)' }}>{item.label}</div>
-              </div>
-            ))}
-          </div>
+          {costLoading ? (
+            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--az-text-muted)' }}>
+              <RefreshCw className="w-4 h-4 animate-spin" /> Loading messaging stats…
+            </div>
+          ) : monthlyCost ? (
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: 'WhatsApp', value: `GHS ${(monthlyCost.whatsapp || 0).toFixed(2)}`, color: '#25D366' },
+                { label: 'SMS', value: `GHS ${(monthlyCost.sms || 0).toFixed(2)}`, color: 'var(--az-info)' },
+                { label: 'Total Messages', value: (monthlyCost.messages || 0).toString(), color: 'var(--az-accent)' },
+              ].map(item => (
+                <div key={item.label} className="text-center p-3 rounded-xl border" style={{ borderColor: 'var(--az-border)', background: 'var(--az-bg)' }}>
+                  <div className="text-xl font-bold tabular-nums" style={{ color: item.color }}>{item.value}</div>
+                  <div className="text-xs mt-1" style={{ color: 'var(--az-text-muted)' }}>{item.label}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-sm" style={{ color: 'var(--az-text-muted)' }}>No messaging data yet this month.</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--az-text-muted)' }}>Stats will appear once you start sending messages.</p>
+            </div>
+          )}
         </GlassPanel>
       )}
 

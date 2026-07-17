@@ -3,6 +3,7 @@
  * Toggle public web ordering, preview storefront, download QR codes.
  */
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { request } from '@/lib/apiCore';
 import { useAuth } from '@/lib/AuthContext';
@@ -37,14 +38,39 @@ export default function WebOrdering() {
 
   const publicUrl = `${PUBLIC_ORDER_BASE}/${bizId}`;
 
-  const isBizType = (types) => types.includes((bizProfile?.businessType || '').toUpperCase());
-  const mockItems = isBizType(['RESTAURANT', 'DINE_IN', 'CAFE'])
-    ? Array.from({ length: 8 }, (_, i) => ({ id: `t${i+1}`, label: `Table ${i+1}`, url: `${publicUrl}?table=${i+1}` }))
-    : isBizType(['HOTEL'])
-    ? Array.from({ length: 6 }, (_, i) => ({ id: `r${i+1}`, label: `Room 10${i+1}`, url: `${publicUrl}?room=10${i+1}` }))
-    : isBizType(['TRANSIT', 'BUS'])
-    ? Array.from({ length: 4 }, (_, i) => ({ id: `v${i+1}`, label: `Route ${i+1}`, url: `${publicUrl}?route=${i+1}` }))
-    : Array.from({ length: 4 }, (_, i) => ({ id: `s${i+1}`, label: `Section ${i+1}`, url: publicUrl }));
+  const isBizType = (types) => types.includes((bizProfile?.businessType || bizProfile?.category || '').toUpperCase());
+  const bizCat = (bizProfile?.businessType || bizProfile?.category || '').toUpperCase();
+  const isRestaurant = isBizType(['RESTAURANT', 'DINE_IN', 'CAFE']);
+  const isHotel = isBizType(['HOTEL']);
+  const isTransit = isBizType(['TRANSIT', 'BUS']);
+
+  // Fetch real tables/rooms/routes for QR code generation
+  const { data: tablesData } = useQuery({
+    queryKey: ['biz-tables'],
+    queryFn: async () => { const r = await request('/api/business-os/restaurant/tables'); return r; },
+    enabled: isRestaurant,
+    staleTime: 5 * 60_000,
+  });
+  const { data: roomsData } = useQuery({
+    queryKey: ['biz-rooms'],
+    queryFn: async () => { const r = await request('/api/business-os/hotel/rooms'); return r; },
+    enabled: isHotel,
+    staleTime: 5 * 60_000,
+  });
+  const { data: routesData } = useQuery({
+    queryKey: ['biz-routes'],
+    queryFn: async () => { const r = await request('/api/business-os/transit/routes'); return r; },
+    enabled: isTransit,
+    staleTime: 5 * 60_000,
+  });
+
+  const qrItems = isRestaurant
+    ? (tablesData?.tables || []).map((t, i) => ({ id: t.id || `t${i}`, label: `Table ${t.label || t.tableNumber || i+1}`, url: `${publicUrl}?table=${t.id || i+1}` }))
+    : isHotel
+    ? (roomsData?.rooms || []).map((r, i) => ({ id: r.id || `r${i}`, label: `Room ${r.roomNumber || i+1}`, url: `${publicUrl}?room=${r.id || r.roomNumber || i+1}` }))
+    : isTransit
+    ? (routesData?.routes || []).map((r, i) => ({ id: r.id || `v${i}`, label: r.name || `Route ${i+1}`, url: `${publicUrl}?route=${r.id || i+1}` }))
+    : [{ id: 'main', label: 'Main', url: publicUrl }];
 
   const handleSave = async () => {
     setSaving(true);
@@ -164,7 +190,7 @@ export default function WebOrdering() {
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {mockItems.map(item => (
+                {qrItems.map(item => (
                   <div key={item.id} className="flex flex-col items-center gap-2 p-4 rounded-2xl border group transition-all hover:shadow-md"
                     style={{ borderColor: 'var(--az-border)', background: 'white' }}>
                     <div className="rounded-xl overflow-hidden border-4 border-white shadow">

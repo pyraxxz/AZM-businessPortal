@@ -332,6 +332,7 @@ export default function RestaurantInventory() {
         </div>
         {canManage && (
           <div className="flex gap-2 flex-wrap">
+            {import.meta.env.DEV && (
             <Button
               variant="outline"
               size="sm"
@@ -344,6 +345,7 @@ export default function RestaurantInventory() {
               <RefreshCw className="w-3.5 h-3.5" />
               Test Deduct Order
             </Button>
+            )}
             <Button
               variant="primary"
               size="sm"
