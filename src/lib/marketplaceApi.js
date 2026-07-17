@@ -442,3 +442,38 @@ export const inventoryApi = {
 };
 
 export default marketplaceApi;
+
+
+// ── MODULE 06: Universal Booking, Orders & Invoicing ────────────────────────
+export const bookingOpsApi = {
+  // Tax Presets
+  taxPresets: () => request('/api/business-os/tax-presets'),
+  createTaxPreset: (data) => request('/api/business-os/tax-presets', { method: 'POST', body: JSON.stringify(data) }),
+  updateTaxPreset: (id, data) => request(`/api/business-os/tax-presets/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteTaxPreset: (id) => request(`/api/business-os/tax-presets/${id}`, { method: 'DELETE' }),
+
+  // Overbooking toggle
+  setOverbooking: (allowed) => request('/api/business-os/overbooking', { method: 'PATCH', body: JSON.stringify({ allowed }) }),
+
+  // Reservation Reschedule
+  proposeReschedule: (id, data) => request(`/api/business-os/reservations/${id}/propose-reschedule`, { method: 'POST', body: JSON.stringify(data) }),
+  respondReschedule: (id, accept) => request(`/api/business-os/reservations/${id}/respond-reschedule`, { method: 'POST', body: JSON.stringify({ accept }) }),
+
+  // Slot Preview
+  slotsPreview: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/availability/slots-preview${qs ? '?' + qs : ''}`);
+  },
+
+  // Bulk Order Operations
+  bulkOrderStatus: (orderIds, status) => request('/api/business-os/orders/bulk-status', { method: 'POST', body: JSON.stringify({ orderIds, status }) }),
+
+  // Order Refund
+  refundOrder: (id, reason) => request(`/api/business-os/orders/${id}/refund`, { method: 'POST', body: JSON.stringify({ reason }) }),
+
+  // Invoice Stats
+  invoiceStats: () => request('/api/business-os/invoices/stats'),
+
+  // Booking Dashboard
+  bookingDashboard: () => request('/api/business-os/booking/dashboard'),
+};
