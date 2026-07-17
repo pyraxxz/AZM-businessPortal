@@ -56,7 +56,7 @@
     --sn-amber-subtle:   var(--az-warning-subtle);
 
     /* Legacy aliases mapped to light theme custom properties */
-    --az-black:          var(--az-text);
+    --az-black:          var(--az-surface-solid);
     --az-card:           var(--az-surface-solid);
     --az-card-elevated:  var(--az-surface-solid);
     --az-border-bright:  var(--az-border-strong);
