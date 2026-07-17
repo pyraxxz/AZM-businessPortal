@@ -1,395 +1,481 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
+import { usePermission } from '@/hooks/usePermission';
 import { KYB_STATUS_META } from '@/lib/utils';
 import { useBizNotifications } from '@/hooks/useBizNotifications';
-import { usePermission } from '@/hooks/usePermission';
 import { getTypeConfig } from '@/lib/businessTypes';
 import NotificationBell from './NotificationBell';
 import { BusinessSelector } from './BusinessSelector';
 import { PhonePreview } from '../PhonePreview';
 import {
-  LayoutDashboard, Package, ShoppingBag, Receipt, Settings, Bell, LogOut,
-  ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight, MapPin, Bus, UtensilsCrossed,
-  Building2, Briefcase, Store, CalendarCheck, QrCode, BedDouble, FileCheck,
-  AlertCircle, CheckCircle2, Users, CalendarDays, Wallet,
-  Megaphone, Image as ImageIcon,
-  Grid3x3, Star, Utensils, Smartphone, Search, LayoutGrid, Wrench, LineChart,
-  Sparkles, ConciergeBell, ChefHat, LayoutDashboard as TableIcon, CarFront, ShipWheel, FileSpreadsheet,
+  LayoutDashboard,
+  Bell,
+  LogOut,
+  ChevronRight,
+  Menu,
+  X,
+  Package,
+  ShoppingBag,
+  Receipt,
+  Settings,
+  MapPin,
+  Bus,
+  CalendarCheck,
+  QrCode,
+  BedDouble,
+  FileCheck,
+  AlertCircle,
+  CheckCircle2,
+  Users,
+  CalendarDays,
+  Wallet,
+  Megaphone,
+  Image as ImageIcon,
+  Grid3x3,
+  Star,
+  Utensils,
+  Smartphone,
+  LayoutGrid,
+  LineChart,
+  Sparkles,
+  ConciergeBell,
+  ChefHat,
+  LayoutDashboard as TableIcon,
+  CarFront,
+  ShipWheel,
+  FileSpreadsheet,
 } from 'lucide-react';
 
-const TYPE_ICONS = { Bus, UtensilsCrossed, Building2, ShoppingBag, Briefcase, Store };
+const SECTION_HEADERS = {
+  overview: 'Overview',
+  bookings: 'Bookings & Orders',
+  ops: 'Vertical Ops',
+  workforce: 'Workforce',
+  finance: 'Finance',
+  marketing: 'Marketing',
+  settings: 'Settings'
+};
+
+const ALL_NAVIGATION_ITEMS = [
+  // Overview
+  { label: 'Dashboard', icon: LayoutDashboard, to: '/', section: 'overview', perm: null },
+  { label: 'Notifications', icon: Bell, to: '/notifications', section: 'overview', perm: null },
+
+  // Bookings & Orders
+  { label: 'Reservations', icon: CalendarCheck, to: '/reservations', section: 'bookings', perm: 'reservations.view' },
+  { label: 'Orders', icon: ShoppingBag, to: '/orders', section: 'bookings', perm: 'orders.view' },
+  { label: 'Invoices', icon: Receipt, to: '/invoices', section: 'bookings', perm: 'invoices.view' },
+
+  // Vertical Ops
+  { label: 'Hotel Rooms', icon: BedDouble, to: '/hotel-rooms', section: 'ops', perm: 'hotel.view' },
+  { label: 'Front Desk', icon: ConciergeBell, to: '/hotel-front-desk', section: 'ops', perm: 'hotel.view' },
+  { label: 'Housekeeping', icon: Sparkles, to: '/hotel-housekeeping', section: 'ops', perm: 'hotel.view' },
+  { label: 'Kitchen', icon: ChefHat, to: '/restaurant-kitchen', section: 'ops', perm: 'restaurant.view' },
+  { label: 'Tables', icon: TableIcon, to: '/restaurant-tables', section: 'ops', perm: 'restaurant.view' },
+  { label: 'Inventory', icon: Package, to: '/inventory', section: 'ops', perm: 'inventory.view' },
+  { label: 'Dine-In', icon: Utensils, to: '/dine-in', section: 'ops', perm: 'restaurant.view' },
+  { label: 'Transit Fleet', icon: CarFront, to: '/transit-fleet', section: 'ops', perm: 'transit.view' },
+  { label: 'Trips', icon: Bus, to: '/transit', section: 'ops', perm: 'transit.view' },
+  { label: 'Drivers', icon: ShipWheel, to: '/transit-drivers', section: 'ops', perm: 'transit.view' },
+  { label: 'Cargo', icon: FileSpreadsheet, to: '/transit-manifests', section: 'ops', perm: 'transit.view' },
+
+  // Workforce
+  { label: 'Employees', icon: Users, to: '/employees', section: 'workforce', perm: 'employees.view' },
+  { label: 'Scheduling', icon: CalendarDays, to: '/scheduling', section: 'workforce', perm: 'shifts.view' },
+  { label: 'Payroll', icon: Wallet, to: '/payroll', section: 'workforce', perm: 'payroll.view' },
+  { label: 'Time Off', icon: CalendarCheck, to: '/time-off', section: 'workforce', perm: 'employees.view' },
+
+  // Finance
+  { label: 'Finance', icon: LineChart, to: '/finance', section: 'finance', perm: 'finance.view' },
+
+  // Marketing
+  { label: 'Marketing', icon: Megaphone, to: '/marketing', section: 'marketing', perm: 'marketing.view' },
+  { label: 'Reviews', icon: Star, to: '/reviews', section: 'marketing', perm: 'reviews.view' },
+  { label: 'Showcase', icon: ImageIcon, to: '/showcase', section: 'marketing', perm: 'marketing.view' },
+
+  // Settings
+  { label: 'Settings', icon: Settings, to: '/settings', section: 'settings', perm: null },
+  { label: 'Locations', icon: MapPin, to: '/locations', section: 'settings', perm: 'locations.view' }
+];
 
 export default function Layout() {
-  const [paneCollapsed, setPaneCollapsed] = useState(false);
-  const [flyout, setFlyout] = useState(null);
-  const [showPhonePreview, setShowPhonePreview] = useState(false);
-  const [pinnedSectionKey, setPinnedSectionKey] = useState('overview');
+  const { hasPermission } = usePermission();
+  const { bizProfile, user, logout, isAdmin, selectedBusinessId } = useAuth();
+  
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => {
+    const saved = localStorage.getItem('az-sidebar-expanded');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [showPhonePreview, setShowPhonePreview] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const railRef = useRef(null);
   const profileRef = useRef(null);
-  const { bizProfile, user, logout, isAdmin, adminBusinesses, selectedBusinessId, selectBusiness } = useAuth();
 
   useBizNotifications();
 
-  // Auto-collapse Pane 2 under lg breakpoint
+  // Save sidebar toggle state
   useEffect(() => {
-    const check = () => { if (window.innerWidth < 1024) setPaneCollapsed(true); };
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+    localStorage.setItem('az-sidebar-expanded', JSON.stringify(sidebarExpanded));
+  }, [sidebarExpanded]);
 
-  // Close flyout on outside click
+  // Handle outside click for profile menu
   useEffect(() => {
     const onClick = (e) => {
-      if (flyout && railRef.current && !railRef.current.contains(e.target)) setFlyout(null);
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, [flyout]);
-
-  // Close profile menu on outside click
-  useEffect(() => {
-    const onClick = (e) => {
-      if (profileMenuOpen && profileRef.current && !profileRef.current.contains(e.target)) setProfileMenuOpen(false);
+      if (profileMenuOpen && profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, [profileMenuOpen]);
 
-  const typeConfig = isAdmin && !selectedBusinessId
-    ? { label: 'Admin View-All', icon: 'Store', navItems: [], color: '#6C5FC7' }
-    : getTypeConfig(bizProfile);
+  // Check if current user is owner (always bypasses permission filtering)
+  const isOwner = user?.role === 'owner' || user?.role === 'admin';
 
-  const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
-  const TypeIcon = TYPE_ICONS[typeConfig.icon] || Store;
+  // Filter items by permission
+  const filteredNavItems = ALL_NAVIGATION_ITEMS.filter(item => {
+    if (!item.perm) return true;
+    if (isOwner) return true;
+    return hasPermission(item.perm);
+  });
 
-  const handleLogout = () => { logout(); navigate('/login'); };
-  const initial = (bizProfile?.businessName || user?.username || 'B').charAt(0).toUpperCase();
+  // Group items by section
+  const navGroups = Object.keys(SECTION_HEADERS).map(sectionKey => {
+    return {
+      key: sectionKey,
+      header: SECTION_HEADERS[sectionKey],
+      items: filteredNavItems.filter(item => item.section === sectionKey)
+    };
+  }).filter(group => group.items.length > 0);
 
-  // Properly Grouped Sidebar Navigation:
-  const railSections = [
-    {
-      key: 'overview',
-      label: 'Overview',
-      icon: LayoutDashboard,
-      items: [
-        { label: 'Dashboard', icon: LayoutDashboard, to: '/', perm: null },
-        { label: 'Notifications', icon: Bell, to: '/notifications', perm: null },
-      ],
-    },
-    {
-      key: 'bookings-orders',
-      label: 'Bookings & Orders',
-      icon: CalendarCheck,
-      items: [
-        { label: 'Reservations', icon: CalendarCheck, to: '/reservations', perm: 'reservations.view' },
-        { label: 'Orders', icon: ShoppingBag, to: '/orders', perm: 'orders.view' },
-        { label: 'Invoices', icon: Receipt, to: '/invoices', perm: 'invoices.view' },
-      ],
-    },
-    {
-      key: 'vertical-ops',
-      label: 'Vertical Ops',
-      icon: LayoutGrid,
-      items: [
-        { label: 'Hotel Rooms', icon: BedDouble, to: '/hotel-rooms', perm: 'hotel.view' },
-        { label: 'Front Desk', icon: ConciergeBell, to: '/hotel-front-desk', perm: 'hotel.view' },
-        { label: 'Housekeeping', icon: Sparkles, to: '/hotel-housekeeping', perm: 'hotel.view' },
-        { label: 'Restaurant Kitchen', icon: ChefHat, to: '/restaurant-kitchen', perm: 'restaurant.view' },
-        { label: 'Tables', icon: TableIcon, to: '/restaurant-tables', perm: 'restaurant.view' },
-        { label: 'Inventory', icon: Package, to: '/inventory', perm: 'inventory.view' },
-        { label: 'Dine-In', icon: Utensils, to: '/dine-in', perm: 'restaurant.view' },
-        { label: 'Transit Fleet', icon: CarFront, to: '/transit-fleet', perm: 'transit.view' },
-        { label: 'Trips', icon: Bus, to: '/transit', perm: 'transit.view' },
-        { label: 'Drivers', icon: ShipWheel, to: '/transit-drivers', perm: 'transit.view' },
-        { label: 'Cargo', icon: FileSpreadsheet, to: '/transit-manifests', perm: 'transit.view' },
-      ],
-    },
-    {
-      key: 'workforce',
-      label: 'Workforce',
-      icon: Users,
-      items: [
-        { label: 'Employees', icon: Users, to: '/employees', perm: 'employees.view' },
-        { label: 'Scheduling', icon: CalendarDays, to: '/scheduling', perm: 'shifts.view' },
-        { label: 'Payroll', icon: Wallet, to: '/payroll', perm: 'payroll.view' },
-        { label: 'Time Off', icon: CalendarCheck, to: '/time-off', perm: 'employees.view' },
-      ],
-    },
-    {
-      key: 'finance',
-      label: 'Finance',
-      icon: LineChart,
-      items: [
-        { label: 'Finance', icon: LineChart, to: '/finance', perm: 'finance.view' },
-      ],
-    },
-    {
-      key: 'marketing',
-      label: 'Marketing',
-      icon: Megaphone,
-      items: [
-        { label: 'Marketing', icon: Megaphone, to: '/marketing', perm: 'marketing.view' },
-        { label: 'Reviews', icon: Star, to: '/reviews', perm: 'reviews.view' },
-        { label: 'Showcase', icon: ImageIcon, to: '/showcase', perm: 'marketing.view' },
-      ],
-    },
-    {
-      key: 'settings',
-      label: 'Settings',
-      icon: Settings,
-      items: [
-        { label: 'Settings', icon: Settings, to: '/settings', perm: null },
-        { label: 'Locations', icon: MapPin, to: '/locations', perm: 'locations.view' },
-      ],
-    },
-  ];
-
-  // Filter nav sections by permission — hide items the user can't access
-  const visibleSections = railSections
-    .map(s => ({
-      ...s,
-      items: (s.items || []).filter(item => !item.perm || hasPermission(item.perm)),
-    }))
-    .filter(s => s.items.length > 0);
-
-  // Determine active section from route
-  const activeSection = visibleSections.find(s =>
-    s.items?.some(i => location.pathname === i.to || (i.to !== '/' && location.pathname.startsWith(i.to)))
-  ) || visibleSections[0];
-
-  // Sync pinned section to active route when route changes
-  useEffect(() => {
-    if (activeSection) setPinnedSectionKey(activeSection.key);
-  }, [activeSection?.key]);
-
-  const displaySection = visibleSections.find(s => s.key === pinnedSectionKey) || activeSection;
-
-  const handleRailClick = (section) => {
-    if (paneCollapsed) {
-      setFlyout(flyout === section.key ? null : section.key);
-    } else {
-      setPinnedSectionKey(section.key);
+  const isItemActive = (to) => {
+    if (to === '/') {
+      return location.pathname === '/';
     }
+    return location.pathname.startsWith(to);
   };
 
-  const isItemActive = (to) => location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
+  // Find active item to display in the header path
+  const activeItem = ALL_NAVIGATION_ITEMS.find(item => isItemActive(item.to));
 
-  const renderPaneItem = (item) => {
-    const active = isItemActive(item.to);
-    return (
-      <Link
-        key={item.to}
-        to={item.to}
-        onClick={() => setFlyout(null)}
-        className={cn(
-          'nav-sentry relative px-3 py-2 text-sm flex items-center gap-2.5 rounded-lg transition-colors',
-          active ? 'text-[var(--sn-purple)] font-semibold' : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text)] hover:bg-[var(--sn-hover)]'
-        )}
-      >
-        {active && (
-          <motion.div
-            layoutId="sidebar-active-bg"
-            className="absolute inset-0 rounded-lg bg-[var(--sn-purple-subtle)]"
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            style={{ zIndex: 0 }}
-          />
-        )}
-        {active && (
-          <motion.div
-            layoutId="sidebar-active-accent"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[var(--sn-purple)] rounded-r"
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            style={{ zIndex: 1 }}
-          />
-        )}
-        <item.icon className="w-4 h-4 relative" style={{ zIndex: 1 }} />
-        <span className="relative truncate" style={{ zIndex: 1 }}>{item.label}</span>
-      </Link>
-    );
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
-  return (
-    <div className="flex h-screen overflow-hidden text-[var(--sn-text)]" style={{ background: 'var(--sn-black)' }}>
-      {/* ── RAIL (PANE 1) ── */}
-      <aside
-        ref={railRef}
-        className="w-16 flex-shrink-0 flex flex-col items-center border-r border-[var(--sn-border)] py-4 justify-between"
-        style={{ background: 'var(--sn-surface)' }}
-      >
-        <div className="flex flex-col items-center gap-6 w-full">
-          {/* Logo */}
-          <Link to="/" className="w-9 h-9 rounded-xl flex items-center justify-center border border-[var(--sn-border)] shadow-md bg-[var(--sn-card)] overflow-hidden">
-            <img src="/azaman-logo.png" className="w-6 h-6 object-contain" alt="AZM" />
-          </Link>
+  const initial = (bizProfile?.businessName || user?.username || 'B').charAt(0).toUpperCase();
+  const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
+  const typeConfig = bizProfile ? getTypeConfig(bizProfile) : null;
 
-          {/* Nav Rail Buttons */}
-          <nav className="flex flex-col gap-2 w-full px-2">
-            {visibleSections.map((section) => {
-              const active = displaySection.key === section.key;
+  // Navigation Links component
+  const NavLinks = ({ onLinkClick }) => (
+    <div className="space-y-6">
+      {navGroups.map(group => (
+        <div key={group.key} className="space-y-1">
+          {sidebarExpanded && (
+            <h3 className="px-3 text-[10px] font-bold uppercase tracking-wider text-az-text-muted">
+              {group.header}
+            </h3>
+          )}
+          <div className="space-y-0.5">
+            {group.items.map(item => {
+              const active = isItemActive(item.to);
               return (
-                <button
-                  key={section.key}
-                  onClick={() => handleRailClick(section)}
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={onLinkClick}
                   className={cn(
-                    'btn-sentry relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150',
-                    active ? 'text-[var(--sn-purple)] bg-[var(--sn-purple-subtle)]' : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text)] hover:bg-[var(--sn-hover)]'
+                    'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all relative rounded-az-md group',
+                    active
+                      ? 'text-az-accent font-semibold'
+                      : 'text-az-text-secondary hover:bg-az-bg-alt hover:text-az-text'
                   )}
-                  title={section.label}
                 >
-                  <section.icon className="w-5 h-5" />
+                  {/* Subtle active pill background */}
                   {active && (
                     <motion.div
-                      layoutId="rail-active"
-                      className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[var(--sn-purple)] rounded-l"
-                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      layoutId="sidebar-active-bg"
+                      className="absolute inset-0 rounded-az-md bg-az-accent-subtle -z-10"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
-                </button>
+                  
+                  {/* Active rail background behind icon in collapsed state */}
+                  {!sidebarExpanded && active && (
+                    <motion.div
+                      layoutId="sidebar-rail-active-bg"
+                      className="absolute inset-y-1.5 left-2 right-2 rounded-lg bg-az-accent-subtle -z-10"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+
+                  <item.icon className={cn('w-4.5 h-4.5 flex-shrink-0', active ? 'text-az-accent' : 'text-az-text-secondary group-hover:text-az-text')} />
+                  
+                  {sidebarExpanded && (
+                    <span className="truncate">{item.label}</span>
+                  )}
+
+                  {/* Collapsed view tooltips */}
+                  {!sidebarExpanded && (
+                    <div className="absolute left-full ml-3 px-2 py-1 rounded bg-az-surface border border-az-border text-az-text text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 z-50 shadow-sm">
+                      {item.label}
+                    </div>
+                  )}
+                </Link>
               );
             })}
-          </nav>
+          </div>
         </div>
+      ))}
+    </div>
+  );
 
-        {/* User profile dropdown and metadata */}
-        <div className="relative" ref={profileRef}>
-          <button
-            onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-            className="w-10 h-10 rounded-xl bg-[var(--sn-purple)] text-[var(--az-black)] border border-[var(--sn-border)] flex items-center justify-center font-bold text-sm tracking-wide shadow-md hover:scale-105 active:scale-95 transition-all"
-          >
-            {initial}
-          </button>
-
-          <AnimatePresence>
-            {profileMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="absolute left-14 bottom-0 w-56 rounded-2xl border border-[var(--sn-border)] shadow-2xl overflow-hidden py-1.5"
-                style={{ background: 'var(--az-card)', zIndex: 100 }}
+  return (
+    <div className="flex h-screen w-screen overflow-hidden bg-az-bg text-az-text font-sans">
+      
+      {/* ── Desktop Sidebar ── */}
+      <motion.aside
+        animate={{ width: sidebarExpanded ? 240 : 64 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 32 }}
+        className="hidden md:flex flex-col flex-shrink-0 border-r border-az-border bg-az-surface backdrop-blur-glass relative z-20 h-full overflow-hidden"
+      >
+        {/* Logo area */}
+        <div className="h-16 flex items-center justify-between px-4 border-b border-az-border flex-shrink-0">
+          <Link to="/" className="flex items-center gap-2 overflow-hidden">
+            <div className="w-9 h-9 rounded-lg bg-az-accent-subtle border border-az-border flex items-center justify-center flex-shrink-0">
+              <img src="/azaman-logo.png" alt="Azaman" className="w-5 h-5 object-contain" />
+            </div>
+            {sidebarExpanded && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="font-bold tracking-tight text-lg text-az-text"
               >
-                <div className="px-4 py-3 border-b border-[var(--sn-border)]">
-                  <p className="text-sm font-bold text-[var(--sn-text)] truncate">{bizProfile?.businessName || user?.username || 'Azaman Business'}</p>
-                  <p className="text-xs text-[var(--sn-text-muted)] truncate mt-0.5">{user?.email || 'portal@azaman.biz'}</p>
-                </div>
-                <button
-                  onClick={() => { setProfileMenuOpen(false); navigate('/settings'); }}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-[var(--sn-text-secondary)] hover:bg-[var(--sn-hover)] transition-colors"
-                >
-                  <Settings className="w-3.5 h-3.5" /> Account settings
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-[var(--sn-red)] hover:bg-[var(--sn-red-subtle)] transition-colors"
-                >
-                  <LogOut className="w-3.5 h-3.5" /> Sign out
-                </button>
-              </motion.div>
+                AZM Portal
+              </motion.span>
             )}
-          </AnimatePresence>
+          </Link>
         </div>
-      </aside>
 
-      {/* ── PANE 2 — Contextual menu ── */}
-      <AnimatePresence initial={false}>
-        {!paneCollapsed && (
-          <motion.aside
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 224, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="flex-shrink-0 flex flex-col border-r border-[var(--sn-border)] overflow-hidden"
-            style={{ background: 'var(--sn-surface)' }}
+        {/* Navigation area */}
+        <div className="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
+          <NavLinks />
+        </div>
+
+        {/* Live Preview Button (Phone Preview) */}
+        {bizProfile && (
+          <div className="p-3 border-t border-az-border">
+            <button
+              onClick={() => setShowPhonePreview(true)}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 py-2 rounded-az-md border border-az-border text-az-text-secondary hover:bg-az-bg-alt hover:text-az-text transition-colors",
+                !sidebarExpanded && "px-0"
+              )}
+              title="Live Preview"
+            >
+              <Smartphone className="w-4.5 h-4.5" />
+              {sidebarExpanded && <span className="text-sm font-medium">Live Preview</span>}
+            </button>
+          </div>
+        )}
+
+        {/* Sidebar Toggle Handle */}
+        <div className="p-3 border-t border-az-border flex justify-end">
+          <button
+            onClick={() => setSidebarExpanded(!sidebarExpanded)}
+            className="w-full py-1.5 flex items-center justify-center rounded-az-md hover:bg-az-bg-alt text-az-text-secondary transition-colors"
           >
-            <div className="w-56 flex flex-col h-full">
-              <div className="h-14 flex items-center justify-between px-4 border-b border-[var(--sn-border)] flex-shrink-0">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--sn-text-muted)] leading-none">AZAMAN</p>
-                  <p className="text-sm font-semibold text-[var(--sn-text)] mt-0.5">{displaySection.label}</p>
-                </div>
+            <motion.div
+              animate={{ rotate: sidebarExpanded ? 0 : 180 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronRight className="w-4 h-4 rotate-180" />
+            </motion.div>
+          </button>
+        </div>
+      </motion.aside>
+
+      {/* ── Mobile Sidebar Drawer ── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 bg-black z-30 md:hidden"
+            />
+            {/* Drawer */}
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 w-[280px] bg-az-surface backdrop-blur-glass border-r border-az-border z-40 md:hidden flex flex-col h-full shadow-lg"
+            >
+              <div className="h-16 flex items-center justify-between px-4 border-b border-az-border flex-shrink-0">
+                <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-lg bg-az-accent-subtle border border-az-border flex items-center justify-center">
+                    <img src="/azaman-logo.png" alt="Azaman" className="w-5 h-5 object-contain" />
+                  </div>
+                  <span className="font-bold tracking-tight text-lg text-az-text">AZM Portal</span>
+                </Link>
                 <button
-                  onClick={() => setPaneCollapsed(true)}
-                  className="btn-sentry w-7 h-7 rounded-md flex items-center justify-center text-[var(--sn-text-muted)] hover:text-[var(--sn-text-secondary)] hover:bg-[var(--sn-hover)] flex-shrink-0"
-                  title="Collapse"
+                  onClick={() => setMobileOpen(false)}
+                  className="p-1.5 rounded-az-md hover:bg-az-bg-alt text-az-text-secondary"
                 >
-                  <ChevronsLeft className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {!isAdmin && bizProfile && (
-                <div className="mx-3 mt-3 p-2.5 rounded-lg border border-[var(--sn-border)]" style={{ background: 'var(--sn-card)' }}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-                         style={{ background: `${typeConfig.color}1a`, border: `1px solid ${typeConfig.color}30` }}>
-                      <TypeIcon className="w-3.5 h-3.5" style={{ color: typeConfig.color }} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-[var(--sn-text)] truncate leading-tight">{bizProfile.businessName}</p>
-                      <p className="text-[10px] mt-0.5 font-medium truncate" style={{ color: typeConfig.color }}>{typeConfig.label}</p>
-                    </div>
-                  </div>
+              <div className="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
+                {/* Keep sidebar expanded for mobile drawer */}
+                <NavLinks onLinkClick={() => setMobileOpen(false)} />
+              </div>
+
+              {bizProfile && (
+                <div className="p-4 border-t border-az-border">
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setShowPhonePreview(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-az-md border border-az-border text-az-text-secondary hover:bg-az-bg-alt"
+                  >
+                    <Smartphone className="w-4.5 h-4.5" />
+                    <span className="text-sm font-medium">Live Preview</span>
+                  </button>
                 </div>
               )}
-
-              {isAdmin && (
-                <div className="px-3 py-3 border-b border-[var(--sn-border)]">
-                  <BusinessSelector />
-                </div>
-              )}
-
-              <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 animate-fade-in">
-                {(displaySection.items || []).map(renderPaneItem)}
-              </nav>
-            </div>
-          </motion.aside>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
 
-      {/* Expand handle when Pane 2 is collapsed */}
-      {paneCollapsed && (
-        <button
-          onClick={() => setPaneCollapsed(false)}
-          className="btn-sentry w-5 flex-shrink-0 flex items-center justify-center border-r border-[var(--sn-border)] hover:bg-[var(--sn-hover)] text-[var(--sn-text-muted)]"
-          style={{ background: 'var(--sn-black)' }}
-          title="Expand"
-        >
-          <ChevronsRight className="w-3.5 h-3.5" />
-        </button>
-      )}
+      {/* ── Main Layout Wrapper ── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        {/* ── Top Bar ── */}
+        <header className="h-16 border-b border-az-border bg-az-surface backdrop-blur-glass flex items-center justify-between px-4 md:px-6 flex-shrink-0 sticky top-0 z-10">
+          <div className="flex items-center gap-3">
+            {/* Hamburger button on Mobile */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="p-2 -ml-2 rounded-az-md hover:bg-az-bg-alt text-az-text-secondary md:hidden flex-shrink-0"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
 
-      {/* ── Main ── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-[var(--sn-border)] flex items-center justify-between px-5 flex-shrink-0" style={{ background: 'var(--sn-surface)' }}>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-[var(--sn-text-muted)]">{displaySection.label}</span>
-            <ChevronRight className="w-3.5 h-3.5 text-[var(--sn-text-muted)]" />
-            <span className="text-[var(--sn-text)] font-medium">
-              {bizProfile ? bizProfile.businessName : 'Overview'}
-            </span>
+            {/* Current route / title */}
+            {activeItem && (
+              <div className="hidden sm:flex items-center gap-2 text-sm font-medium">
+                <span className="text-az-text-muted capitalize">{activeItem.section}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-az-text-muted" />
+                <span className="text-az-text font-semibold">{activeItem.label}</span>
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Top Bar Actions (Right) */}
+          <div className="flex items-center gap-3">
+            
+            {/* Sync / Connection Status */}
+            <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full bg-az-bg-alt border border-az-border text-xs text-az-text-secondary font-medium">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Online & synced
+            </div>
+
+            {/* Verification Badge */}
             {bizProfile && bizProfile.kybStatus !== 'VERIFIED' && (
               <Link
                 to="/kyb"
-                className="btn-sentry flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-                style={{ background: kybMeta.bg, color: kybMeta.color, border: `1px solid ${kybMeta.color}30` }}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-az-md text-xs font-medium border transition-colors shadow-sm"
+                style={{ background: kybMeta.bg, color: kybMeta.color, borderColor: `${kybMeta.color}30` }}
               >
                 {bizProfile.kybStatus === 'UNVERIFIED' ? <AlertCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                {kybMeta.label}
+                <span className="hidden xs:inline">{kybMeta.label}</span>
               </Link>
             )}
+
+            {/* Business Selector or Admin view badge */}
+            {isAdmin && !selectedBusinessId ? (
+              <span className="px-3 py-1.5 rounded-az-md bg-az-accent-subtle text-az-accent text-xs font-semibold border border-az-accent/20">
+                Admin View-All
+              </span>
+            ) : (
+              <BusinessSelector />
+            )}
+
+            {/* Notification Bell */}
             <NotificationBell />
+
+            {/* User Profile Dropdown */}
+            <div ref={profileRef} className="relative">
+              <button
+                onClick={() => setProfileMenuOpen(v => !v)}
+                className="w-9 h-9 rounded-full bg-az-accent-subtle text-az-accent border border-az-accent/15 flex items-center justify-center font-bold text-sm hover:brightness-95 transition-all shadow-sm flex-shrink-0"
+              >
+                {initial}
+              </button>
+
+              <AnimatePresence>
+                {profileMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-56 rounded-az-md border border-az-border bg-az-surface shadow-lg z-50 overflow-hidden"
+                  >
+                    <div className="px-4 py-3 border-b border-az-border flex items-center gap-3 bg-az-bg-alt/50">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-az-accent-subtle text-az-accent font-bold text-xs flex-shrink-0">
+                        {initial}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-az-text truncate">
+                          {bizProfile?.businessName || user?.username || 'Account'}
+                        </p>
+                        <p className="text-xs text-az-text-muted truncate">
+                          {user?.email || user?.username || 'Signed in'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        navigate('/settings');
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-az-text-secondary hover:bg-az-bg-alt hover:text-az-text transition-colors"
+                    >
+                      <Settings className="w-4 h-4" /> Account settings
+                    </button>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50/50 hover:text-red-600 transition-colors border-t border-az-border"
+                    >
+                      <LogOut className="w-4 h-4" /> Sign out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto animate-fade-in" style={{ background: 'var(--sn-black)' }}>
+        {/* ── Content Area ── */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-az-bg">
           <Outlet />
         </main>
       </div>

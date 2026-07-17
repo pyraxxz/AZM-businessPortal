@@ -1,11 +1,130 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* ── Sentry v3 tokens — deep indigo-black ── */
+    /* ── Phase 2 Design System: Light liquid glass aesthetic (DEFAULT) ── */
+    --az-bg:            #F7F5F2;
+    --az-bg-alt:        #FBFAF8;
+    --az-surface:       rgba(255, 255, 255, 0.72);
+    --az-surface-solid: #FFFFFF;
+    --az-border:        rgba(17, 17, 17, 0.08);
+    --az-border-strong: rgba(17, 17, 17, 0.14);
+    --az-text:           #15141A;
+    --az-text-secondary: #5D5A66;
+    --az-text-muted:     #9A96A3;
+
+    --az-accent:         #6C4FD1;
+    --az-accent-hover:   #7C61DD;
+    --az-accent-subtle:  rgba(108, 79, 209, 0.10);
+    --az-accent-border:  rgba(108, 79, 209, 0.28);
+
+    --az-success:        #1FA37A;
+    --az-success-subtle: rgba(31, 163, 122, 0.10);
+    --az-warning:        #E2A33D;
+    --az-warning-subtle: rgba(226, 163, 61, 0.12);
+    --az-danger:         #E15361;
+    --az-danger-subtle:  rgba(225, 83, 97, 0.10);
+    --az-info:           #3D74DB;
+
+    /* ── Sentry v3 tokens — mapped to light mode equivalents for safety ── */
+    --sn-black:          var(--az-bg);
+    --sn-surface:        var(--az-bg-alt);
+    --sn-elevated:       var(--az-surface-solid);
+    --sn-hover:          rgba(17, 17, 17, 0.04);
+    --sn-card:           var(--az-surface);
+    --sn-card-hover:     rgba(255, 255, 255, 0.9);
+    --sn-border:         var(--az-border);
+    --sn-border-hover:   var(--az-border-strong);
+    --sn-border-bright:  var(--az-border-strong);
+    --sn-text:           var(--az-text);
+    --sn-text-secondary: var(--az-text-secondary);
+    --sn-text-muted:     var(--az-text-muted);
+    --sn-purple:         var(--az-accent);
+    --sn-purple-h:       var(--az-accent-hover);
+    --sn-purple-subtle:  var(--az-accent-subtle);
+    --sn-purple-border:  var(--az-accent-border);
+    --sn-blue:           var(--az-info);
+    --sn-blue-subtle:    rgba(61, 116, 219, 0.1);
+    --sn-green:          var(--az-success);
+    --sn-green-subtle:   var(--az-success-subtle);
+    --sn-red:            var(--az-danger);
+    --sn-red-subtle:     var(--az-danger-subtle);
+    --sn-amber:          var(--az-warning);
+    --sn-amber-subtle:   var(--az-warning-subtle);
+
+    /* Legacy aliases mapped to light theme custom properties */
+    --az-black:          var(--az-text);
+    --az-card:           var(--az-surface-solid);
+    --az-card-elevated:  var(--az-surface-solid);
+    --az-border-bright:  var(--az-border-strong);
+    --az-text-primary:   var(--az-text);
+    --az-text-secondary: var(--az-text-secondary);
+    --az-text-muted:     var(--az-text-muted);
+    --az-emerald:        var(--az-success);
+    --az-emerald-dim:    var(--az-success-subtle);
+    --az-emerald-glow:   rgba(31, 163, 122, 0.15);
+    --az-blue:           var(--az-info);
+    --az-blue-dim:       rgba(61, 116, 219, 0.1);
+    --az-purple:         var(--az-accent);
+    --az-amber:          var(--az-warning);
+    --az-amber-dim:      var(--az-warning-subtle);
+    --az-red:            var(--az-danger);
+    --az-red-dim:        var(--az-danger-subtle);
+    --az-cyan:           var(--az-info);
+    --az-cyan-dim:       rgba(61, 116, 219, 0.1);
+    --az-accent-grad:    linear-gradient(135deg, var(--az-success) 0%, var(--az-info) 100%);
+
+    /* ── shadcn/ui compatibility layer ── */
+    --background:          var(--az-bg);
+    --foreground:          var(--az-text);
+    --card:                var(--az-surface-solid);
+    --card-foreground:     var(--az-text);
+    --popover:             var(--az-surface-solid);
+    --popover-foreground:  var(--az-text);
+    --primary:             var(--az-accent);
+    --primary-foreground:  #ffffff;
+    --secondary:           var(--az-bg-alt);
+    --secondary-foreground: var(--az-text);
+    --muted:               var(--az-bg-alt);
+    --muted-foreground:    var(--az-text-muted);
+    --accent:              rgba(17, 17, 17, 0.04);
+    --accent-foreground:   var(--az-text);
+    --destructive:         var(--az-danger);
+    --destructive-foreground: #ffffff;
+    --border:              var(--az-border);
+    --input:               var(--az-border);
+    --ring:                var(--az-accent);
+  }
+
+  /* ── Dark Mode activation ── */
+  html.dark, body.dark, .dark {
+    --az-bg:            #0F0E13;
+    --az-bg-alt:        #15141C;
+    --az-surface:       rgba(30, 28, 38, 0.65);
+    --az-surface-solid: #1E1C26;
+    --az-border:        rgba(255, 255, 255, 0.08);
+    --az-border-strong: rgba(255, 255, 255, 0.14);
+    --az-text:           #F0F0F5;
+    --az-text-secondary: #C6BDCF;
+    --az-text-muted:     #776589;
+
+    --az-accent:         #6C4FD1;
+    --az-accent-hover:   #7C61DD;
+    --az-accent-subtle:  rgba(108, 79, 209, 0.12);
+    --az-accent-border:  rgba(108, 79, 209, 0.32);
+
+    --az-success:        #1FA37A;
+    --az-success-subtle: rgba(31, 163, 122, 0.12);
+    --az-warning:        #E2A33D;
+    --az-warning-subtle: rgba(226, 163, 61, 0.15);
+    --az-danger:         #E15361;
+    --az-danger-subtle:  rgba(225, 83, 97, 0.12);
+    --az-info:           #3D74DB;
+
+    /* Sentry v3 compatibility in Dark Mode */
     --sn-black:          #16141c;
     --sn-surface:        #1a1822;
     --sn-elevated:       #211f2a;
@@ -31,12 +150,9 @@
     --sn-amber:          #FFC227;
     --sn-amber-subtle:   rgba(255, 194, 39, 0.1);
 
-    /* Legacy aliases */
     --az-black:          var(--sn-black);
-    --az-surface:        var(--sn-surface);
     --az-card:           var(--sn-card);
     --az-card-elevated:  var(--sn-elevated);
-    --az-border:         var(--sn-border);
     --az-border-bright:  var(--sn-border-bright);
     --az-text-primary:   var(--sn-text);
     --az-text-secondary: var(--sn-text-secondary);
@@ -53,31 +169,49 @@
     --az-red-dim:        var(--sn-red-subtle);
     --az-cyan:           var(--sn-blue);
     --az-cyan-dim:       var(--sn-blue-subtle);
-    --az-accent-grad:    linear-gradient(135deg, #33BF9E 0%, #3D74DB 100%);
 
-    /* ── shadcn/ui compatibility layer ──
-       Some pages use generic shadcn utility classes (bg-card, text-foreground,
-       bg-primary, border-input, etc). Map them onto the Sentry dark theme so
-       those pages aren't left with unstyled browser-default white inputs. */
-    --background:          var(--sn-black);
-    --foreground:          var(--sn-text);
-    --card:                var(--sn-card);
-    --card-foreground:     var(--sn-text);
-    --popover:             var(--sn-elevated);
-    --popover-foreground:  var(--sn-text);
-    --primary:             var(--sn-purple);
+    --background:          var(--az-bg);
+    --foreground:          var(--az-text);
+    --card:                var(--az-surface-solid);
+    --card-foreground:     var(--az-text);
+    --popover:             var(--az-surface-solid);
+    --popover-foreground:  var(--az-text);
+    --primary:             var(--az-accent);
     --primary-foreground:  #ffffff;
-    --secondary:           var(--sn-surface);
-    --secondary-foreground: var(--sn-text);
-    --muted:               var(--sn-surface);
-    --muted-foreground:    var(--sn-text-muted);
-    --accent:              var(--sn-hover);
-    --accent-foreground:   var(--sn-text);
-    --destructive:         var(--sn-red);
+    --secondary:           var(--az-bg-alt);
+    --secondary-foreground: var(--az-text);
+    --muted:               var(--az-bg-alt);
+    --muted-foreground:    var(--az-text-muted);
+    --accent:              rgba(255, 255, 255, 0.04);
+    --accent-foreground:   var(--az-text);
+    --destructive:         var(--az-danger);
     --destructive-foreground: #ffffff;
-    --border:              var(--sn-border);
-    --input:               var(--sn-border);
-    --ring:                var(--sn-purple);
+    --border:              var(--az-border);
+    --input:               var(--az-border);
+    --ring:                var(--az-accent);
+  }
+
+  /* Accessibility settings overrides */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-delay: -1ms !important;
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      background-attachment: initial !important;
+      scroll-behavior: auto !important;
+      transition-delay: 0s !important;
+      transition-duration: 0s !important;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :root, .dark, html.dark, body.dark {
+      --az-surface: var(--az-surface-solid);
+    }
+    .backdrop-blur-glass, .backdrop-blur-sm, .backdrop-blur-md, .backdrop-blur-lg {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
   }
 
   * { box-sizing: border-box; }
@@ -89,19 +223,19 @@
   }
 
   body {
-    background: var(--sn-black);
-    color: var(--sn-text);
-    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--az-bg);
+    color: var(--az-text);
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
 
-  /* Scrollbar — Sentry style */
+  /* Scrollbar styling - Light/Theme-aware */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--sn-border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--sn-border-hover); }
+  ::-webkit-scrollbar-thumb { background: var(--az-border-strong); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--az-accent); }
 }
 
 @layer components {
@@ -109,15 +243,15 @@
   .btn-sentry {
     @apply inline-flex items-center justify-center gap-2 rounded-md font-semibold select-none;
     @apply transition-all duration-150 ease-out;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2);
     transform: translateY(0);
   }
   .btn-sentry:hover {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
   }
   .btn-sentry:active {
     transform: translateY(1px);
-    box-shadow: 0 0 0 rgba(0,0,0,0), inset 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 0 0 rgba(0,0,0,0), inset 0 1px 2px rgba(0,0,0,0.1);
   }
   .btn-sentry:disabled {
     @apply opacity-50 cursor-not-allowed;
@@ -125,10 +259,19 @@
     transform: none;
   }
   .btn-sentry-primary {
-    @apply btn-sentry bg-[var(--sn-purple)] text-white;
+    @apply btn-sentry bg-[var(--az-accent)] text-white;
   }
   .btn-sentry-primary:hover {
-    @apply bg-[var(--sn-purple-h)];
+    @apply bg-[var(--az-accent-hover)];
+  }
+
+  /* Light-theme aware enterprise helpers */
+  .btn-az {
+    @apply inline-flex items-center justify-center gap-2 rounded-az-md font-semibold select-none transition-all duration-200;
+    box-shadow: var(--shadow-az-card);
+  }
+  .btn-az-primary {
+    @apply btn-az bg-az-accent text-white hover:bg-az-accent-hover focus:ring-2 focus:ring-az-accent/20;
   }
 
   /* ── Sentry-style nav item ── */
@@ -136,25 +279,25 @@
     @apply flex items-center gap-2.5 px-3 py-2 rounded-md text-sm relative transition-colors duration-150;
   }
   .nav-sentry.active {
-    @apply font-semibold;
+    @apply font-semibold text-[var(--az-accent)];
   }
   .nav-sentry:hover:not(.active) {
-    @apply bg-[var(--sn-hover)] text-[var(--sn-text-secondary)];
+    @apply bg-az-accent-subtle text-[var(--az-text-secondary)];
   }
 
   /* ── Sentry tooltip ── */
   .tooltip-sentry {
-    background: var(--sn-elevated);
-    border: 1px solid var(--sn-border-bright);
-    color: var(--sn-text);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,95,199,0.1);
+    background: var(--az-surface-solid);
+    border: 1px solid var(--az-border-strong);
+    color: var(--az-text);
+    box-shadow: var(--shadow-az-card);
   }
 
   /* ── Card ── */
   .card-sentry {
     @apply rounded-lg border p-4;
-    background: var(--sn-card);
-    border-color: var(--sn-border);
+    background: var(--az-surface);
+    border-color: var(--az-border);
   }
 
   /* ── Enterprise density ── */
@@ -173,7 +316,7 @@
 
   /* ── Shimmer skeleton ── */
   .skeleton-sentry {
-    background: linear-gradient(90deg, var(--sn-card) 0%, var(--sn-hover) 50%, var(--sn-card) 100%);
+    background: linear-gradient(90deg, var(--az-surface) 0%, var(--az-border) 50%, var(--az-surface) 100%);
     background-size: 200% 100%;
     animation: shimmer 1.6s linear infinite;
   }

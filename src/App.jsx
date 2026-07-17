@@ -39,6 +39,7 @@ import TransitDrivers from '@/pages/TransitDrivers';
 import TransitManifests from '@/pages/TransitManifests';
 import TransitCargo from '@/pages/TransitCargo';
 import RestaurantInventory from '@/pages/RestaurantInventory';
+import { AppBackground } from '@/components/AppBackground';
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -128,6 +129,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <ErrorBoundary>
+      <AppBackground />
       <AuthProvider>
         <QueryClientProvider client={qc}>
           <ToastProvider>

@@ -5,6 +5,38 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // ── Phase 2 Design System: Light-first 'liquid glass' ──
+        // Light surface stack (default)
+        'az-bg':            '#F7F5F2',
+        'az-bg-alt':        '#FBFAF8',
+        'az-surface':       'rgba(255,255,255,0.72)',
+        'az-surface-solid': '#FFFFFF',
+        'az-border':        'rgba(17,17,17,0.08)',
+        'az-border-strong': 'rgba(17,17,17,0.14)',
+        'az-text':           '#15141A',
+        'az-text-secondary': '#5D5A66',
+        'az-text-muted':     '#9A96A3',
+
+        // Dark surface stack (toggleable)
+        'az-bg-dark':        '#0F0E13',
+        'az-surface-dark':   'rgba(30,28,38,0.65)',
+        'az-border-dark':    'rgba(255,255,255,0.08)',
+
+        // Accent
+        'az-accent':         '#6C4FD1',
+        'az-accent-hover':   '#7C61DD',
+        'az-accent-subtle':  'rgba(108,79,209,0.10)',
+        'az-accent-border':  'rgba(108,79,209,0.28)',
+
+        // Semantic
+        'az-success':        '#1FA37A',
+        'az-success-subtle': 'rgba(31,163,122,0.10)',
+        'az-warning':        '#E2A33D',
+        'az-warning-subtle': 'rgba(226,163,61,0.12)',
+        'az-danger':         '#E15361',
+        'az-danger-subtle':  'rgba(225,83,97,0.10)',
+        'az-info':           '#3D74DB',
+
         // ── Sentry v3 palette — deep indigo-black (NOT purple) ──
         'sn-black':          '#16141c',
         'sn-surface':        '#1a1822',
@@ -45,10 +77,8 @@ module.exports = {
 
         // Legacy aliases (backward compat)
         'az-black':          '#16141c',
-        'az-surface':        '#1a1822',
         'az-card':           '#1e1c26',
         'az-card-elevated':  '#211f2a',
-        'az-border':         '#2a2732',
         'az-border-bright':  '#3d3a47',
         'az-emerald':        '#33BF9E',
         'az-blue':           '#3D74DB',
@@ -72,7 +102,7 @@ module.exports = {
         ring: 'var(--ring)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       borderRadius: {
@@ -80,8 +110,22 @@ module.exports = {
         lg: '12px',
         md: '10px',
         sm: '8px',
+        'az-lg': '20px',
+        'az-md': '14px',
+        'az-sm': '10px',
+        'az-pill': '999px',
+      },
+      backdropBlur: {
+        xs: '2px',
+        glass: '20px',
       },
       boxShadow: {
+        'az-card':      '0 1px 2px rgba(17,17,17,0.04), 0 8px 24px -8px rgba(17,17,17,0.08)',
+        'az-card-hover':'0 4px 16px rgba(17,17,17,0.06), 0 16px 40px -12px rgba(17,17,17,0.14)',
+        'az-glass':     '0 8px 32px rgba(17,17,17,0.10), inset 0 1px 0 rgba(255,255,255,0.4)',
+        'az-modal':     '0 24px 64px rgba(17,17,17,0.24), 0 0 0 1px rgba(17,17,17,0.06)',
+        'az-focus':     '0 0 0 3px rgba(108,79,209,0.18)',
+
         'sn-button':        '0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
         'sn-button-active': '0 0 0 rgba(0,0,0,0), inset 0 1px 2px rgba(0,0,0,0.3)',
         'sn-dropdown':      '0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,95,199,0.1)',

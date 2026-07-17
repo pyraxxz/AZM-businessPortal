@@ -2,6 +2,9 @@
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
+export { GlassPanel } from './GlassPanel';
+export { AnimatedNumber } from './AnimatedNumber';
+
 // ── Badge ─────────────────────────────────────────────────────────────────────
 export function Badge({ children, color = 'var(--sn-purple)', bg, className }) {
   const bgColor = bg || `${color}1a`;
