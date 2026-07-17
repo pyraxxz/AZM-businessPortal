@@ -42,6 +42,9 @@ import RestaurantInventory from '@/pages/RestaurantInventory';
 import Messages from '@/pages/Messages';
 import { AppBackground } from '@/components/AppBackground';
 import Analytics from '@/pages/Analytics';
+import Developer from '@/pages/settings/Developer';
+import BusinessGroups from '@/pages/BusinessGroups';
+import POS from '@/pages/POS';
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -122,6 +125,9 @@ function AppRoutes() {
         <Route path="/transit-cargo"         element={<TransitCargo />} />
         <Route path="/restaurant-inventory" element={<RestaurantInventory />} />
         <Route path="/analytics"            element={<Analytics />} />
+        <Route path="/pos"                   element={<POS />} />
+        <Route path="/settings/developer"   element={<Developer />} />
+        <Route path="/groups"               element={<BusinessGroups />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />

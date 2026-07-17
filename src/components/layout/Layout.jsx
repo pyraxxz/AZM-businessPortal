@@ -50,7 +50,7 @@ import {
   FileSpreadsheet,
   MessageSquare,
   ShoppingCart,
-, BarChart2 } from 'lucide-react';
+  BarChart2, Code2 } from 'lucide-react';
 
 const SECTION_HEADERS = {
   overview: 'Overview',
@@ -81,7 +81,7 @@ const ALL_NAVIGATION_ITEMS = [
   { label: 'Tables', icon: TableIcon, to: '/restaurant-tables', section: 'ops', perm: 'restaurant.view' },
   { label: 'Inventory', icon: Package, to: '/inventory', section: 'ops', perm: 'inventory.view' },
   { label: 'Dine-In', icon: Utensils, to: '/dine-in', section: 'ops', perm: 'restaurant.view' },
-  { label: 'POS', icon: ShoppingCart, to: '/dine-in', section: 'ops', perm: 'restaurant.view' },
+  { label: 'POS', icon: ShoppingCart, to: '/pos', section: 'ops', perm: 'restaurant.view' },
   { label: 'Transit Fleet', icon: CarFront, to: '/transit-fleet', section: 'ops', perm: 'transit.view' },
   { label: 'Trips', icon: Bus, to: '/transit', section: 'ops', perm: 'transit.view' },
   { label: 'Drivers', icon: ShipWheel, to: '/transit-drivers', section: 'ops', perm: 'transit.view' },
@@ -104,7 +104,8 @@ const ALL_NAVIGATION_ITEMS = [
 
   // Settings
   { label: 'Settings', icon: Settings, to: '/settings', section: 'settings', perm: null },
-  { label: 'Locations', icon: MapPin, to: '/locations', section: 'settings', perm: 'locations.view' }
+  { label: 'Locations', icon: MapPin, to: '/locations', section: 'settings', perm: 'locations.view' },
+  { label: 'Developer', icon: Code2, to: '/settings/developer', section: 'settings', perm: null }
 ];
 
 export default function Layout() {
