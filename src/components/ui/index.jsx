@@ -6,13 +6,27 @@ export { GlassPanel } from './GlassPanel';
 export { AnimatedNumber } from './AnimatedNumber';
 
 // ── Badge ─────────────────────────────────────────────────────────────────────
-export function Badge({ children, color = 'var(--az-accent)', bg, className }) {
-  const bgColor = bg || `${color}1a`;
+export function Badge({ children, variant = 'primary', color, bg, className }) {
+  const variants = {
+    primary:   { color: 'var(--az-accent)', bg: 'var(--az-accent-subtle)' },
+    success:   { color: 'var(--az-success)', bg: 'var(--az-success-subtle)' },
+    warning:   { color: 'var(--az-warning)', bg: 'var(--az-warning-subtle)' },
+    danger:    { color: 'var(--az-danger)', bg: 'var(--az-danger-subtle)' },
+    secondary: { color: 'var(--az-text-secondary)', bg: 'var(--az-bg-alt)', border: 'var(--az-border)' },
+    outline:   { color: 'var(--az-text-muted)', bg: 'transparent', border: 'var(--az-border)' },
+  };
+  const v = variants[variant] || variants.primary;
+  const c = color || v.color;
+  const b = bg || v.bg;
+
   return (
     <span
-      className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold', className)}
-      style={{ color, background: bgColor }}
+      className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold', className)}
+      style={{ color: c, background: b, border: v.border ? `1px solid ${v.border}` : undefined }}
     >
+      {variant !== 'outline' && variant !== 'secondary' && (
+        <span className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+      )}
       {children}
     </span>
   );

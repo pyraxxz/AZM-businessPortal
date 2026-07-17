@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/AuthContext';
 import { GlassPanel } from '@/components/ui/GlassPanel';
-import { orders as ordersApi } from '@/lib/api';
+import { orders as ordersApi, analytics as analyticsApi } from '@/lib/api';
 import { fmtUSDC, fmt, cn } from '@/lib/utils';
 import {
   TrendingUp, TrendingDown, Package, Users, AlertTriangle,
@@ -116,7 +116,7 @@ function Sk({ className = '' }) {
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-az-surface-solid border border-az-border rounded-az-md px-3 py-2 shadow-az-card text-xs">
+    <div className="bg-az-surface-solid border border-az-border rounded-xl px-3 py-2 shadow-az-card text-xs">
       <p className="text-az-text-muted mb-1">{label}</p>
       {payload.map((p, i) => (
         <p key={i} style={{ color: p.color }} className="font-semibold">{p.name}: {p.value}</p>
@@ -132,6 +132,12 @@ export default function Analytics() {
   const { bizProfile } = useAuth();
   const [forecastView, setForecastView] = useState('orders');
 
+  const { data: predictiveData, isLoading: predictiveLoading } = useQuery({
+    queryKey: ['analytics-predictive'],
+    queryFn: () => analyticsApi.predictive(),
+    enabled: !!bizProfile,
+  });
+
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['analytics-orders'],
     queryFn: () => ordersApi.list({ limit: 200 }),
@@ -140,10 +146,10 @@ export default function Analytics() {
 
   const allOrders = useMemo(() => Array.isArray(ordersData) ? ordersData : (ordersData?.orders || []), [ordersData]);
 
-  const forecast  = useMemo(() => forecastNext7Days(allOrders, buildDayOfWeekProfile(allOrders)), [allOrders]);
+  const forecast  = predictiveData?.forecast || [];
   const dowProfile = useMemo(() => buildDayOfWeekProfile(allOrders), [allOrders]);
-  const churnList  = useMemo(() => computeChurnRisk([], allOrders), [allOrders]);
-
+  const churnList  = predictiveData?.churnRisk || [];
+  const inventoryAlerts = predictiveData?.inventoryAlerts || [];
   // Trailing 30d revenue
   const revenueData = useMemo(() => {
     const map = {};
@@ -226,7 +232,7 @@ export default function Analytics() {
                       <stop offset="100%" stopColor="var(--az-accent)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke="var(--az-border)" strokeOpacity={0.4} vertical={false} />
+                  <CartesianGrid stroke="var(--az-border)" strokeOpacity={0.4} vertical={false} strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fill: 'var(--az-text-muted)', fontSize: 10 }} tickLine={false} axisLine={false} interval={6} />
                   <YAxis tick={{ fill: 'var(--az-text-muted)', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={v => v > 0 ? `$${(v/1).toFixed(0)}` : '0'} />
                   <Tooltip content={<ChartTooltip />} />
@@ -281,7 +287,7 @@ export default function Analytics() {
             {ordersLoading ? <Sk className="h-36 w-full" /> : (
               <ResponsiveContainer width="100%" height={150}>
                 <BarChart data={dowProfile} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                  <CartesianGrid stroke="var(--az-border)" strokeOpacity={0.4} vertical={false} />
+                  <CartesianGrid stroke="var(--az-border)" strokeOpacity={0.4} vertical={false} strokeDasharray="3 3" />
                   <XAxis dataKey="day" tick={{ fill: 'var(--az-text-muted)', fontSize: 11 }} tickLine={false} axisLine={false} />
                   <YAxis tick={{ fill: 'var(--az-text-muted)', fontSize: 10 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<ChartTooltip />} />

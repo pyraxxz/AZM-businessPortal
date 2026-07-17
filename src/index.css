@@ -8,7 +8,7 @@
     /* ── Phase 2 Design System: Light liquid glass aesthetic (DEFAULT) ── */
     --az-bg:            #F7F5F2;
     --az-bg-alt:        #FBFAF8;
-    --az-surface:       rgba(255, 255, 255, 0.72);
+    --az-surface:       #FFFFFF;
     --az-surface-solid: #FFFFFF;
     --az-border:        rgba(17, 17, 17, 0.08);
     --az-border-strong: rgba(17, 17, 17, 0.14);
@@ -267,7 +267,7 @@
 
   /* Light-theme aware enterprise helpers */
   .btn-az {
-    @apply inline-flex items-center justify-center gap-2 rounded-az-md font-semibold select-none transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold select-none transition-all duration-200;
     box-shadow: var(--shadow-az-card);
   }
   .btn-az-primary {

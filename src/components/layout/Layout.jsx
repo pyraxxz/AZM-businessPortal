@@ -234,7 +234,7 @@ export default function Layout() {
                   onClick={onLinkClick}
                   aria-label={item.label}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all relative rounded-az-md group',
+                    'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all relative rounded-full group',
                     active
                       ? 'text-az-accent font-semibold'
                       : 'text-az-text-secondary hover:bg-az-bg-alt hover:text-az-text'
@@ -244,7 +244,7 @@ export default function Layout() {
                   {active && (
                     <motion.div
                       layoutId="sidebar-active-bg"
-                      className="absolute inset-0 rounded-az-md bg-az-accent-subtle -z-10"
+                      className="absolute inset-0 rounded-full bg-az-accent-subtle -z-10"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -253,7 +253,7 @@ export default function Layout() {
                   {!sidebarExpanded && active && (
                     <motion.div
                       layoutId="sidebar-rail-active-bg"
-                      className="absolute inset-y-1.5 left-2 right-2 rounded-lg bg-az-accent-subtle -z-10"
+                      className="absolute inset-y-1.5 left-2 right-2 rounded-full bg-az-accent-subtle -z-10"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -289,7 +289,7 @@ export default function Layout() {
       <motion.aside
         animate={{ width: sidebarExpanded ? 240 : 64 }}
         transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-        className="hidden md:flex flex-col flex-shrink-0 border-r border-az-border bg-az-surface backdrop-blur-glass relative z-20 h-full overflow-hidden"
+        className="hidden md:flex flex-col flex-shrink-0 border-r border-az-border bg-white relative z-20 h-full overflow-hidden"
       >
         {/* Logo area */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-az-border flex-shrink-0">
@@ -365,7 +365,7 @@ export default function Layout() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-[280px] bg-az-surface backdrop-blur-glass border-r border-az-border z-40 md:hidden flex flex-col h-full shadow-lg"
+              className="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-az-border z-40 md:hidden flex flex-col h-full shadow-lg"
             >
               <div className="h-16 flex items-center justify-between px-4 border-b border-az-border flex-shrink-0">
                 <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">

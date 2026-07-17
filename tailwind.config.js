@@ -9,7 +9,7 @@ module.exports = {
         // Light surface stack (default)
         'az-bg':            '#F7F5F2',
         'az-bg-alt':        '#FBFAF8',
-        'az-surface':       'rgba(255,255,255,0.72)',
+        'az-surface':       '#FFFFFF',
         'az-surface-solid': '#FFFFFF',
         'az-border':        'rgba(17,17,17,0.08)',
         'az-border-strong': 'rgba(17,17,17,0.14)',
@@ -120,10 +120,10 @@ module.exports = {
         glass: '20px',
       },
       boxShadow: {
-        'az-card':      '0 1px 2px rgba(17,17,17,0.04), 0 8px 24px -8px rgba(17,17,17,0.08)',
-        'az-card-hover':'0 4px 16px rgba(17,17,17,0.06), 0 16px 40px -12px rgba(17,17,17,0.14)',
-        'az-glass':     '0 8px 32px rgba(17,17,17,0.10), inset 0 1px 0 rgba(255,255,255,0.4)',
-        'az-modal':     '0 24px 64px rgba(17,17,17,0.24), 0 0 0 1px rgba(17,17,17,0.06)',
+        'az-card':      '0 4px 20px rgba(17,17,17,0.04), 0 1px 3px rgba(17,17,17,0.02)',
+        'az-card-hover':'0 8px 30px rgba(17,17,17,0.08), 0 4px 10px rgba(17,17,17,0.04)',
+        'az-glass':     '0 8px 32px rgba(17,17,17,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
+        'az-modal':     '0 24px 64px rgba(17,17,17,0.15), 0 0 0 1px rgba(17,17,17,0.06)',
         'az-focus':     '0 0 0 3px rgba(108,79,209,0.18)',
 
         'sn-button':        '0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',

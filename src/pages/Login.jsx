@@ -30,12 +30,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'var(--az-black)' }}>
+    <div className="min-h-screen flex bg-white text-az-text">
 
       {/* Left panel — branding */}
       <div
-        className="hidden lg:flex flex-col justify-between w-[420px] flex-shrink-0 p-10 border-r border-[var(--az-border)]"
-        style={{ background: 'var(--az-surface)' }}
+        className="hidden lg:flex flex-col justify-between w-[420px] flex-shrink-0 p-10 border-r border-az-border bg-az-bg-alt"
       >
         <div>
           {/* Logo */}
@@ -115,7 +114,7 @@ export default function Login() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   autoComplete="current-password"
-                  className="w-full px-4 py-3 pr-10 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] text-[var(--az-text)] text-sm placeholder:text-[var(--az-text-muted)] outline-none focus:border-[var(--az-accent)] focus:ring-1 focus:ring-[var(--az-accent)] transition-colors"
+                  className="w-full px-4 py-3 pr-10 rounded-xl bg-white border border-az-border text-az-text text-sm placeholder:text-az-text-muted outline-none focus:border-az-accent focus:ring-1 focus:ring-az-accent transition-colors"
                 />
                 <button
                   type="button"
@@ -128,9 +127,9 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--az-danger)] border border-[var(--az-danger)]">
-                <AlertCircle className="w-4 h-4 text-[var(--az-danger)] flex-shrink-0" />
-                <p className="text-xs text-[var(--az-danger)]">{error}</p>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-az-danger-subtle border border-az-danger-subtle">
+                <AlertCircle className="w-4 h-4 text-az-danger flex-shrink-0" />
+                <p className="text-xs text-az-danger font-medium">{error}</p>
               </div>
             )}
 
