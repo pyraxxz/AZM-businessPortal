@@ -258,6 +258,42 @@ export const financeApi = {
   getCashFlow: (days = 30) => request(`/api/business-os/finance/cash-flow?days=${days}`),
   getPnl: (month) => request(`/api/business-os/finance/pnl?month=${month}`),
   payOut: (amount, destination) => request('/api/business-os/finance/payout', { method: 'POST', body: JSON.stringify({ amount, destination }) }),
+  getDashboard: (params) => {
+    const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/business-os/finance/dashboard${qs}`);
+  },
+  getPnL: (params) => {
+    const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/business-os/finance/pl${qs}`);
+  },
+  getCashflow: (params) => {
+    const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/business-os/finance/cashflow${qs}`);
+  },
+  getExpenses: (params) => {
+    const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/business-os/finance/expenses${qs}`);
+  },
+  getEscrowHeld: () => request('/api/business-os/finance/escrow-held'),
+  getRecurring: () => request('/api/business-os/finance/recurring'),
+  createRecurring: (data) => request('/api/business-os/finance/recurring', { method: 'POST', body: JSON.stringify(data) }),
+  updateRecurring: (id, data) => request(`/api/business-os/finance/recurring/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteRecurring: (id) => request(`/api/business-os/finance/recurring/${id}`, { method: 'DELETE' }),
+  getPayrollPosition: () => request('/api/business-os/finance/payroll-position'),
+  getLedgerDashboard: (params) => {
+    const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/business-os/ledger/dashboard${qs}`);
+  },
+  getProfitLoss: (params) => {
+    const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/business-os/ledger/profit-loss${qs}`);
+  },
+  getLedgerExpenses: (params) => {
+    const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/business-os/ledger/expenses${qs}`);
+  },
+  createLedgerEntry: (data) => request('/api/business-os/ledger', { method: 'POST', body: JSON.stringify(data) }),
+  deleteLedgerEntry: (id) => request(`/api/business-os/ledger/${id}`, { method: 'DELETE' })
 };
 
 export const hotelOpsApi = {
@@ -477,3 +513,33 @@ export const bookingOpsApi = {
   // Booking Dashboard
   bookingDashboard: () => request('/api/business-os/booking/dashboard'),
 };
+
+// ── Analytics API ────────────────────────────────────────────────────────────
+export const analyticsApi = {
+  getCustomer: () => request('/api/business-os/analytics/customer'),
+  getOperational: () => request('/api/business-os/analytics/operational'),
+};
+
+// ── Module 08: Marketing & Promotions API ──────────────────────────────────
+export const marketingApi = {
+  // Promotions CRUD
+  getPromotions: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/marketing/promotions${qs ? `?${qs}` : ''}`);
+  },
+  createPromotion: (data) => request('/api/business-os/marketing/promotions', { method: 'POST', body: JSON.stringify(data) }),
+  updatePromotion: (id, data) => request(`/api/business-os/marketing/promotions/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deletePromotion: (id) => request(`/api/business-os/marketing/promotions/${id}`, { method: 'DELETE' }),
+
+  // Review management
+  respondToReview: (reviewId, response) => request(`/api/business-os/marketing/reviews/${reviewId}/respond`, { method: 'POST', body: JSON.stringify({ response }) }),
+  flagReview: (reviewId, reason) => request(`/api/business-os/marketing/reviews/${reviewId}/flag`, { method: 'POST', body: JSON.stringify({ reason }) }),
+
+  // Broadcast to followers
+  broadcast: (title, message) => request('/api/business-os/marketing/broadcast', { method: 'POST', body: JSON.stringify({ title, message }) }),
+  getFollowers: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/api/business-os/marketing/followers${qs ? `?${qs}` : ''}`);
+  },
+};
+
