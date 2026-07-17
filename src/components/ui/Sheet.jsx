@@ -10,14 +10,14 @@ export function Sheet({ open, onClose, title, children, side = 'right', width = 
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div
         className={cn(
-          'absolute top-0 bottom-0 overflow-y-auto border-l border-[var(--sn-border)] shadow-2xl',
+          'absolute top-0 bottom-0 overflow-y-auto border-l border-[var(--az-border)] shadow-2xl',
           sideClass, animation, width, className
         )}
-        style={{ background: 'var(--sn-card)' }}
+        style={{ background: 'var(--az-surface)' }}
       >
-        <div className="sticky top-0 flex items-center justify-between px-6 py-4 border-b border-[var(--sn-border)] z-10" style={{ background: 'var(--sn-card)' }}>
-          <h2 className="text-base font-bold text-[var(--sn-text)]">{title}</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--sn-card-hover)] text-[var(--sn-text-muted)] hover:text-[var(--sn-text)] transition-colors">
+        <div className="sticky top-0 flex items-center justify-between px-6 py-4 border-b border-[var(--az-border)] z-10" style={{ background: 'var(--az-surface)' }}>
+          <h2 className="text-base font-bold text-[var(--az-text)]">{title}</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--az-bg-alt)] text-[var(--az-text-muted)] hover:text-[var(--az-text)] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>

@@ -38,12 +38,12 @@ import { request } from '@/lib/apiCore'; // safe request fallback if we call new
 
 // Status configuration metadata
 const STATUS_META = {
-  AVAILABLE: { label: 'Available', color: 'var(--sn-green)', icon: CheckCircle2 },
-  OCCUPIED: { label: 'Occupied', color: 'var(--sn-blue)', icon: BedDouble },
-  DIRTY: { label: 'Dirty', color: 'var(--sn-amber)', icon: AlertCircle },
-  MAINTENANCE: { label: 'Maintenance', color: 'var(--sn-red)', icon: Wrench },
-  RESERVED: { label: 'Reserved', color: 'var(--sn-purple)', icon: BedDouble },
-  CLEANING: { label: 'Cleaning', color: 'var(--sn-purple)', icon: Sparkles }
+  AVAILABLE: { label: 'Available', color: 'var(--az-success)', icon: CheckCircle2 },
+  OCCUPIED: { label: 'Occupied', color: 'var(--az-info)', icon: BedDouble },
+  DIRTY: { label: 'Dirty', color: 'var(--az-warning)', icon: AlertCircle },
+  MAINTENANCE: { label: 'Maintenance', color: 'var(--az-danger)', icon: Wrench },
+  RESERVED: { label: 'Reserved', color: 'var(--az-accent)', icon: BedDouble },
+  CLEANING: { label: 'Cleaning', color: 'var(--az-accent)', icon: Sparkles }
 };
 
 // Available Amenities list for selection/chips
@@ -443,12 +443,12 @@ export default function HotelRooms() {
   };
 
   return (
-    <div className="space-y-6 pb-12" style={{ color: 'var(--sn-text)' }}>
+    <div className="space-y-6 pb-12" style={{ color: 'var(--az-text)' }}>
       {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--sn-border)] pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--az-border)] pb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Hotel Room Command</h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">
             Manage your physical spaces, rooms status, and dynamic rate pricing rules from a central dashboard.
           </p>
         </div>
@@ -469,13 +469,13 @@ export default function HotelRooms() {
       </div>
 
       {/* PRIMARY TAB CONTROLLER */}
-      <div className="flex gap-1 p-1 bg-[var(--az-black)] border border-[var(--sn-border)] rounded-xl w-fit">
+      <div className="flex gap-1 p-1 bg-[var(--az-black)] border border-[var(--az-border)] rounded-xl w-fit">
         <button
           onClick={() => setActiveTab('inventory')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
             activeTab === 'inventory'
-              ? 'bg-[var(--sn-purple)] text-[var(--az-black)] shadow-sm'
-              : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'
+              ? 'bg-[var(--az-accent)] text-[var(--az-black)] shadow-sm'
+              : 'text-[var(--az-text-muted)] hover:text-[var(--az-text)]'
           }`}
         >
           <BedDouble className="w-4 h-4" />
@@ -485,8 +485,8 @@ export default function HotelRooms() {
           onClick={() => setActiveTab('rates')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
             activeTab === 'rates'
-              ? 'bg-[var(--sn-purple)] text-[var(--az-black)] shadow-sm'
-              : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'
+              ? 'bg-[var(--az-accent)] text-[var(--az-black)] shadow-sm'
+              : 'text-[var(--az-text-muted)] hover:text-[var(--az-text)]'
           }`}
         >
           <Calendar className="w-4 h-4" />
@@ -520,11 +520,11 @@ export default function HotelRooms() {
               return (
                 <div
                   key={key}
-                  className="flex flex-col justify-between p-3 rounded-xl border border-[var(--sn-border)] bg-[var(--az-card)]"
+                  className="flex flex-col justify-between p-3 rounded-xl border border-[var(--az-border)] bg-[var(--az-card)]"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <meta.icon className="w-4 h-4 flex-shrink-0" style={{ color: meta.color }} />
-                    <span className="text-[10px] text-[var(--sn-text-muted)] font-bold uppercase tracking-wider">
+                    <span className="text-[10px] text-[var(--az-text-muted)] font-bold uppercase tracking-wider">
                       {meta.label}
                     </span>
                   </div>
@@ -535,13 +535,13 @@ export default function HotelRooms() {
           </div>
 
           {/* FILTER CONTROLS */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-[var(--az-card)] p-4 rounded-xl border border-[var(--sn-border)]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-[var(--az-card)] p-4 rounded-xl border border-[var(--az-border)]">
             <div>
-              <label className="text-[10px] font-bold text-[var(--sn-text-muted)] uppercase mb-1 block">Floor</label>
+              <label className="text-[10px] font-bold text-[var(--az-text-muted)] uppercase mb-1 block">Floor</label>
               <select
                 value={filterFloor}
                 onChange={(e) => setFilterFloor(e.target.value)}
-                className="w-full bg-[var(--az-black)] border border-[var(--sn-border)] text-sm rounded-lg p-2 outline-none text-[var(--sn-text)] focus:border-[var(--sn-purple)]"
+                className="w-full bg-[var(--az-black)] border border-[var(--az-border)] text-sm rounded-lg p-2 outline-none text-[var(--az-text)] focus:border-[var(--az-accent)]"
               >
                 <option value="ALL">All Floors</option>
                 {uniqueFloors.map(fl => (
@@ -550,11 +550,11 @@ export default function HotelRooms() {
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-[var(--sn-text-muted)] uppercase mb-1 block">Room Type</label>
+              <label className="text-[10px] font-bold text-[var(--az-text-muted)] uppercase mb-1 block">Room Type</label>
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="w-full bg-[var(--az-black)] border border-[var(--sn-border)] text-sm rounded-lg p-2 outline-none text-[var(--sn-text)] focus:border-[var(--sn-purple)]"
+                className="w-full bg-[var(--az-black)] border border-[var(--az-border)] text-sm rounded-lg p-2 outline-none text-[var(--az-text)] focus:border-[var(--az-accent)]"
               >
                 <option value="ALL">All Types</option>
                 {ROOM_TYPES.map(opt => (
@@ -563,11 +563,11 @@ export default function HotelRooms() {
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-[var(--sn-text-muted)] uppercase mb-1 block">Status</label>
+              <label className="text-[10px] font-bold text-[var(--az-text-muted)] uppercase mb-1 block">Status</label>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full bg-[var(--az-black)] border border-[var(--sn-border)] text-sm rounded-lg p-2 outline-none text-[var(--sn-text)] focus:border-[var(--sn-purple)]"
+                className="w-full bg-[var(--az-black)] border border-[var(--az-border)] text-sm rounded-lg p-2 outline-none text-[var(--az-text)] focus:border-[var(--az-accent)]"
               >
                 <option value="ALL">All Statuses</option>
                 {Object.entries(STATUS_META).map(([key, meta]) => (
@@ -607,7 +607,7 @@ export default function HotelRooms() {
                     <div>
                       {/* Badge / Meta */}
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-bold text-[var(--sn-text-muted)]">
+                        <span className="text-xs font-bold text-[var(--az-text-muted)]">
                           FLOOR {room.floor}
                         </span>
                         <Badge color={meta.color}>{meta.label}</Badge>
@@ -616,15 +616,15 @@ export default function HotelRooms() {
                       {/* Number & Type */}
                       <div className="mb-2">
                         <h3 className="text-lg font-bold">Room {room.roomNumber}</h3>
-                        <p className="text-xs text-[var(--sn-text-muted)]">
+                        <p className="text-xs text-[var(--az-text-muted)]">
                           {ROOM_TYPES.find(t => t.value === room.roomType)?.label || room.roomType}
                         </p>
                       </div>
 
                       {/* Bed Config */}
                       {room.bedConfig && (
-                        <p className="text-xs text-[var(--sn-text-muted)] flex items-center gap-1.5 mb-3">
-                          <BedDouble className="w-3.5 h-3.5 text-[var(--sn-purple)]" />
+                        <p className="text-xs text-[var(--az-text-muted)] flex items-center gap-1.5 mb-3">
+                          <BedDouble className="w-3.5 h-3.5 text-[var(--az-accent)]" />
                           {room.bedConfig}
                         </p>
                       )}
@@ -635,13 +635,13 @@ export default function HotelRooms() {
                           {room.amenities.slice(0, maxChips).map(am => (
                             <span
                               key={am}
-                              className="text-[10px] px-2 py-0.5 rounded bg-[var(--sn-border)] text-[var(--sn-text-muted)] font-medium"
+                              className="text-[10px] px-2 py-0.5 rounded bg-[var(--az-border)] text-[var(--az-text-muted)] font-medium"
                             >
                               {am}
                             </span>
                           ))}
                           {extraCount > 0 && (
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--sn-purple)]0d text-[var(--sn-purple)] font-medium">
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--az-accent)]0d text-[var(--az-accent)] font-medium">
                               +{extraCount} more
                             </span>
                           )}
@@ -650,10 +650,10 @@ export default function HotelRooms() {
                     </div>
 
                     {/* Footer price & view details button */}
-                    <div className="pt-3 border-t border-[var(--sn-border)] flex items-center justify-between mt-auto">
+                    <div className="pt-3 border-t border-[var(--az-border)] flex items-center justify-between mt-auto">
                       <div>
-                        <p className="text-[10px] text-[var(--sn-text-muted)] font-bold uppercase">Rate</p>
-                        <p className="text-sm font-bold text-[var(--sn-green)]">{priceStr}</p>
+                        <p className="text-[10px] text-[var(--az-text-muted)] font-bold uppercase">Rate</p>
+                        <p className="text-sm font-bold text-[var(--az-success)]">{priceStr}</p>
                       </div>
                       <Button variant="secondary" size="sm" className="py-1 px-2.5 h-8 text-xs" onClick={() => openEditModal(room)}>
                         Manage
@@ -671,21 +671,21 @@ export default function HotelRooms() {
       {activeTab === 'rates' && (
         <div className="space-y-6">
           {/* INTRO AND QUICK ACTIONS */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--az-card)] p-4 rounded-xl border border-[var(--sn-border)]">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--az-card)] p-4 rounded-xl border border-[var(--az-border)]">
             <div>
               <h3 className="text-sm font-bold">Smart Pricing Override</h3>
-              <p className="text-xs text-[var(--sn-text-muted)]">
+              <p className="text-xs text-[var(--az-text-muted)]">
                 Click cells to set rates, or apply multipliers over your baseline prices.
               </p>
             </div>
             {canManage && (
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" onClick={() => handleBulkRateAction('WEEKEND')}>
-                  <TrendingUp className="w-3.5 h-3.5 text-[var(--sn-purple)] mr-1" />
+                  <TrendingUp className="w-3.5 h-3.5 text-[var(--az-accent)] mr-1" />
                   Weekend +20%
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleBulkRateAction('HOLIDAY')}>
-                  <TrendingUp className="w-3.5 h-3.5 text-[var(--sn-purple)] mr-1" />
+                  <TrendingUp className="w-3.5 h-3.5 text-[var(--az-accent)] mr-1" />
                   Holiday +40%
                 </Button>
               </div>
@@ -696,15 +696,15 @@ export default function HotelRooms() {
           {loadingRates ? (
             <Skeleton className="h-96 w-full" />
           ) : (
-            <div className="overflow-x-auto border border-[var(--sn-border)] rounded-xl bg-[var(--az-card)]">
+            <div className="overflow-x-auto border border-[var(--az-border)] rounded-xl bg-[var(--az-card)]">
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-[var(--sn-border)] bg-[var(--az-black)]">
-                    <th className="p-3 text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider sticky left-0 bg-[var(--az-black)] z-10">
+                  <tr className="border-b border-[var(--az-border)] bg-[var(--az-black)]">
+                    <th className="p-3 text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider sticky left-0 bg-[var(--az-black)] z-10">
                       Room Type
                     </th>
                     {calendarDates.map(d => (
-                      <th key={d.dateStr} className="p-3 text-xs font-bold text-[var(--sn-text-muted)] uppercase text-center min-w-[90px]">
+                      <th key={d.dateStr} className="p-3 text-xs font-bold text-[var(--az-text-muted)] uppercase text-center min-w-[90px]">
                         {d.display}
                       </th>
                     ))}
@@ -715,10 +715,10 @@ export default function HotelRooms() {
                     const defaultPrice = getDefaultPriceForType(type.value);
 
                     return (
-                      <tr key={type.value} className="border-b border-[var(--sn-border)] hover:bg-[var(--sn-border)]/10">
-                        <td className="p-3 text-sm font-bold sticky left-0 bg-[var(--az-card)] border-r border-[var(--sn-border)] z-10">
+                      <tr key={type.value} className="border-b border-[var(--az-border)] hover:bg-[var(--az-border)]/10">
+                        <td className="p-3 text-sm font-bold sticky left-0 bg-[var(--az-card)] border-r border-[var(--az-border)] z-10">
                           {type.label}
-                          <p className="text-[10px] text-[var(--sn-text-muted)] font-normal">
+                          <p className="text-[10px] text-[var(--az-text-muted)] font-normal">
                             Base: {defaultPrice.toFixed(2)} USDC
                           </p>
                         </td>
@@ -737,17 +737,17 @@ export default function HotelRooms() {
                                 setRateOverridePrice(String(ratePrice));
                                 setIsRateOverrideModalOpen(true);
                               }}
-                              className={`p-3 text-center cursor-pointer transition-all border-r border-[var(--sn-border)]/50 ${
+                              className={`p-3 text-center cursor-pointer transition-all border-r border-[var(--az-border)]/50 ${
                                 isOverridden
-                                  ? 'bg-[var(--sn-purple)]/15 hover:bg-[var(--sn-purple)]/25 text-[var(--sn-purple)]'
-                                  : 'hover:bg-[var(--sn-border)]/30 text-[var(--sn-text)]'
+                                  ? 'bg-[var(--az-accent)]/15 hover:bg-[var(--az-accent)]/25 text-[var(--az-accent)]'
+                                  : 'hover:bg-[var(--az-border)]/30 text-[var(--az-text)]'
                               }`}
                             >
                               <div className="font-semibold text-xs py-1">
                                 {parseFloat(ratePrice).toFixed(2)}
                               </div>
                               {isOverridden && (
-                                <span className="inline-block text-[8px] bg-[var(--sn-purple)]/20 px-1 py-0.2 rounded font-bold uppercase tracking-wider">
+                                <span className="inline-block text-[8px] bg-[var(--az-accent)]/20 px-1 py-0.2 rounded font-bold uppercase tracking-wider">
                                   Custom
                                 </span>
                               )}
@@ -836,10 +836,10 @@ export default function HotelRooms() {
           />
 
           <div>
-            <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider block mb-1.5">
+            <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider block mb-1.5">
               Amenities
             </label>
-            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-[var(--az-black)] border border-[var(--sn-border)] rounded-xl">
+            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-[var(--az-black)] border border-[var(--az-border)] rounded-xl">
               {AVAILABLE_AMENITIES.map(am => {
                 const isSelected = roomForm.amenities.includes(am);
                 return (
@@ -849,8 +849,8 @@ export default function HotelRooms() {
                     onClick={() => toggleAmenity(am)}
                     className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition-all ${
                       isSelected
-                        ? 'bg-[var(--sn-purple)] border-[var(--sn-purple)] text-[var(--az-black)]'
-                        : 'bg-[var(--az-card)] border-[var(--sn-border)] text-[var(--sn-text-muted)] hover:border-[var(--sn-purple)]'
+                        ? 'bg-[var(--az-accent)] border-[var(--az-accent)] text-[var(--az-black)]'
+                        : 'bg-[var(--az-card)] border-[var(--az-border)] text-[var(--az-text-muted)] hover:border-[var(--az-accent)]'
                     }`}
                   >
                     {am}
@@ -867,7 +867,7 @@ export default function HotelRooms() {
             onChange={(e) => setRoomForm({ ...roomForm, notes: e.target.value })}
           />
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--az-border)]">
             <Button variant="secondary" size="sm" type="button" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>
@@ -939,7 +939,7 @@ export default function HotelRooms() {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--az-border)]">
             <Button variant="secondary" size="sm" type="button" onClick={() => setIsBulkModalOpen(false)}>
               Cancel
             </Button>
@@ -959,15 +959,15 @@ export default function HotelRooms() {
         {selectedRoom && (
           <form onSubmit={handleUpdateRoom} className="space-y-4">
             {/* Status cycling options */}
-            <div className="p-3 bg-[var(--az-black)] rounded-xl border border-[var(--sn-border)] flex flex-wrap gap-2 items-center justify-between">
+            <div className="p-3 bg-[var(--az-black)] rounded-xl border border-[var(--az-border)] flex flex-wrap gap-2 items-center justify-between">
               <div>
-                <p className="text-[10px] font-bold text-[var(--sn-text-muted)] uppercase">Status Control</p>
+                <p className="text-[10px] font-bold text-[var(--az-text-muted)] uppercase">Status Control</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span
                     className="w-2.5 h-2.5 rounded-full inline-block"
-                    style={{ backgroundColor: STATUS_META[selectedRoom.status]?.color || 'var(--sn-text)' }}
+                    style={{ backgroundColor: STATUS_META[selectedRoom.status]?.color || 'var(--az-text)' }}
                   />
-                  <p className="text-sm font-semibold text-[var(--sn-text)]">{STATUS_META[selectedRoom.status]?.label}</p>
+                  <p className="text-sm font-semibold text-[var(--az-text)]">{STATUS_META[selectedRoom.status]?.label}</p>
                 </div>
               </div>
               <div className="flex gap-1 flex-wrap">
@@ -978,8 +978,8 @@ export default function HotelRooms() {
                     onClick={() => handleCycleStatus(selectedRoom, st)}
                     className={`text-[10px] px-2 py-1 rounded font-bold transition-all ${
                       selectedRoom.status === st
-                        ? 'bg-[var(--sn-purple)] text-[var(--az-black)]'
-                        : 'bg-[var(--az-card)] border border-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'
+                        ? 'bg-[var(--az-accent)] text-[var(--az-black)]'
+                        : 'bg-[var(--az-card)] border border-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-text)]'
                     }`}
                   >
                     {STATUS_META[st].label}
@@ -990,16 +990,16 @@ export default function HotelRooms() {
 
             {/* Block action */}
             {canManage && (
-              <div className="bg-[var(--sn-red)]/10 p-3 rounded-xl border border-[var(--sn-red)]/25 flex items-center justify-between">
+              <div className="bg-[var(--az-danger)]/10 p-3 rounded-xl border border-[var(--az-danger)]/25 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-[var(--sn-red)]">Block / Place Out of Order</p>
-                  <p className="text-[10px] text-[var(--sn-text-muted)] mt-0.5">Prevent room availability bookings.</p>
+                  <p className="text-xs font-bold text-[var(--az-danger)]">Block / Place Out of Order</p>
+                  <p className="text-[10px] text-[var(--az-text-muted)] mt-0.5">Prevent room availability bookings.</p>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   type="button"
-                  className="border-[var(--sn-red)] text-[var(--sn-red)] hover:bg-[var(--sn-red)]/10 text-xs px-2 py-1.5 h-8"
+                  className="border-[var(--az-danger)] text-[var(--az-danger)] hover:bg-[var(--az-danger)]/10 text-xs px-2 py-1.5 h-8"
                   onClick={() => setIsBlockModalOpen(true)}
                 >
                   Configure Block
@@ -1070,10 +1070,10 @@ export default function HotelRooms() {
             />
 
             <div>
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider block mb-1.5">
+              <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider block mb-1.5">
                 Amenities
               </label>
-              <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-[var(--az-black)] border border-[var(--sn-border)] rounded-xl">
+              <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-[var(--az-black)] border border-[var(--az-border)] rounded-xl">
                 {AVAILABLE_AMENITIES.map(am => {
                   const isSelected = roomForm.amenities.includes(am);
                   return (
@@ -1085,8 +1085,8 @@ export default function HotelRooms() {
                       }}
                       className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition-all ${
                         isSelected
-                          ? 'bg-[var(--sn-purple)] border-[var(--sn-purple)] text-[var(--az-black)]'
-                          : 'bg-[var(--az-card)] border-[var(--sn-border)] text-[var(--sn-text-muted)] hover:border-[var(--sn-purple)]'
+                          ? 'bg-[var(--az-accent)] border-[var(--az-accent)] text-[var(--az-black)]'
+                          : 'bg-[var(--az-card)] border-[var(--az-border)] text-[var(--az-text-muted)] hover:border-[var(--az-accent)]'
                       }`}
                       disabled={!canManage}
                     >
@@ -1104,7 +1104,7 @@ export default function HotelRooms() {
               disabled={!canManage}
             />
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--az-border)]">
               <Button variant="secondary" size="sm" type="button" onClick={() => setIsDetailModalOpen(false)}>
                 {canManage ? 'Cancel' : 'Close'}
               </Button>
@@ -1125,7 +1125,7 @@ export default function HotelRooms() {
         title={selectedRoom ? `Block Room ${selectedRoom.roomNumber}` : 'Block Room'}
       >
         <form onSubmit={handleBlockRoom} className="space-y-4">
-          <p className="text-xs text-[var(--sn-text-muted)]">
+          <p className="text-xs text-[var(--az-text-muted)]">
             Specify a maintenance date range. The status will update automatically and block outbound reservations.
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -1151,7 +1151,7 @@ export default function HotelRooms() {
             onChange={(e) => setBlockForm({ ...blockForm, reason: e.target.value })}
             required
           />
-          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--az-border)]">
             <Button variant="secondary" size="sm" type="button" onClick={() => setIsBlockModalOpen(false)}>
               Cancel
             </Button>
@@ -1170,11 +1170,11 @@ export default function HotelRooms() {
       >
         {selectedRateCell && (
           <form onSubmit={handleSaveRateOverride} className="space-y-4">
-            <div className="p-3 bg-[var(--az-black)] rounded-xl border border-[var(--sn-border)] space-y-1">
-              <p className="text-xs font-bold text-[var(--sn-text-muted)] uppercase">Override Parameters</p>
+            <div className="p-3 bg-[var(--az-black)] rounded-xl border border-[var(--az-border)] space-y-1">
+              <p className="text-xs font-bold text-[var(--az-text-muted)] uppercase">Override Parameters</p>
               <div className="flex justify-between text-sm">
                 <span>Room Type:</span>
-                <span className="font-bold text-[var(--sn-purple)]">
+                <span className="font-bold text-[var(--az-accent)]">
                   {ROOM_TYPES.find(t => t.value === selectedRateCell.roomType)?.label || selectedRateCell.roomType}
                 </span>
               </div>
@@ -1194,7 +1194,7 @@ export default function HotelRooms() {
               autoFocus
             />
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--az-border)]">
               <Button variant="secondary" size="sm" type="button" onClick={() => setIsRateOverrideModalOpen(false)}>
                 Cancel
               </Button>

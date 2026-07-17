@@ -7,7 +7,7 @@ const ToastContext = createContext(null);
 export const useToast = () => useContext(ToastContext);
 
 const ICONS = { success: CheckCircle2, error: XCircle, info: Info, warning: AlertCircle };
-const COLORS = { success: 'var(--sn-purple)', error: 'var(--sn-red)', info: 'var(--sn-blue)', warning: 'var(--sn-amber)' };
+const COLORS = { success: 'var(--az-accent)', error: 'var(--az-danger)', info: 'var(--az-info)', warning: 'var(--az-warning)' };
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
@@ -39,11 +39,11 @@ export function ToastProvider({ children }) {
               className={cn(
                 'flex items-start gap-3 px-4 py-3 rounded-xl border shadow-2xl animate-slide-in-right',
               )}
-              style={{ background: 'var(--sn-card)', borderColor: `${color}40` }}
+              style={{ background: 'var(--az-surface)', borderColor: `${color}40` }}
             >
               <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color }} />
-              <p className="text-sm text-[var(--sn-text)] flex-1">{t.message}</p>
-              <button onClick={() => remove(t.id)} className="text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]">
+              <p className="text-sm text-[var(--az-text)] flex-1">{t.message}</p>
+              <button onClick={() => remove(t.id)} className="text-[var(--az-text-muted)] hover:text-[var(--az-text)]">
                 <X className="w-4 h-4" />
               </button>
             </div>

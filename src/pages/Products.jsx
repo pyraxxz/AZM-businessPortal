@@ -625,12 +625,12 @@ export default function Products() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in product-catalog-page">
       {/* Header Panel */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[var(--az-card)] border border-[var(--sn-border)] p-6 rounded-2xl">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[var(--az-card)] border border-[var(--az-border)] p-6 rounded-2xl">
         <div>
-          <h1 className="text-2xl font-black text-[var(--sn-text)] flex items-center gap-2">
-            <Layers className="w-6 h-6 text-[var(--sn-purple)]" /> Menu & Product Catalog
+          <h1 className="text-2xl font-black text-[var(--az-text)] flex items-center gap-2">
+            <Layers className="w-6 h-6 text-[var(--az-accent)]" /> Menu & Product Catalog
           </h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">
             Build and optimize menu sections, dietary tags, variants, modifier rules, and inventory-linked recipe formulas.
           </p>
         </div>
@@ -653,7 +653,7 @@ export default function Products() {
       </div>
 
       {/* Control / Filter Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[var(--sn-card)] border border-[var(--sn-border)] p-4 rounded-xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[var(--az-surface)] border border-[var(--az-border)] p-4 rounded-xl">
         <Select
           label="Outlet Location"
           options={[{ value: '', label: 'All Locations' }, ...locationsList.map(l => ({ value: l.id, label: l.name }))]}
@@ -672,10 +672,10 @@ export default function Products() {
         />
 
         <div className="flex flex-col gap-1.5 justify-end">
-          <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Quick Metrics</label>
-          <div className="flex items-center gap-4 text-sm font-semibold py-2 px-3 bg-[var(--az-black)] rounded-xl border border-[var(--sn-border)] text-[var(--sn-text-muted)]">
-            <span>Total: <strong className="text-[var(--sn-text)]">{productsList.length}</strong></span>
-            <span>Sold Out (86'd): <strong className="text-[var(--sn-red)]">{soldOutIds.size}</strong></span>
+          <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Quick Metrics</label>
+          <div className="flex items-center gap-4 text-sm font-semibold py-2 px-3 bg-[var(--az-black)] rounded-xl border border-[var(--az-border)] text-[var(--az-text-muted)]">
+            <span>Total: <strong className="text-[var(--az-text)]">{productsList.length}</strong></span>
+            <span>Sold Out (86'd): <strong className="text-[var(--az-danger)]">{soldOutIds.size}</strong></span>
           </div>
         </div>
       </div>
@@ -685,9 +685,9 @@ export default function Products() {
         
         {/* Left Column: Sections Reordering Panel */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="flex items-center justify-between border-b border-[var(--sn-border)] pb-2">
-            <h3 className="text-sm font-bold text-[var(--sn-text)]">Menu Sections</h3>
-            <Badge color="var(--sn-purple)">{sectionsList.length}</Badge>
+          <div className="flex items-center justify-between border-b border-[var(--az-border)] pb-2">
+            <h3 className="text-sm font-bold text-[var(--az-text)]">Menu Sections</h3>
+            <Badge color="var(--az-accent)">{sectionsList.length}</Badge>
           </div>
 
           {isSectionsLoading ? (
@@ -695,7 +695,7 @@ export default function Products() {
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-14" />)}
             </div>
           ) : sectionsList.length === 0 ? (
-            <div className="p-4 rounded-xl border border-[var(--sn-border)] bg-[var(--az-black)] text-center text-xs text-[var(--sn-text-muted)]">
+            <div className="p-4 rounded-xl border border-[var(--az-border)] bg-[var(--az-black)] text-center text-xs text-[var(--az-text-muted)]">
               No custom sections built.
             </div>
           ) : (
@@ -705,13 +705,13 @@ export default function Products() {
                 .map((section, idx) => (
                   <div
                     key={section.id}
-                    className="flex items-center justify-between p-3 rounded-xl border border-[var(--sn-border)] bg-[var(--az-card)] hover:border-[var(--sn-purple)] transition-all"
+                    className="flex items-center justify-between p-3 rounded-xl border border-[var(--az-border)] bg-[var(--az-card)] hover:border-[var(--az-accent)] transition-all"
                   >
                     <div className="flex-1 min-w-0 pr-2">
-                      <p className="text-xs font-bold text-[var(--sn-text)] truncate">{section.name}</p>
+                      <p className="text-xs font-bold text-[var(--az-text)] truncate">{section.name}</p>
                       {section.availableFrom && (
-                        <p className="text-[10px] text-[var(--sn-text-muted)] flex items-center gap-1 mt-0.5">
-                          <Clock className="w-2.5 h-2.5 text-[var(--sn-purple)]" />
+                        <p className="text-[10px] text-[var(--az-text-muted)] flex items-center gap-1 mt-0.5">
+                          <Clock className="w-2.5 h-2.5 text-[var(--az-accent)]" />
                           {section.availableFrom} - {section.availableTo}
                         </p>
                       )}
@@ -723,20 +723,20 @@ export default function Products() {
                           <button
                             onClick={() => handleReorderSection(section, 'up')}
                             disabled={idx === 0}
-                            className="p-1 rounded bg-[var(--az-black)] hover:bg-[var(--sn-border)] disabled:opacity-30 text-[var(--sn-text-muted)]"
+                            className="p-1 rounded bg-[var(--az-black)] hover:bg-[var(--az-border)] disabled:opacity-30 text-[var(--az-text-muted)]"
                           >
                             <ChevronUp className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => handleReorderSection(section, 'down')}
                             disabled={idx === sectionsList.length - 1}
-                            className="p-1 rounded bg-[var(--az-black)] hover:bg-[var(--sn-border)] disabled:opacity-30 text-[var(--sn-text-muted)]"
+                            className="p-1 rounded bg-[var(--az-black)] hover:bg-[var(--az-border)] disabled:opacity-30 text-[var(--az-text-muted)]"
                           >
                             <ChevronDown className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => openEditSection(section)}
-                            className="p-1 rounded bg-[var(--az-black)] hover:bg-[var(--sn-border)] text-[var(--sn-purple)]"
+                            className="p-1 rounded bg-[var(--az-black)] hover:bg-[var(--az-border)] text-[var(--az-accent)]"
                           >
                             <Pencil className="w-3 h-3" />
                           </button>
@@ -746,7 +746,7 @@ export default function Products() {
                                 deleteSectionMutation.mutate(section.id);
                               }
                             }}
-                            className="p-1 rounded bg-[var(--az-black)] hover:bg-[var(--sn-red)]/20 text-[var(--sn-red)]"
+                            className="p-1 rounded bg-[var(--az-black)] hover:bg-[var(--az-danger)]/20 text-[var(--az-danger)]"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -761,9 +761,9 @@ export default function Products() {
 
         {/* Right Column: Dynamic Menu / Catalog Card Grid */}
         <div className="lg:col-span-3 space-y-6">
-          <div className="border-b border-[var(--sn-border)] pb-2 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-[var(--sn-text)]">Active Items & Catalog Listings</h3>
-            <span className="text-xs text-[var(--sn-text-muted)]">Sort: Active first</span>
+          <div className="border-b border-[var(--az-border)] pb-2 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--az-text)]">Active Items & Catalog Listings</h3>
+            <span className="text-xs text-[var(--az-text-muted)]">Sort: Active first</span>
           </div>
 
           {isProductsLoading ? (
@@ -790,14 +790,14 @@ export default function Products() {
                 return (
                   <Card
                     key={product.id}
-                    className="flex flex-col justify-between border-[var(--sn-border)] bg-[var(--az-card)] relative overflow-hidden group"
+                    className="flex flex-col justify-between border-[var(--az-border)] bg-[var(--az-card)] relative overflow-hidden group"
                     style={{ opacity: product.isActive ? 1 : 0.6 }}
                   >
                     <div>
                       {/* Product Status Indicator bar */}
                       <div className="flex items-center justify-between mb-3">
                         <Badge
-                          color={product.isActive ? 'var(--sn-green)' : 'var(--sn-text-muted)'}
+                          color={product.isActive ? 'var(--az-success)' : 'var(--az-text-muted)'}
                           bg={product.isActive ? 'rgba(16,185,129,0.1)' : 'rgba(156,163,175,0.1)'}
                         >
                           {product.isActive ? 'Active Menu Item' : 'Inactive'}
@@ -805,7 +805,7 @@ export default function Products() {
 
                         {/* Sold Out Switch Directly on Item Card */}
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--sn-text-muted)]">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--az-text-muted)]">
                             {isSoldOut ? 'Sold Out' : 'Available'}
                           </span>
                           <Switch
@@ -820,19 +820,19 @@ export default function Products() {
                       <div className="flex gap-3">
                         {/* Thumbnail */}
                         {product.imageUrls && product.imageUrls[0] ? (
-                          <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border border-[var(--sn-border)]">
+                          <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border border-[var(--az-border)]">
                             <img src={product.imageUrls[0]} alt="" className="w-full h-full object-cover" />
                           </div>
                         ) : (
-                          <div className="w-20 h-20 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] flex items-center justify-center flex-shrink-0">
-                            <Package className="w-8 h-8 text-[var(--sn-border)]" />
+                          <div className="w-20 h-20 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] flex items-center justify-center flex-shrink-0">
+                            <Package className="w-8 h-8 text-[var(--az-border)]" />
                           </div>
                         )}
 
                         <div className="min-w-0 flex-1">
-                          <h4 className="text-sm font-bold text-[var(--sn-text)] truncate">{product.name}</h4>
-                          <p className="text-xs text-[var(--sn-text-muted)] line-clamp-2 mt-0.5">{product.description}</p>
-                          <div className="text-sm font-black text-[var(--sn-purple)] mt-2 az-mono">
+                          <h4 className="text-sm font-bold text-[var(--az-text)] truncate">{product.name}</h4>
+                          <p className="text-xs text-[var(--az-text-muted)] line-clamp-2 mt-0.5">{product.description}</p>
+                          <div className="text-sm font-black text-[var(--az-accent)] mt-2 az-mono">
                             {fmtUSDC(product.priceUsdc)}
                           </div>
                         </div>
@@ -844,7 +844,7 @@ export default function Products() {
                           {product.tags.map(t => {
                             const found = DIETARY_TAGS.find(dt => dt.value === t);
                             return (
-                              <span key={t} className="text-[10px] bg-[var(--az-black)] border border-[var(--sn-border)] px-1.5 py-0.5 rounded text-[var(--sn-text-secondary)]">
+                              <span key={t} className="text-[10px] bg-[var(--az-black)] border border-[var(--az-border)] px-1.5 py-0.5 rounded text-[var(--az-text-muted)]">
                                 {found ? found.label : t}
                               </span>
                             );
@@ -853,8 +853,8 @@ export default function Products() {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 border-t border-[var(--sn-border)] pt-3 mt-4">
-                      <div className="text-[10px] text-[var(--sn-text-muted)]">
+                    <div className="flex items-center justify-between gap-2 border-t border-[var(--az-border)] pt-3 mt-4">
+                      <div className="text-[10px] text-[var(--az-text-muted)]">
                         {product.preparationMins ? `${product.preparationMins} mins prep` : 'Instant'}
                       </div>
 
@@ -864,7 +864,7 @@ export default function Products() {
                             <button
                               onClick={() => handleDuplicateProduct(product)}
                               title="Duplicate listing"
-                              className="p-1.5 rounded-xl bg-[var(--az-black)] hover:bg-[var(--sn-border)] text-[var(--sn-text-secondary)] transition-colors"
+                              className="p-1.5 rounded-xl bg-[var(--az-black)] hover:bg-[var(--az-border)] text-[var(--az-text-muted)] transition-colors"
                             >
                               <Copy className="w-3.5 h-3.5" />
                             </button>
@@ -877,7 +877,7 @@ export default function Products() {
                                   deleteProductMutation.mutate(product.id);
                                 }
                               }}
-                              className="p-1.5 rounded-xl bg-[var(--az-black)] hover:bg-[var(--sn-red)]/10 text-[var(--sn-red)] transition-colors"
+                              className="p-1.5 rounded-xl bg-[var(--az-black)] hover:bg-[var(--az-danger)]/10 text-[var(--az-danger)] transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -931,7 +931,7 @@ export default function Products() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Cover Image URL</label>
+            <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Cover Image URL</label>
             <div className="flex gap-2">
               <Input
                 placeholder="Upload or insert direct URL"
@@ -939,7 +939,7 @@ export default function Products() {
                 onChange={(e) => setSectionForm(sf => ({ ...sf, imageUrl: e.target.value }))}
                 className="flex-1"
               />
-              <label className="px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] hover:border-[var(--sn-purple)] text-xs text-[var(--sn-text-muted)] cursor-pointer flex items-center justify-center">
+              <label className="px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] hover:border-[var(--az-accent)] text-xs text-[var(--az-text-muted)] cursor-pointer flex items-center justify-center">
                 <input
                   type="file"
                   accept="image/*"
@@ -952,7 +952,7 @@ export default function Products() {
           </div>
 
           {formError && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--sn-red)]/15 border border-[var(--sn-red)]/35 text-[var(--sn-red)]">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--az-danger)]/15 border border-[var(--az-danger)]/35 text-[var(--az-danger)]">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <p className="text-xs">{formError}</p>
             </div>
@@ -1035,7 +1035,7 @@ export default function Products() {
 
           {/* Toggleable Chip Tags */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider flex items-center gap-1">
+            <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider flex items-center gap-1">
               <Tag className="w-3.5 h-3.5" /> Dietary & Tag Pickers
             </label>
             <div className="flex flex-wrap gap-2">
@@ -1048,9 +1048,9 @@ export default function Products() {
                     onClick={() => toggleTagChip(chip.value)}
                     className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                     style={{
-                      background: isSelected ? 'var(--sn-purple)' : 'var(--az-black)',
-                      border: `1px solid ${isSelected ? 'var(--sn-purple)' : 'var(--sn-border)'}`,
-                      color: isSelected ? 'var(--az-black)' : 'var(--sn-text)',
+                      background: isSelected ? 'var(--az-accent)' : 'var(--az-black)',
+                      border: `1px solid ${isSelected ? 'var(--az-accent)' : 'var(--az-border)'}`,
+                      color: isSelected ? 'var(--az-black)' : 'var(--az-text)',
                     }}
                   >
                     {chip.label}
@@ -1061,10 +1061,10 @@ export default function Products() {
           </div>
 
           {/* Repeatable Row Editors - Product Variants */}
-          <div className="bg-[var(--az-black)] p-4 rounded-xl border border-[var(--sn-border)] space-y-4">
+          <div className="bg-[var(--az-black)] p-4 rounded-xl border border-[var(--az-border)] space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[var(--sn-purple)]" /> Product Variants
+              <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--az-accent)]" /> Product Variants
               </label>
               <Button type="button" size="sm" variant="outline" onClick={addVariantRow}>
                 <Plus className="w-3 h-3" /> Add Size/Type
@@ -1072,7 +1072,7 @@ export default function Products() {
             </div>
 
             {productForm.variants.length === 0 ? (
-              <p className="text-xs text-[var(--sn-text-muted)] italic">No product size variations added yet.</p>
+              <p className="text-xs text-[var(--az-text-muted)] italic">No product size variations added yet.</p>
             ) : (
               <div className="space-y-2">
                 {productForm.variants.map((variant, index) => (
@@ -1094,7 +1094,7 @@ export default function Products() {
                     <button
                       type="button"
                       onClick={() => removeVariantRow(index)}
-                      className="p-2.5 rounded-xl hover:bg-[var(--sn-red)]/10 text-[var(--sn-red)]"
+                      className="p-2.5 rounded-xl hover:bg-[var(--az-danger)]/10 text-[var(--az-danger)]"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -1105,10 +1105,10 @@ export default function Products() {
           </div>
 
           {/* Repeatable Row Editors - Modifier Options Groups */}
-          <div className="bg-[var(--az-black)] p-4 rounded-xl border border-[var(--sn-border)] space-y-4">
+          <div className="bg-[var(--az-black)] p-4 rounded-xl border border-[var(--az-border)] space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-[var(--sn-purple)]" /> Add-on & Modifier Selection Rules
+              <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[var(--az-accent)]" /> Add-on & Modifier Selection Rules
               </label>
               <Button type="button" size="sm" variant="outline" onClick={addModifierGroup}>
                 <Plus className="w-3 h-3" /> Add Modifier Group
@@ -1116,11 +1116,11 @@ export default function Products() {
             </div>
 
             {productForm.modifierGroups.length === 0 ? (
-              <p className="text-xs text-[var(--sn-text-muted)] italic">No complex custom option rules built yet.</p>
+              <p className="text-xs text-[var(--az-text-muted)] italic">No complex custom option rules built yet.</p>
             ) : (
               <div className="space-y-6">
                 {productForm.modifierGroups.map((group, groupIndex) => (
-                  <div key={groupIndex} className="p-3 rounded-xl border border-[var(--sn-border)] bg-[var(--az-card)] space-y-3">
+                  <div key={groupIndex} className="p-3 rounded-xl border border-[var(--az-border)] bg-[var(--az-card)] space-y-3">
                     <div className="flex items-center gap-2">
                       <Input
                         placeholder="Group Label (e.g. Extra Cheese / Addons)"
@@ -1140,14 +1140,14 @@ export default function Products() {
                       <button
                         type="button"
                         onClick={() => removeModifierGroup(groupIndex)}
-                        className="p-2.5 rounded-xl hover:bg-[var(--sn-red)]/10 text-[var(--sn-red)]"
+                        className="p-2.5 rounded-xl hover:bg-[var(--az-danger)]/10 text-[var(--az-danger)]"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
 
                     {/* Options inside this group */}
-                    <div className="pl-4 border-l-2 border-[var(--sn-border)] space-y-2">
+                    <div className="pl-4 border-l-2 border-[var(--az-border)] space-y-2">
                       {group.options.map((opt, optIndex) => (
                         <div key={optIndex} className="flex gap-2 items-center">
                           <Input
@@ -1167,7 +1167,7 @@ export default function Products() {
                           <button
                             type="button"
                             onClick={() => removeModifierOption(groupIndex, optIndex)}
-                            className="p-2 text-[var(--sn-red)] hover:bg-[var(--sn-red)]/10 rounded"
+                            className="p-2 text-[var(--az-danger)] hover:bg-[var(--az-danger)]/10 rounded"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -1176,7 +1176,7 @@ export default function Products() {
                       <button
                         type="button"
                         onClick={() => addModifierOption(groupIndex)}
-                        className="text-xs font-bold text-[var(--sn-purple)] flex items-center gap-1 hover:underline"
+                        className="text-xs font-bold text-[var(--az-accent)] flex items-center gap-1 hover:underline"
                       >
                         <Plus className="w-3.5 h-3.5" /> Add Choice Option
                       </button>
@@ -1189,10 +1189,10 @@ export default function Products() {
 
           {/* Ingredient Recipe formulas Linker */}
           {canManageInventory && (
-            <div className="bg-[var(--az-black)] p-4 rounded-xl border border-[var(--sn-border)] space-y-4">
+            <div className="bg-[var(--az-black)] p-4 rounded-xl border border-[var(--az-border)] space-y-4">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider flex items-center gap-1.5">
-                  <Link2 className="w-3.5 h-3.5 text-[var(--sn-purple)]" /> Linked Ingredients (Recipes API)
+                <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-[var(--az-accent)]" /> Linked Ingredients (Recipes API)
                 </label>
                 <Button
                   type="button"
@@ -1205,7 +1205,7 @@ export default function Products() {
               </div>
 
               {inlineIngredients.length === 0 ? (
-                <p className="text-xs text-[var(--sn-text-muted)] italic">No connected ingredients. Stock will not auto-deduct.</p>
+                <p className="text-xs text-[var(--az-text-muted)] italic">No connected ingredients. Stock will not auto-deduct.</p>
               ) : (
                 <div className="space-y-2">
                   {inlineIngredients.map((item, index) => (
@@ -1234,7 +1234,7 @@ export default function Products() {
                       <button
                         type="button"
                         onClick={() => setInlineIngredients(items => items.filter((_, idx) => idx !== index))}
-                        className="p-2.5 rounded-xl hover:bg-[var(--sn-red)]/10 text-[var(--sn-red)]"
+                        className="p-2.5 rounded-xl hover:bg-[var(--az-danger)]/10 text-[var(--az-danger)]"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1247,25 +1247,25 @@ export default function Products() {
 
           {/* Image Upload Gallery Section */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Product Gallery Images</p>
+            <p className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Product Gallery Images</p>
             <div className="grid grid-cols-3 gap-2">
               {productForm.imageUrls.map((url, idx) => (
-                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-[var(--az-black)] border border-[var(--sn-border)] group">
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-[var(--az-black)] border border-[var(--az-border)] group">
                   <img src={url} alt="" className="w-full h-full object-cover" />
                   {idx === 0 && (
-                    <span className="absolute bottom-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--sn-purple)] text-[var(--az-black)]">COVER</span>
+                    <span className="absolute bottom-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--az-accent)] text-[var(--az-black)]">COVER</span>
                   )}
                   <button
                     type="button"
                     onClick={() => removeProductImage(idx)}
-                    className="absolute top-1 right-1 w-5 h-5 bg-[var(--sn-red)] rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
+                    className="absolute top-1 right-1 w-5 h-5 bg-[var(--az-danger)] rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
                   >
                     <X className="w-3 h-3" />
                   </button>
                 </div>
               ))}
               {productForm.imageUrls.length < MAX_IMAGES && (
-                <label className={`aspect-square rounded-xl border-2 border-dashed border-[var(--sn-border)] flex flex-col items-center justify-center transition-colors ${uploading ? 'opacity-60' : 'cursor-pointer hover:border-[var(--sn-purple)]'}`}>
+                <label className={`aspect-square rounded-xl border-2 border-dashed border-[var(--az-border)] flex flex-col items-center justify-center transition-colors ${uploading ? 'opacity-60' : 'cursor-pointer hover:border-[var(--az-accent)]'}`}>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -1274,17 +1274,17 @@ export default function Products() {
                     className="hidden"
                   />
                   {uploading ? (
-                    <Loader2 className="w-5 h-5 text-[var(--sn-purple)] animate-spin" />
+                    <Loader2 className="w-5 h-5 text-[var(--az-accent)] animate-spin" />
                   ) : (
                     <>
-                      <Plus className="w-5 h-5 text-[var(--sn-text-muted)]" />
-                      <span className="text-xs text-[var(--sn-text-muted)] mt-1">Add Image</span>
+                      <Plus className="w-5 h-5 text-[var(--az-text-muted)]" />
+                      <span className="text-xs text-[var(--az-text-muted)] mt-1">Add Image</span>
                     </>
                   )}
                 </label>
               )}
             </div>
-            <p className="text-[11px] text-[var(--sn-text-muted)]">
+            <p className="text-[11px] text-[var(--az-text-muted)]">
               {isCloudinaryConfigured()
                 ? 'Up to 5 images. The first image will be set as the main display cover.'
                 : 'Asset upload service offline. Paste links directly or configure your cloud providers.'}
@@ -1292,13 +1292,13 @@ export default function Products() {
           </div>
 
           {formError && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--sn-red)]/15 border border-[var(--sn-red)]/35 text-[var(--sn-red)]">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--az-danger)]/15 border border-[var(--az-danger)]/35 text-[var(--az-danger)]">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <p className="text-xs">{formError}</p>
             </div>
           )}
 
-          <div className="flex gap-3 pt-4 border-t border-[var(--sn-border)]">
+          <div className="flex gap-3 pt-4 border-t border-[var(--az-border)]">
             <Button variant="secondary" onClick={closeProductModal} className="flex-1">
               Cancel
             </Button>
@@ -1321,8 +1321,8 @@ export default function Products() {
         className="max-w-md"
       >
         <div className="space-y-4">
-          <p className="text-xs text-[var(--sn-text-muted)] leading-relaxed">
-            Apply a percentage price delta increase or decrease to all products inside a selected section. (e.g. enter <strong className="text-[var(--sn-purple)]">5</strong> for +5% increase or <strong className="text-[var(--sn-red)]">-10</strong> for a 10% discount).
+          <p className="text-xs text-[var(--az-text-muted)] leading-relaxed">
+            Apply a percentage price delta increase or decrease to all products inside a selected section. (e.g. enter <strong className="text-[var(--az-accent)]">5</strong> for +5% increase or <strong className="text-[var(--az-danger)]">-10</strong> for a 10% discount).
           </p>
 
           <Select
@@ -1359,7 +1359,7 @@ export default function Products() {
         }
         .product-catalog-page select option {
           background-color: var(--az-card) !important;
-          color: var(--sn-text) !important;
+          color: var(--az-text) !important;
         }
       `}</style>
     </div>

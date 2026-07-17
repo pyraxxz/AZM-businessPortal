@@ -118,7 +118,7 @@ export default function Orders() {
   };
 
   const getStatusBadge = (status) => {
-    const meta = ORDER_STATUS_META[status] || { label: status, color: 'var(--sn-purple)' };
+    const meta = ORDER_STATUS_META[status] || { label: status, color: 'var(--az-accent)' };
     return <Badge color={meta.color}>{meta.label}</Badge>;
   };
 
@@ -129,10 +129,10 @@ export default function Orders() {
       label: (
         <button 
           onClick={() => handleSelectAll(filteredOrders)} 
-          className="p-1 rounded hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]"
+          className="p-1 rounded hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-text)]"
         >
           {selectedIds.length === filteredOrders.length && filteredOrders.length > 0 ? (
-            <CheckSquare className="w-4 h-4 text-[var(--sn-purple)]" />
+            <CheckSquare className="w-4 h-4 text-[var(--az-accent)]" />
           ) : (
             <Square className="w-4 h-4" />
           )}
@@ -145,10 +145,10 @@ export default function Orders() {
             e.stopPropagation();
             handleSelectOne(row.id);
           }} 
-          className="p-1 rounded hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]"
+          className="p-1 rounded hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-text)]"
         >
           {selectedIds.includes(row.id) ? (
-            <CheckSquare className="w-4 h-4 text-[var(--sn-purple)]" />
+            <CheckSquare className="w-4 h-4 text-[var(--az-accent)]" />
           ) : (
             <Square className="w-4 h-4" />
           )}
@@ -161,7 +161,7 @@ export default function Orders() {
       sortable: true,
       sortValue: (row) => row.orderRef,
       render: (row) => (
-        <span className="font-bold az-mono text-[var(--sn-purple)] hover:underline cursor-pointer" onClick={() => navigate(`/orders/${row.id}`)}>
+        <span className="font-bold az-mono text-[var(--az-accent)] hover:underline cursor-pointer" onClick={() => navigate(`/orders/${row.id}`)}>
           {row.orderRef || `#${row.id.substring(0, 8)}`}
         </span>
       )
@@ -173,8 +173,8 @@ export default function Orders() {
       sortValue: (row) => row.customer?.name || row.customerName || '',
       render: (row) => (
         <div>
-          <div className="font-medium text-[var(--sn-text)]">{row.customer?.name || row.customerName || 'Anonymous'}</div>
-          <div className="text-[10px] text-[var(--sn-text-muted)]">{row.customer?.azamanId || 'No ID'}</div>
+          <div className="font-medium text-[var(--az-text)]">{row.customer?.name || row.customerName || 'Anonymous'}</div>
+          <div className="text-[10px] text-[var(--az-text-muted)]">{row.customer?.azamanId || 'No ID'}</div>
         </div>
       )
     },
@@ -182,7 +182,7 @@ export default function Orders() {
       key: 'product',
       label: 'Product',
       render: (row) => (
-        <span className="truncate max-w-[200px] block text-[var(--sn-text-muted)]">
+        <span className="truncate max-w-[200px] block text-[var(--az-text-muted)]">
           {row.product?.title || row.productTitle || 'N/A'}
         </span>
       )
@@ -192,7 +192,7 @@ export default function Orders() {
       label: 'Amount',
       sortable: true,
       sortValue: (row) => row.amount,
-      render: (row) => <span className="font-bold az-mono text-[var(--sn-text)]">{fmtUSDC(row.amount)}</span>
+      render: (row) => <span className="font-bold az-mono text-[var(--az-text)]">{fmtUSDC(row.amount)}</span>
     },
     {
       key: 'status',
@@ -205,7 +205,7 @@ export default function Orders() {
       sortable: true,
       sortValue: (row) => new Date(row.created_date || row.createdAt).getTime(),
       render: (row) => (
-        <span className="text-[11px] text-[var(--sn-text-muted)]" title={formatDateTime(row.created_date || row.createdAt)}>
+        <span className="text-[11px] text-[var(--az-text-muted)]" title={formatDateTime(row.created_date || row.createdAt)}>
           {relativeTime(row.created_date || row.createdAt)}
         </span>
       )
@@ -226,27 +226,27 @@ export default function Orders() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-[var(--sn-text)] flex items-center gap-2">
-            <ShoppingBag className="w-6 h-6 text-[var(--sn-purple)]" />
+          <h1 className="text-2xl font-black text-[var(--az-text)] flex items-center gap-2">
+            <ShoppingBag className="w-6 h-6 text-[var(--az-accent)]" />
             Orders Console
           </h1>
-          <p className="text-sm text-[var(--sn-text-muted)]">Manage customer orders, track escrows, fulfillment, and process bulk updates.</p>
+          <p className="text-sm text-[var(--az-text-muted)]">Manage customer orders, track escrows, fulfillment, and process bulk updates.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="sm" onClick={() => refetch()} title="Refresh Data">
             <RefreshCw className="w-4 h-4" />
           </Button>
-          <div className="flex rounded-xl bg-[var(--sn-card)] p-0.5 border border-[var(--sn-border)]">
+          <div className="flex rounded-xl bg-[var(--az-surface)] p-0.5 border border-[var(--az-border)]">
             <button
               onClick={() => setViewMode('kanban')}
-              className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold ${viewMode === 'kanban' ? 'bg-[var(--sn-purple)] text-[var(--az-black)]' : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'}`}
+              className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold ${viewMode === 'kanban' ? 'bg-[var(--az-accent)] text-[var(--az-black)]' : 'text-[var(--az-text-muted)] hover:text-[var(--az-text)]'}`}
             >
               <Grid className="w-3.5 h-3.5" />
               Kanban
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold ${viewMode === 'table' ? 'bg-[var(--sn-purple)] text-[var(--az-black)]' : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'}`}
+              className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold ${viewMode === 'table' ? 'bg-[var(--az-accent)] text-[var(--az-black)]' : 'text-[var(--az-text-muted)] hover:text-[var(--az-text)]'}`}
             >
               <List className="w-3.5 h-3.5" />
               Table
@@ -257,34 +257,34 @@ export default function Orders() {
 
       {/* Stats Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Widget title="Total Orders" icon={ShoppingBag} iconColor="var(--sn-blue)" loading={isLoadingStats || isLoading}>
+        <Widget title="Total Orders" icon={ShoppingBag} iconColor="var(--az-info)" loading={isLoadingStats || isLoading}>
           <WidgetStat value={stats.totalCount} label="All marketplace bookings" />
         </Widget>
-        <Widget title="Pending Payment" icon={Clock} iconColor="var(--sn-amber)" loading={isLoadingStats || isLoading}>
+        <Widget title="Pending Payment" icon={Clock} iconColor="var(--az-warning)" loading={isLoadingStats || isLoading}>
           <WidgetStat value={stats.awaitingPayment} label="Awaiting user settlement" />
         </Widget>
-        <Widget title="In Transit" icon={Truck} iconColor="var(--sn-purple)" loading={isLoadingStats || isLoading}>
+        <Widget title="In Transit" icon={Truck} iconColor="var(--az-accent)" loading={isLoadingStats || isLoading}>
           <WidgetStat value={stats.inTransit} label="Dispatched / Delivered" />
         </Widget>
-        <Widget title="Completed" icon={CheckSquare} iconColor="var(--sn-green)" loading={isLoadingStats || isLoading}>
+        <Widget title="Completed" icon={CheckSquare} iconColor="var(--az-success)" loading={isLoadingStats || isLoading}>
           <WidgetStat value={stats.completed} label="Escrow satisfied & released" />
         </Widget>
-        <Widget title="Total Revenue" icon={DollarSign} iconColor="var(--sn-purple)" loading={isLoadingStats || isLoading}>
+        <Widget title="Total Revenue" icon={DollarSign} iconColor="var(--az-accent)" loading={isLoadingStats || isLoading}>
           <WidgetStat value={fmtUSDC(stats.totalRevenue)} label="Excluding cancellations" />
         </Widget>
       </div>
 
       {/* Filter and Bulk Action Controls */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 rounded-2xl border border-[var(--sn-border)]" style={{ background: 'var(--az-card)' }}>
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 rounded-2xl border border-[var(--az-border)]" style={{ background: 'var(--az-card)' }}>
         <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[var(--sn-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[var(--az-text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by order ref or customer name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-sm bg-[var(--az-black)] border border-[var(--sn-border)] rounded-xl text-[var(--sn-text)] placeholder:text-[var(--sn-text-muted)] outline-none focus:border-[var(--sn-purple)] transition-colors"
+              className="w-full pl-10 pr-4 py-2 text-sm bg-[var(--az-black)] border border-[var(--az-border)] rounded-xl text-[var(--az-text)] placeholder:text-[var(--az-text-muted)] outline-none focus:border-[var(--az-accent)] transition-colors"
             />
           </div>
           <div className="w-full sm:w-48">
@@ -298,17 +298,17 @@ export default function Orders() {
 
         {/* Bulk Action Bar */}
         {selectedIds.length > 0 && (
-          <div className="flex items-center gap-3 bg-[var(--sn-border)] px-4 py-2 rounded-xl animate-fade-in border border-[var(--sn-purple)]/30">
-            <span className="text-xs font-bold text-[var(--sn-text)] az-mono">
+          <div className="flex items-center gap-3 bg-[var(--az-border)] px-4 py-2 rounded-xl animate-fade-in border border-[var(--az-accent)]/30">
+            <span className="text-xs font-bold text-[var(--az-text)] az-mono">
               {selectedIds.length} SELECTED
             </span>
-            <div className="h-4 w-px bg-[var(--sn-border)]" />
+            <div className="h-4 w-px bg-[var(--az-border)]" />
             <Button
               size="sm"
               variant="primary"
               loading={bulkActionLoading}
               onClick={() => handleBulkAction('DELIVERED')}
-              className="bg-[var(--sn-purple)] hover:bg-[var(--sn-purple)]/80 text-[var(--az-black)] py-1.5"
+              className="bg-[var(--az-accent)] hover:bg-[var(--az-accent)]/80 text-[var(--az-black)] py-1.5"
             >
               <Truck className="w-3.5 h-3.5" />
               Mark Delivered
@@ -318,14 +318,14 @@ export default function Orders() {
               variant="danger"
               loading={bulkActionLoading}
               onClick={() => handleBulkAction('CANCELLED')}
-              className="bg-transparent text-[var(--sn-red)] border-[var(--sn-red)] hover:bg-[var(--sn-red)]/10 py-1.5"
+              className="bg-transparent text-[var(--az-danger)] border-[var(--az-danger)] hover:bg-[var(--az-danger)]/10 py-1.5"
             >
               <X className="w-3.5 h-3.5" />
               Cancel Orders
             </Button>
             <button 
               onClick={() => setSelectedIds([])} 
-              className="text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]"
+              className="text-[var(--az-text-muted)] hover:text-[var(--az-text)]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -363,21 +363,21 @@ export default function Orders() {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
           {KANBAN_COLUMNS.map(column => {
             const columnOrders = filteredOrders.filter(o => o.status === column);
-            const columnMeta = ORDER_STATUS_META[column] || { label: column, color: 'var(--sn-purple)' };
+            const columnMeta = ORDER_STATUS_META[column] || { label: column, color: 'var(--az-accent)' };
             
             return (
               <div 
                 key={column} 
-                className="flex flex-col rounded-2xl border border-[var(--sn-border)]/50 p-3 min-h-[400px]"
+                className="flex flex-col rounded-2xl border border-[var(--az-border)]/50 p-3 min-h-[400px]"
                 style={{ background: 'rgba(20,20,30,0.4)' }}
               >
                 {/* Column Title */}
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-[var(--sn-border)]/50">
+                <div className="flex items-center justify-between mb-4 pb-2 border-b border-[var(--az-border)]/50">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background: columnMeta.color }} />
-                    <span className="text-xs font-black text-[var(--sn-text)] uppercase tracking-wider">{columnMeta.label}</span>
+                    <span className="text-xs font-black text-[var(--az-text)] uppercase tracking-wider">{columnMeta.label}</span>
                   </div>
-                  <span className="text-xs bg-[var(--sn-card)] border border-[var(--sn-border)] text-[var(--sn-text-muted)] font-bold px-2 py-0.5 rounded-full az-mono">
+                  <span className="text-xs bg-[var(--az-surface)] border border-[var(--az-border)] text-[var(--az-text-muted)] font-bold px-2 py-0.5 rounded-full az-mono">
                     {columnOrders.length}
                   </span>
                 </div>
@@ -389,7 +389,7 @@ export default function Orders() {
                     return (
                       <div
                         key={order.id}
-                        className={`group relative rounded-xl border p-4 cursor-pointer transition-all duration-150 select-none ${isSelected ? 'border-[var(--sn-purple)] bg-[var(--sn-card)] shadow-lg shadow-[var(--sn-purple)]/5' : 'border-[var(--sn-border)] hover:border-[var(--sn-purple)] bg-[var(--sn-card)] hover:translate-y-[-2px]'}`}
+                        className={`group relative rounded-xl border p-4 cursor-pointer transition-all duration-150 select-none ${isSelected ? 'border-[var(--az-accent)] bg-[var(--az-surface)] shadow-lg shadow-[var(--az-accent)]/5' : 'border-[var(--az-border)] hover:border-[var(--az-accent)] bg-[var(--az-surface)] hover:translate-y-[-2px]'}`}
                         onClick={() => navigate(`/orders/${order.id}`)}
                       >
                         {/* Checkbox overlay button */}
@@ -398,10 +398,10 @@ export default function Orders() {
                             e.stopPropagation();
                             handleSelectOne(order.id);
                           }}
-                          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] transition-opacity"
+                          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded hover:bg-[var(--az-border)] text-[var(--az-text-muted)] transition-opacity"
                         >
                           {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-[var(--sn-purple)]" />
+                            <CheckSquare className="w-4 h-4 text-[var(--az-accent)]" />
                           ) : (
                             <Square className="w-4 h-4" />
                           )}
@@ -409,25 +409,25 @@ export default function Orders() {
 
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-bold az-mono text-[var(--sn-purple)]">
+                            <span className="text-[11px] font-bold az-mono text-[var(--az-accent)]">
                               {order.orderRef || `#${order.id.substring(0, 8)}`}
                             </span>
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold text-[var(--sn-text)] line-clamp-1">
+                            <p className="text-xs font-semibold text-[var(--az-text)] line-clamp-1">
                               {order.customer?.name || order.customerName || 'Anonymous'}
                             </p>
-                            <p className="text-[11px] text-[var(--sn-text-muted)] line-clamp-1 mt-0.5">
+                            <p className="text-[11px] text-[var(--az-text-muted)] line-clamp-1 mt-0.5">
                               {order.product?.title || order.productTitle || 'N/A'}
                             </p>
                           </div>
 
-                          <div className="flex items-center justify-between pt-2 border-t border-[var(--sn-border)]/30">
-                            <span className="text-xs font-bold text-[var(--sn-text)] az-mono">
+                          <div className="flex items-center justify-between pt-2 border-t border-[var(--az-border)]/30">
+                            <span className="text-xs font-bold text-[var(--az-text)] az-mono">
                               {fmtUSDC(order.amount)}
                             </span>
-                            <span className="text-[10px] text-[var(--sn-text-muted)]">
+                            <span className="text-[10px] text-[var(--az-text-muted)]">
                               {relativeTime(order.created_date || order.createdAt)}
                             </span>
                           </div>
@@ -436,9 +436,9 @@ export default function Orders() {
                     );
                   })}
                   {columnOrders.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-10 border border-dashed border-[var(--sn-border)]/40 rounded-xl text-center">
-                      <Package className="w-5 h-5 text-[var(--sn-text-muted)]/30 mb-2" />
-                      <span className="text-[10px] text-[var(--sn-text-muted)] font-medium">Empty Column</span>
+                    <div className="flex flex-col items-center justify-center py-10 border border-dashed border-[var(--az-border)]/40 rounded-xl text-center">
+                      <Package className="w-5 h-5 text-[var(--az-text-muted)]/30 mb-2" />
+                      <span className="text-[10px] text-[var(--az-text-muted)] font-medium">Empty Column</span>
                     </div>
                   )}
                 </div>
@@ -448,7 +448,7 @@ export default function Orders() {
         </div>
       ) : (
         /* Table View */
-        <div className="rounded-2xl border border-[var(--sn-border)] overflow-hidden" style={{ background: 'var(--az-card)' }}>
+        <div className="rounded-2xl border border-[var(--az-border)] overflow-hidden" style={{ background: 'var(--az-card)' }}>
           <DataTable
             columns={columns}
             data={filteredOrders}

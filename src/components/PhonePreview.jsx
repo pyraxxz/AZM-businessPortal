@@ -58,7 +58,7 @@ export function PhonePreview({ business, onClose }) {
           exit={{ opacity: 0, scale: 0.6 }}
           onClick={() => setMinimized(false)}
           className="pointer-events-auto absolute bottom-8 right-8 w-14 h-14 rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing shadow-sn-tooltip"
-          style={{ background: 'var(--sn-purple)', touchAction: 'none' }}
+          style={{ background: 'var(--az-accent)', touchAction: 'none' }}
           title="Show live preview"
         >
           <Smartphone className="w-6 h-6 text-white" />
@@ -79,23 +79,23 @@ export function PhonePreview({ business, onClose }) {
           {/* Drag handle / title bar */}
           <div
             onPointerDown={(e) => dragControls.start(e)}
-            className="w-full mb-2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--sn-elevated)] border border-[var(--sn-border-bright)] shadow-sn-tooltip cursor-grab active:cursor-grabbing select-none"
+            className="w-full mb-2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--az-card)] border border-[var(--az-border-strong)] shadow-sn-tooltip cursor-grab active:cursor-grabbing select-none"
             style={{ touchAction: 'none' }}
           >
-            <Move className="w-3 h-3 text-[var(--sn-text-muted)] flex-shrink-0" />
-            <p className="text-[11px] font-medium text-[var(--sn-text-secondary)] truncate flex-1">
-              Live Preview: <span className="font-bold text-[var(--sn-text)]">{business.businessName}</span>
+            <Move className="w-3 h-3 text-[var(--az-text-muted)] flex-shrink-0" />
+            <p className="text-[11px] font-medium text-[var(--az-text-muted)] truncate flex-1">
+              Live Preview: <span className="font-bold text-[var(--az-text)]">{business.businessName}</span>
             </p>
             <button
               onClick={() => setMinimized(true)}
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--sn-text-muted)] hover:text-white hover:bg-[var(--sn-hover)] flex-shrink-0"
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--az-text-muted)] hover:text-white hover:bg-[var(--az-bg-alt)] flex-shrink-0"
               aria-label="Minimize preview"
             >
               <Minus className="w-3 h-3" />
             </button>
             <button
               onClick={onClose}
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--sn-text-muted)] hover:text-white hover:bg-[var(--sn-hover)] flex-shrink-0"
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--az-text-muted)] hover:text-white hover:bg-[var(--az-bg-alt)] flex-shrink-0"
               aria-label="Close preview"
             >
               <X className="w-3 h-3" />

@@ -12,12 +12,12 @@ import {
 } from 'lucide-react';
 
 const TRIP_STATUS = {
-  SCHEDULED: { label: 'Scheduled', color: 'var(--sn-blue)' },
-  BOARDING: { label: 'Boarding', color: 'var(--sn-amber)' },
-  DEPARTED: { label: 'Departed', color: 'var(--sn-purple)' },
-  COMPLETED: { label: 'Completed', color: 'var(--sn-purple)' },
-  CANCELLED: { label: 'Cancelled', color: 'var(--sn-red)' },
-  DELAYED: { label: 'Delayed', color: 'var(--sn-red)' }
+  SCHEDULED: { label: 'Scheduled', color: 'var(--az-info)' },
+  BOARDING: { label: 'Boarding', color: 'var(--az-warning)' },
+  DEPARTED: { label: 'Departed', color: 'var(--az-accent)' },
+  COMPLETED: { label: 'Completed', color: 'var(--az-accent)' },
+  CANCELLED: { label: 'Cancelled', color: 'var(--az-danger)' },
+  DELAYED: { label: 'Delayed', color: 'var(--az-danger)' }
 };
 
 const BLANK_TRIP = {
@@ -274,12 +274,12 @@ export default function TransitTrips() {
       sortValue: (r) => r.routeName,
       render: (r) => (
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[var(--sn-blue)] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
-            <Route className="w-3.5 h-3.5 text-[var(--sn-blue)]" />
+          <div className="w-8 h-8 rounded-lg bg-[var(--az-info)] border border-[#4f8ef730] flex items-center justify-center flex-shrink-0">
+            <Route className="w-3.5 h-3.5 text-[var(--az-info)]" />
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-[var(--sn-text)] truncate">{r.routeName}</p>
-            <p className="text-[var(--sn-text-muted)] text-[10px] truncate">{r.origin} → {r.destination}</p>
+            <p className="font-semibold text-[var(--az-text)] truncate">{r.routeName}</p>
+            <p className="text-[var(--az-text-muted)] text-[10px] truncate">{r.origin} → {r.destination}</p>
           </div>
         </div>
       ),
@@ -291,13 +291,13 @@ export default function TransitTrips() {
       sortValue: (r) => new Date(r.departureAt).getTime(),
       render: (r) => (
         <div className="flex flex-col">
-          <span className="text-[var(--sn-text)] font-medium">{formatDateTime(r.departureAt)}</span>
+          <span className="text-[var(--az-text)] font-medium">{formatDateTime(r.departureAt)}</span>
           {r.arrivalAt && (
-            <span className="text-[var(--sn-text-muted)] text-[10px]">
+            <span className="text-[var(--az-text-muted)] text-[10px]">
               ETA: {formatDateTime(r.arrivalAt)}
             </span>
           )}
-          <span className="text-[var(--sn-text-muted)] text-[10px]">{r.vehicle?.licensePlate || 'No plate'} · {r.vehicle?.type || '—'}</span>
+          <span className="text-[var(--az-text-muted)] text-[10px]">{r.vehicle?.licensePlate || 'No plate'} · {r.vehicle?.type || '—'}</span>
         </div>
       ),
     },
@@ -312,9 +312,9 @@ export default function TransitTrips() {
         const pct = total > 0 ? (booked / total) * 100 : 0;
         return (
           <div className="flex flex-col gap-1">
-            <span className="text-[var(--sn-text)] font-bold az-mono">{booked}/{total}</span>
-            <div className="w-20 h-1.5 rounded-full bg-[var(--sn-border)] overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct > 80 ? 'var(--sn-amber)' : 'var(--sn-purple)' }} />
+            <span className="text-[var(--az-text)] font-bold az-mono">{booked}/{total}</span>
+            <div className="w-20 h-1.5 rounded-full bg-[var(--az-border)] overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct > 80 ? 'var(--az-warning)' : 'var(--az-accent)' }} />
             </div>
           </div>
         );
@@ -325,7 +325,7 @@ export default function TransitTrips() {
       label: 'Fare',
       sortable: true,
       sortValue: (r) => Number(r.fareUsdc) || 0,
-      render: (r) => <span className="text-[var(--sn-text)] font-bold az-mono">{fmtUSDC(r.fareUsdc)}</span>,
+      render: (r) => <span className="text-[var(--az-text)] font-bold az-mono">{fmtUSDC(r.fareUsdc)}</span>,
     },
     {
       key: 'status',
@@ -344,7 +344,7 @@ export default function TransitTrips() {
         <div className="flex items-center gap-1.5">
           <button
             onClick={(e) => { e.stopPropagation(); setSeatEditorFor(r); }}
-            className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-blue)] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-info)] transition-colors"
             title="Edit seat map"
           >
             <Grid3x3 className="w-3.5 h-3.5" />
@@ -352,7 +352,7 @@ export default function TransitTrips() {
           
           <button
             onClick={(e) => { e.stopPropagation(); openDelayModal(r); }}
-            className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-amber)] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-warning)] transition-colors"
             title="Mark Delay / ETA"
           >
             <Clock className="w-3.5 h-3.5" />
@@ -360,7 +360,7 @@ export default function TransitTrips() {
 
           <button
             onClick={(e) => { e.stopPropagation(); openEdit(r); }}
-            className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-purple)] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-accent)] transition-colors"
             title="Edit trip"
           >
             <Pencil className="w-3.5 h-3.5" />
@@ -368,7 +368,7 @@ export default function TransitTrips() {
 
           <button
             onClick={(e) => { e.stopPropagation(); handleRequestCancel(r); }}
-            className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-danger)] transition-colors"
             title="Cancel Trip & Refunds"
           >
             <XCircle className="w-3.5 h-3.5" />
@@ -379,7 +379,7 @@ export default function TransitTrips() {
               e.stopPropagation();
               if (confirm(`Delete trip "${r.routeName}"? This cannot be undone.`)) deleteMut.mutate(r.id);
             }}
-            className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-danger)] transition-colors"
             title="Delete trip"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -392,13 +392,13 @@ export default function TransitTrips() {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
-      <div className="flex items-start justify-between border-b border-[var(--sn-border)] pb-5">
+      <div className="flex items-start justify-between border-b border-[var(--az-border)] pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--sn-text)] flex items-center gap-2">
-            <Bus className="w-5 h-5 text-[var(--sn-blue)]" />
+          <h1 className="text-2xl font-bold text-[var(--az-text)] flex items-center gap-2">
+            <Bus className="w-5 h-5 text-[var(--az-info)]" />
             Transit Trips Console
           </h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">Schedule and status-track commercial runs, templates, cancellations, and visual layouts.</p>
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">Schedule and status-track commercial runs, templates, cancellations, and visual layouts.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={() => setTemplatesExpanded(!templatesExpanded)} variant="secondary" size="sm">
@@ -412,11 +412,11 @@ export default function TransitTrips() {
 
       {/* Collapsible Route Templates Section */}
       {templatesExpanded && (
-        <Card className="border-[var(--sn-purple)]/20 bg-black/20 space-y-4">
-          <div className="flex items-center justify-between border-b border-[var(--sn-border)] pb-3">
+        <Card className="border-[var(--az-accent)]/20 bg-black/20 space-y-4">
+          <div className="flex items-center justify-between border-b border-[var(--az-border)] pb-3">
             <div className="flex items-center gap-2">
-              <Route className="w-4 h-4 text-[var(--sn-purple)]" />
-              <h2 className="text-sm font-bold text-[var(--sn-text)]">Recurring Route Templates</h2>
+              <Route className="w-4 h-4 text-[var(--az-accent)]" />
+              <h2 className="text-sm font-bold text-[var(--az-text)]">Recurring Route Templates</h2>
             </div>
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" className="text-xs" onClick={() => setGenerateTripsOpen(true)}>
@@ -429,21 +429,21 @@ export default function TransitTrips() {
           </div>
 
           {templates.length === 0 ? (
-            <p className="text-xs text-[var(--sn-text-muted)] py-4 text-center">No route templates found. Create template patterns to batch schedule recurring schedules.</p>
+            <p className="text-xs text-[var(--az-text-muted)] py-4 text-center">No route templates found. Create template patterns to batch schedule recurring schedules.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {templates.map(t => (
-                <div key={t.id} className="p-3.5 rounded-xl bg-[var(--sn-card)] border border-[var(--sn-border)] relative group">
-                  <button onClick={() => handleDeleteTemplate(t.id)} className="absolute top-3.5 right-3.5 p-1 rounded hover:bg-red-500/10 text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors">
+                <div key={t.id} className="p-3.5 rounded-xl bg-[var(--az-surface)] border border-[var(--az-border)] relative group">
+                  <button onClick={() => handleDeleteTemplate(t.id)} className="absolute top-3.5 right-3.5 p-1 rounded hover:bg-red-500/10 text-[var(--az-text-muted)] hover:text-[var(--az-danger)] transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
-                  <p className="font-bold text-xs text-[var(--sn-text)]">{t.name}</p>
-                  <p className="text-[10px] text-[var(--sn-text-muted)] mt-0.5">{t.origin} → {t.destination}</p>
-                  <div className="mt-3 flex items-center justify-between text-[10px] font-mono text-[var(--sn-text-muted)]">
+                  <p className="font-bold text-xs text-[var(--az-text)]">{t.name}</p>
+                  <p className="text-[10px] text-[var(--az-text-muted)] mt-0.5">{t.origin} → {t.destination}</p>
+                  <div className="mt-3 flex items-center justify-between text-[10px] font-mono text-[var(--az-text-muted)]">
                     <span>Est: {t.durationMins} mins</span>
-                    <span className="text-[var(--sn-green)] font-bold">${t.typicalFareUsdc} USDC</span>
+                    <span className="text-[var(--az-success)] font-bold">${t.typicalFareUsdc} USDC</span>
                   </div>
-                  <div className="mt-2 text-[10px] text-[var(--sn-text-muted)]">
+                  <div className="mt-2 text-[10px] text-[var(--az-text-muted)]">
                     <span className="font-bold block text-[8px] uppercase tracking-wider text-purple-400">Scheduled times:</span>
                     <span className="font-mono">{t.departureTimes || '—'}</span>
                   </div>
@@ -456,17 +456,17 @@ export default function TransitTrips() {
 
       {/* Stats widgets */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Widget title="Total Trips" icon={Bus} iconColor="var(--sn-blue)" loading={isLoading}>
+        <Widget title="Total Trips" icon={Bus} iconColor="var(--az-info)" loading={isLoading}>
           <WidgetStat value={fmt(totalTrips, 0)} label="All trips" />
         </Widget>
-        <Widget title="Active" icon={Clock} iconColor="var(--sn-amber)" loading={isLoading}>
-          <WidgetStat value={fmt(activeTrips, 0)} label="Scheduled + Delayed" color="var(--sn-amber)" />
+        <Widget title="Active" icon={Clock} iconColor="var(--az-warning)" loading={isLoading}>
+          <WidgetStat value={fmt(activeTrips, 0)} label="Scheduled + Delayed" color="var(--az-warning)" />
         </Widget>
-        <Widget title="Bookings" icon={Users} iconColor="var(--sn-purple)" loading={isLoading}>
-          <WidgetStat value={fmt(totalBookings, 0)} label="Assigned seats" color="var(--sn-purple)" />
+        <Widget title="Bookings" icon={Users} iconColor="var(--az-accent)" loading={isLoading}>
+          <WidgetStat value={fmt(totalBookings, 0)} label="Assigned seats" color="var(--az-accent)" />
         </Widget>
-        <Widget title="Estimated Revenue" icon={DollarSign} iconColor="var(--sn-green)" loading={isLoading}>
-          <WidgetStat value={fmtUSDC(totalRevenue)} label="Based on booked seats" color="var(--sn-green)" />
+        <Widget title="Estimated Revenue" icon={DollarSign} iconColor="var(--az-success)" loading={isLoading}>
+          <WidgetStat value={fmtUSDC(totalRevenue)} label="Based on booked seats" color="var(--az-success)" />
         </Widget>
       </div>
 
@@ -485,7 +485,7 @@ export default function TransitTrips() {
       <Modal open={!!modal} onClose={closeModal} title={modal === 'create' ? 'Schedule New Run' : 'Edit Scheduled Run'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           {formError && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-[var(--sn-red)] text-xs text-[var(--sn-red)]">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-[var(--az-danger)] text-xs text-[var(--az-danger)]">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{formError}</span>
             </div>
@@ -547,15 +547,15 @@ export default function TransitTrips() {
                 options={[{ value: '', label: 'Select a vehicle...' }, ...vehicleOptions.map(v => ({ value: v.value, label: `${v.label} — ${v.sub}` }))]}
               />
             ) : (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--sn-amber)]/10 border border-[var(--sn-amber)]">
-                <AlertCircle className="w-4 h-4 text-[var(--sn-amber)] flex-shrink-0" />
-                <p className="text-xs text-[var(--sn-amber)]">Add a vehicle in Fleet Management first — a trip needs one.</p>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--az-warning)]/10 border border-[var(--az-warning)]">
+                <AlertCircle className="w-4 h-4 text-[var(--az-warning)] flex-shrink-0" />
+                <p className="text-xs text-[var(--az-warning)]">Add a vehicle in Fleet Management first — a trip needs one.</p>
               </div>
             )
           ) : (
-            <div className="p-3 rounded-xl bg-[var(--sn-border)]">
-              <p className="text-xs text-[var(--sn-text-muted)]">Vehicle (fixed after creation)</p>
-              <p className="text-sm text-[var(--sn-text)] font-medium mt-0.5">
+            <div className="p-3 rounded-xl bg-[var(--az-border)]">
+              <p className="text-xs text-[var(--az-text-muted)]">Vehicle (fixed after creation)</p>
+              <p className="text-sm text-[var(--az-text)] font-medium mt-0.5">
                 {modal?.vehicle ? `${modal.vehicle.make || ''} ${modal.vehicle.model || ''} — ${modal.vehicle.licensePlate || 'No plate'}`.trim() : '—'}
               </p>
             </div>
@@ -627,15 +627,15 @@ export default function TransitTrips() {
             </div>
           </div>
 
-          <div className="p-4 rounded-xl border border-[var(--sn-border)] bg-black/20 space-y-3">
-            <p className="font-semibold text-xs border-b border-[var(--sn-border)] pb-2 uppercase tracking-wide">Cancellation Impact Breakdown</p>
+          <div className="p-4 rounded-xl border border-[var(--az-border)] bg-black/20 space-y-3">
+            <p className="font-semibold text-xs border-b border-[var(--az-border)] pb-2 uppercase tracking-wide">Cancellation Impact Breakdown</p>
             <div className="flex justify-between">
               <span>Affected Bookings Count</span>
-              <span className="font-bold text-[var(--sn-text)]">{cancellationPreviewData?.cancelledBookings || cancellationPreviewData?.bookings?.length || 0}</span>
+              <span className="font-bold text-[var(--az-text)]">{cancellationPreviewData?.cancelledBookings || cancellationPreviewData?.bookings?.length || 0}</span>
             </div>
             <div className="flex justify-between">
               <span>Expected Cash Refund (USDC)</span>
-              <span className="font-bold text-[var(--sn-red)]">
+              <span className="font-bold text-[var(--az-danger)]">
                 {fmtUSDC((cancellationPreviewData?.bookings?.length || 0) * (Number(selectedTripToCancel?.fareUsdc) || 0))}
               </span>
             </div>
@@ -643,7 +643,7 @@ export default function TransitTrips() {
 
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" onClick={() => { setCancelPreviewOpen(false); setSelectedTripToCancel(null); }}>Keep Trip Active</Button>
-            <Button variant="danger" className="bg-[var(--sn-red)] text-white hover:bg-red-700" onClick={confirmTripCancellation}>Confirm Cancellation</Button>
+            <Button variant="danger" className="bg-[var(--az-danger)] text-white hover:bg-red-700" onClick={confirmTripCancellation}>Confirm Cancellation</Button>
           </div>
         </div>
       </Modal>
@@ -651,14 +651,14 @@ export default function TransitTrips() {
       {/* Modal - Mark Trip Delayed */}
       <Modal open={delayModalOpen} onClose={() => setDelayModalOpen(false)} title="Mark Trip as Delayed">
         <form onSubmit={handleMarkDelayed} className="space-y-4 text-xs">
-          <p className="text-[var(--sn-text-muted)]">Input total minutes delayed. An updated arrival ETA estimate is pushed to booking alerts.</p>
+          <p className="text-[var(--az-text-muted)]">Input total minutes delayed. An updated arrival ETA estimate is pushed to booking alerts.</p>
           <div className="grid grid-cols-2 gap-4">
             <Input label="Delay (Minutes) *" type="number" value={delayForm.delayMins} onChange={e => setFormDelay({ ...delayForm, delayMins: e.target.value })} />
             <Input label="New Estimated Arrival Time (ETA)" type="datetime-local" value={delayForm.eta} onChange={e => setFormDelay({ ...delayForm, eta: e.target.value })} />
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={() => setDelayModalOpen(false)}>Cancel</Button>
-            <Button type="submit" className="bg-[var(--sn-amber)] text-black">Update Route Delay</Button>
+            <Button type="submit" className="bg-[var(--az-warning)] text-black">Update Route Delay</Button>
           </div>
         </form>
       </Modal>
@@ -674,9 +674,9 @@ export default function TransitTrips() {
 // ── Seat Map Editor ──────────────────────────────────────────────────────────
 const SEAT_TIERS = ['ECONOMY', 'STANDARD', 'VIP'];
 const TIER_COLORS = {
-  ECONOMY:  { bg: 'var(--sn-purple-subtle, rgba(147,51,234,0.12))', border: 'var(--sn-purple)', text: 'var(--sn-purple)' },
-  STANDARD: { bg: 'var(--sn-blue-subtle, rgba(59,130,246,0.15))', border: 'var(--sn-blue, #3b82f6)', text: 'var(--sn-blue, #3b82f6)' },
-  VIP:      { bg: 'var(--sn-amber-subtle, rgba(245,158,11,0.15))', border: 'var(--sn-amber)', text: 'var(--sn-amber)' },
+  ECONOMY:  { bg: 'var(--az-accent-subtle))', border: 'var(--az-accent)', text: 'var(--az-accent)' },
+  STANDARD: { bg: 'var(--az-info-subtle))', border: 'var(--az-info)', text: 'var(--az-info)' },
+  VIP:      { bg: 'var(--az-warning-subtle))', border: 'var(--az-warning)', text: 'var(--az-warning)' },
 };
 
 function SeatMapEditor({ trip, onClose }) {
@@ -751,14 +751,14 @@ function SeatMapEditor({ trip, onClose }) {
         {/* Legend */}
         <div className="flex items-center gap-4 flex-wrap text-xs">
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-lg bg-[var(--sn-amber)] border border-[var(--sn-amber)]" />
-            <span className="text-[var(--sn-text-muted)]">Occupied (locked)</span>
+            <div className="w-5 h-5 rounded-lg bg-[var(--az-warning)] border border-[var(--az-warning)]" />
+            <span className="text-[var(--az-text-muted)]">Occupied (locked)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-lg bg-[var(--sn-red)] border border-[var(--sn-red)]" />
-            <span className="text-[var(--sn-text-muted)]">Blocked</span>
+            <div className="w-5 h-5 rounded-lg bg-[var(--az-danger)] border border-[var(--az-danger)]" />
+            <span className="text-[var(--az-text-muted)]">Blocked</span>
           </div>
-          <span className="text-[var(--sn-text-muted)] ml-auto">Click a seat to cycle its tier · click legend below to block/unblock</span>
+          <span className="text-[var(--az-text-muted)] ml-auto">Click a seat to cycle its tier · click legend below to block/unblock</span>
         </div>
 
         {/* Tier legend / fare inputs */}
@@ -780,10 +780,10 @@ function SeatMapEditor({ trip, onClose }) {
         </div>
 
         {/* Bus outline */}
-        <div className="rounded-2xl border-2 border-[var(--sn-border)] p-4 mx-auto max-w-sm" style={{ background: 'var(--az-black)' }}>
+        <div className="rounded-2xl border-2 border-[var(--az-border)] p-4 mx-auto max-w-sm" style={{ background: 'var(--az-black)' }}>
           {/* Driver */}
           <div className="flex justify-center mb-3">
-            <div className="w-10 h-6 rounded-lg bg-[var(--sn-border)] flex items-center justify-center text-[10px] text-[var(--sn-text-muted)] font-bold">
+            <div className="w-10 h-6 rounded-lg bg-[var(--az-border)] flex items-center justify-center text-[10px] text-[var(--az-text-muted)] font-bold">
               DRIVER
             </div>
           </div>
@@ -852,9 +852,9 @@ function SeatButton({ seat, onClick }) {
   const isOccupied = seat.status === 'OCCUPIED';
   const isBlocked = seat.status === 'BLOCKED';
   const c = isOccupied
-    ? { bg: 'var(--sn-amber)', border: 'var(--sn-amber)', text: 'var(--sn-amber)' }
+    ? { bg: 'var(--az-warning)', border: 'var(--az-warning)', text: 'var(--az-warning)' }
     : isBlocked
-    ? { bg: 'var(--sn-red)', border: 'var(--sn-red)', text: 'var(--sn-red)' }
+    ? { bg: 'var(--az-danger)', border: 'var(--az-danger)', text: 'var(--az-danger)' }
     : TIER_COLORS[seat.tier || 'ECONOMY'];
 
   return (
@@ -868,7 +868,7 @@ function SeatButton({ seat, onClick }) {
       style={{
         background: c.bg,
         borderColor: c.border,
-        color: isOccupied || isBlocked ? '#000000' : 'var(--sn-text)'
+        color: isOccupied || isBlocked ? '#000000' : 'var(--az-text)'
       }}
     >
       <span>{seat.seatId}</span>

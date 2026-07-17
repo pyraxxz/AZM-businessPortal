@@ -6,12 +6,12 @@ import { fmtUSDC, cn } from '@/lib/utils';
 import { Package, Plus, Clock, MapPin, AlertCircle, CheckCircle2, Truck, Link, Filter } from 'lucide-react';
 
 const STATUS_COLUMNS = [
-  { key: 'PENDING', label: 'Pending', color: 'var(--sn-text-muted)' },
-  { key: 'LOADED', label: 'Loaded', color: 'var(--sn-blue)' },
-  { key: 'IN_TRANSIT', label: 'In Transit', color: 'var(--sn-purple)' },
-  { key: 'DELIVERED', label: 'Delivered', color: 'var(--sn-green)' },
-  { key: 'RETURNED', label: 'Returned', color: 'var(--sn-amber)' },
-  { key: 'LOST', label: 'Lost', color: 'var(--sn-red)' },
+  { key: 'PENDING', label: 'Pending', color: 'var(--az-text-muted)' },
+  { key: 'LOADED', label: 'Loaded', color: 'var(--az-info)' },
+  { key: 'IN_TRANSIT', label: 'In Transit', color: 'var(--az-accent)' },
+  { key: 'DELIVERED', label: 'Delivered', color: 'var(--az-success)' },
+  { key: 'RETURNED', label: 'Returned', color: 'var(--az-warning)' },
+  { key: 'LOST', label: 'Lost', color: 'var(--az-danger)' },
 ];
 
 const NEXT_STATUS = {
@@ -103,22 +103,22 @@ export default function TransitCargo() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[var(--sn-text)]">Cargo & Logistics</h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-0.5">Track parcels from dispatch to delivery</p>
+          <h1 className="text-xl font-bold text-[var(--az-text)]">Cargo & Logistics</h1>
+          <p className="text-sm text-[var(--az-text-muted)] mt-0.5">Track parcels from dispatch to delivery</p>
         </div>
         <Button onClick={() => setAddOpen(true)}><Plus className="w-4 h-4" /> New Parcel</Button>
       </div>
 
       {/* Filters */}
       <div className="flex items-center gap-3">
-        <Filter className="w-4 h-4 text-[var(--sn-text-muted)]" />
+        <Filter className="w-4 h-4 text-[var(--az-text-muted)]" />
         <Select value={filterTrip} onChange={e => setFilterTrip(e.target.value)}
           options={[{ value: '', label: 'All Trips' }, ...trips.map(t => ({ value: t.id, label: (t.routeName || t.origin) + ' → ' + t.destination }))]}
           className="w-56" />
         <Select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
           options={[{ value: '', label: 'All Statuses' }, ...STATUS_COLUMNS.map(s => ({ value: s.key, label: s.label }))]}
           className="w-44" />
-        <span className="text-sm text-[var(--sn-text-muted)]">{cargo.length} parcels</span>
+        <span className="text-sm text-[var(--az-text-muted)]">{cargo.length} parcels</span>
       </div>
 
       {/* Pipeline Board */}
@@ -126,27 +126,27 @@ export default function TransitCargo() {
         {STATUS_COLUMNS.map(col => (
           <div key={col.key} className="space-y-2 min-w-[200px]">
             <div className="flex items-center justify-between px-1">
-              <span className="text-sm font-bold text-[var(--sn-text)]">{col.label}</span>
+              <span className="text-sm font-bold text-[var(--az-text)]">{col.label}</span>
               <Badge color={col.color}>{grouped[col.key]?.length || 0}</Badge>
             </div>
             {grouped[col.key]?.map(item => (
               <Card key={item.id} className="p-3 space-y-2">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-bold text-[var(--sn-text)]">{item.senderName}</p>
-                    <p className="text-xs text-[var(--sn-text-muted)]">→ {item.receiverName}</p>
+                    <p className="text-sm font-bold text-[var(--az-text)]">{item.senderName}</p>
+                    <p className="text-xs text-[var(--az-text-muted)]">→ {item.receiverName}</p>
                   </div>
-                  {item.fragile && <Badge color="var(--sn-red)">Fragile</Badge>}
+                  {item.fragile && <Badge color="var(--az-danger)">Fragile</Badge>}
                 </div>
                 <div className="space-y-1 text-xs">
-                  <div className="flex justify-between"><span className="text-[var(--sn-text-muted)]">Weight</span><span className="text-[var(--sn-text)] font-medium">{item.weightKg} kg</span></div>
-                  <div className="flex justify-between"><span className="text-[var(--sn-text-muted)]">Price</span><span className="text-[var(--sn-text)] font-medium">{fmtUSDC(item.priceUsdc)}</span></div>
-                  {item.loadedAt && <div className="flex items-center gap-1 text-[var(--sn-text-muted)]"><Clock className="w-3 h-3" />Loaded {new Date(item.loadedAt).toLocaleDateString('en', { day: 'numeric', month: 'short' })}</div>}
-                  {item.deliveredAt && <div className="flex items-center gap-1 text-[var(--sn-green)]"><CheckCircle2 className="w-3 h-3" />Delivered {new Date(item.deliveredAt).toLocaleDateString('en', { day: 'numeric', month: 'short' })}</div>}
+                  <div className="flex justify-between"><span className="text-[var(--az-text-muted)]">Weight</span><span className="text-[var(--az-text)] font-medium">{item.weightKg} kg</span></div>
+                  <div className="flex justify-between"><span className="text-[var(--az-text-muted)]">Price</span><span className="text-[var(--az-text)] font-medium">{fmtUSDC(item.priceUsdc)}</span></div>
+                  {item.loadedAt && <div className="flex items-center gap-1 text-[var(--az-text-muted)]"><Clock className="w-3 h-3" />Loaded {new Date(item.loadedAt).toLocaleDateString('en', { day: 'numeric', month: 'short' })}</div>}
+                  {item.deliveredAt && <div className="flex items-center gap-1 text-[var(--az-success)]"><CheckCircle2 className="w-3 h-3" />Delivered {new Date(item.deliveredAt).toLocaleDateString('en', { day: 'numeric', month: 'short' })}</div>}
                 </div>
-                {item.description && <p className="text-xs text-[var(--sn-text-muted)] truncate">{item.description}</p>}
+                {item.description && <p className="text-xs text-[var(--az-text-muted)] truncate">{item.description}</p>}
                 {item.proofOfDeliveryUrl && (
-                  <a href={item.proofOfDeliveryUrl} target="_blank" rel="noopener" className="flex items-center gap-1 text-xs text-[var(--sn-blue)] hover:underline">
+                  <a href={item.proofOfDeliveryUrl} target="_blank" rel="noopener" className="flex items-center gap-1 text-xs text-[var(--az-info)] hover:underline">
                     <Link className="w-3 h-3" /> Proof of delivery
                   </a>
                 )}
@@ -163,7 +163,7 @@ export default function TransitCargo() {
               </Card>
             ))}
             {grouped[col.key]?.length === 0 && (
-              <div className="text-center py-8 text-xs text-[var(--sn-text-muted)] border border-dashed border-[var(--sn-border)] rounded-lg">
+              <div className="text-center py-8 text-xs text-[var(--az-text-muted)] border border-dashed border-[var(--az-border)] rounded-lg">
                 <Package className="w-6 h-6 mx-auto mb-1 opacity-30" />
                 No parcels
               </div>
@@ -197,7 +197,7 @@ export default function TransitCargo() {
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.fragile} onChange={e => setForm({ ...form, fragile: e.target.checked })} className="rounded" />
-            <span className="text-sm text-[var(--sn-text)]">Fragile</span>
+            <span className="text-sm text-[var(--az-text)]">Fragile</span>
           </label>
           <Input label="Notes" placeholder="Additional handling instructions..." value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
           <Button onClick={handleCreate} className="w-full" disabled={!form.transitTripId || !form.senderName || !form.receiverName || !form.weightKg || !form.priceUsdc}>Create Parcel</Button>
@@ -207,8 +207,8 @@ export default function TransitCargo() {
       {/* Proof of Delivery Modal */}
       <Modal open={!!proofOpen} onClose={() => { setProofOpen(null); setProofUrl(''); }} title="Attach Proof of Delivery">
         <div className="space-y-4">
-          <p className="text-sm text-[var(--sn-text-muted)]">
-            Attach a URL to the delivery photo or signature for parcel from <span className="text-[var(--sn-text)] font-medium">{proofOpen?.senderName}</span> to <span className="text-[var(--sn-text)] font-medium">{proofOpen?.receiverName}</span>.
+          <p className="text-sm text-[var(--az-text-muted)]">
+            Attach a URL to the delivery photo or signature for parcel from <span className="text-[var(--az-text)] font-medium">{proofOpen?.senderName}</span> to <span className="text-[var(--az-text)] font-medium">{proofOpen?.receiverName}</span>.
           </p>
           <Input label="Proof of Delivery URL" placeholder="https://..." value={proofUrl} onChange={e => setProofUrl(e.target.value)} />
           <Button onClick={handleAttachProof} className="w-full" disabled={!proofUrl}>Attach & Mark Delivered</Button>

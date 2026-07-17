@@ -17,15 +17,15 @@ export function DropdownMenu({ trigger, items, align = 'right', className }) {
       {open && (
         <div
           className={cn(
-            'absolute z-50 mt-2 min-w-[180px] rounded-xl border border-[var(--sn-border)] shadow-2xl py-1.5 animate-scale-in',
+            'absolute z-50 mt-2 min-w-[180px] rounded-xl border border-[var(--az-border)] shadow-2xl py-1.5 animate-scale-in',
             align === 'right' ? 'right-0' : 'left-0',
             className
           )}
-          style={{ background: 'var(--sn-card)' }}
+          style={{ background: 'var(--az-surface)' }}
         >
           {items.map((item, i) =>
             item.divider ? (
-              <div key={i} className="h-px bg-[var(--sn-border)] my-1.5" />
+              <div key={i} className="h-px bg-[var(--az-border)] my-1.5" />
             ) : (
               <button
                 key={i}
@@ -33,13 +33,13 @@ export function DropdownMenu({ trigger, items, align = 'right', className }) {
                 className={cn(
                   'w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors text-left',
                   item.danger
-                    ? 'text-[var(--sn-red)] hover:bg-[var(--sn-red-subtle)]'
-                    : 'text-[var(--sn-text-secondary)] hover:bg-[var(--sn-card-hover)] hover:text-[var(--sn-text)]'
+                    ? 'text-[var(--az-danger)] hover:bg-[var(--az-danger-subtle)]'
+                    : 'text-[var(--az-text-muted)] hover:bg-[var(--az-bg-alt)] hover:text-[var(--az-text)]'
                 )}
               >
                 {item.icon && <item.icon className="w-4 h-4 flex-shrink-0" />}
                 <span className="flex-1">{item.label}</span>
-                {item.shortcut && <span className="text-xs text-[var(--sn-text-muted)]">{item.shortcut}</span>}
+                {item.shortcut && <span className="text-xs text-[var(--az-text-muted)]">{item.shortcut}</span>}
               </button>
             )
           )}

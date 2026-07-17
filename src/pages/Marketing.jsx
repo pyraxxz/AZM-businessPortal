@@ -378,9 +378,9 @@ export default function Marketing() {
   if (!canView) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[500px] text-center p-6">
-        <AlertTriangle className="w-12 h-12 text-[var(--sn-red)] mb-4 animate-bounce" />
-        <h2 className="text-xl font-bold text-[var(--sn-text)] mb-2">Access Denied</h2>
-        <p className="text-sm text-[var(--sn-text-muted)] max-w-md">
+        <AlertTriangle className="w-12 h-12 text-[var(--az-danger)] mb-4 animate-bounce" />
+        <h2 className="text-xl font-bold text-[var(--az-text)] mb-2">Access Denied</h2>
+        <p className="text-sm text-[var(--az-text-muted)] max-w-md">
           You do not have permission to view the Marketing module. Please contact your administrator.
         </p>
       </div>
@@ -388,32 +388,32 @@ export default function Marketing() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in text-[var(--sn-text)]">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in text-[var(--az-text)]">
       {/* Page Title & Follower Quick Card */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black flex items-center gap-3">
-            <Megaphone className="w-6 h-6 text-[var(--sn-purple)]" />
+            <Megaphone className="w-6 h-6 text-[var(--az-accent)]" />
             Marketing & Growth Hub
           </h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">
             Grow your custom customer base, manage ad campaigns, dispatch live broadcasts, and handle discount codes.
           </p>
         </div>
 
         {/* Quick Follower KPI Card */}
-        <div className="flex items-center gap-4 bg-[var(--sn-card)] border border-[var(--sn-border)] rounded-2xl p-4 md:w-80 shadow-md">
-          <div className="w-12 h-12 rounded-xl bg-[var(--sn-purple-subtle)] flex items-center justify-center text-[var(--sn-purple)]">
+        <div className="flex items-center gap-4 bg-[var(--az-surface)] border border-[var(--az-border)] rounded-2xl p-4 md:w-80 shadow-md">
+          <div className="w-12 h-12 rounded-xl bg-[var(--az-accent-subtle)] flex items-center justify-center text-[var(--az-accent)]">
             <Radio className="w-6 h-6 animate-pulse" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="text-2xl font-black tracking-tight">{followerStats.followerCount}</span>
-              <Badge color="var(--sn-purple)" bg="var(--sn-purple-subtle)" className="text-[10px] px-1.5 py-0">
+              <Badge color="var(--az-accent)" bg="var(--az-accent-subtle)" className="text-[10px] px-1.5 py-0">
                 +{followerStats.growthRate}%
               </Badge>
             </div>
-            <p className="text-xs text-[var(--sn-text-muted)] uppercase tracking-wider font-semibold">Live Storefront Followers</p>
+            <p className="text-xs text-[var(--az-text-muted)] uppercase tracking-wider font-semibold">Live Storefront Followers</p>
           </div>
         </div>
       </div>
@@ -442,7 +442,7 @@ export default function Marketing() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-bold">Business Promotions & Discounts</h3>
-                  <p className="text-xs text-[var(--sn-text-muted)]">Configure high-conversion coupon codes for digital checkout.</p>
+                  <p className="text-xs text-[var(--az-text-muted)]">Configure high-conversion coupon codes for digital checkout.</p>
                 </div>
                 {canPublish && (
                   <Button onClick={openCreatePromoModal} variant="primary" size="sm" className="gap-1">
@@ -465,10 +465,10 @@ export default function Marketing() {
                   />
                 </Card>
               ) : (
-                <div className="overflow-x-auto rounded-2xl border border-[var(--sn-border)] bg-[var(--sn-card)]">
+                <div className="overflow-x-auto rounded-2xl border border-[var(--az-border)] bg-[var(--az-surface)]">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-[var(--sn-border)] bg-[var(--sn-surface)] text-xs font-bold uppercase tracking-wider text-[var(--sn-text-muted)]">
+                      <tr className="border-b border-[var(--az-border)] bg-[var(--az-surface)] text-xs font-bold uppercase tracking-wider text-[var(--az-text-muted)]">
                         <th className="px-6 py-4">Promo Details</th>
                         <th className="px-6 py-4">Scope</th>
                         <th className="px-6 py-4">Value</th>
@@ -478,22 +478,22 @@ export default function Marketing() {
                         <th className="px-6 py-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[var(--sn-border)] text-sm font-medium">
+                    <tbody className="divide-y divide-[var(--az-border)] text-sm font-medium">
                       {promotions.map((promo) => (
-                        <tr key={promo.id} className="hover:bg-[var(--sn-hover)] transition-colors">
+                        <tr key={promo.id} className="hover:bg-[var(--az-bg-alt)] transition-colors">
                           <td className="px-6 py-4">
-                            <p className="font-extrabold text-[var(--sn-purple)] tracking-wide">{promo.code}</p>
-                            <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">{promo.name}</p>
+                            <p className="font-extrabold text-[var(--az-accent)] tracking-wide">{promo.code}</p>
+                            <p className="text-xs text-[var(--az-text-muted)] mt-0.5">{promo.name}</p>
                           </td>
                           <td className="px-6 py-4">
-                            <Badge color="var(--sn-blue)">{promo.scope}</Badge>
+                            <Badge color="var(--az-info)">{promo.scope}</Badge>
                           </td>
                           <td className="px-6 py-4 font-bold">
                             {promo.discountType === 'PERCENTAGE' ? `${promo.discountValue}% Off` : `$${promo.discountValue} Off`}
                           </td>
-                          <td className="px-6 py-4 text-xs text-[var(--sn-text-muted)]">
+                          <td className="px-6 py-4 text-xs text-[var(--az-text-muted)]">
                             <div className="flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5 text-[var(--sn-purple)]" />
+                              <Calendar className="w-3.5 h-3.5 text-[var(--az-accent)]" />
                               <span>
                                 {promo.startDate ? new Date(promo.startDate).toLocaleDateString() : 'Immediate'} - {promo.endDate ? new Date(promo.endDate).toLocaleDateString() : 'Ongoing'}
                               </span>
@@ -514,7 +514,7 @@ export default function Marketing() {
                               Edit
                             </Button>
                             {canPublish && (
-                              <Button size="sm" variant="ghost" className="text-[var(--sn-red)]" onClick={() => handleDeletePromo(promo.id)}>
+                              <Button size="sm" variant="ghost" className="text-[var(--az-danger)]" onClick={() => handleDeletePromo(promo.id)}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             )}
@@ -535,7 +535,7 @@ export default function Marketing() {
               <div className="lg:col-span-7 space-y-6">
                 <Card>
                   <h3 className="text-lg font-bold mb-1">Create Storefront Ad Campaign</h3>
-                  <p className="text-xs text-[var(--sn-text-muted)] mb-6">Create promotional panels displayed natively on the customer marketplace feed.</p>
+                  <p className="text-xs text-[var(--az-text-muted)] mb-6">Create promotional panels displayed natively on the customer marketplace feed.</p>
 
                   <form onSubmit={handleCreateAd} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -560,14 +560,14 @@ export default function Marketing() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Ad Media Asset</label>
+                      <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Ad Media Asset</label>
                       <div className="flex items-center gap-4">
                         {adForm.mediaUrl && (
-                          <img src={adForm.mediaUrl} className="w-16 h-16 object-cover rounded-xl border border-[var(--sn-border)]" alt="Ad thumb" />
+                          <img src={adForm.mediaUrl} className="w-16 h-16 object-cover rounded-xl border border-[var(--az-border)]" alt="Ad thumb" />
                         )}
-                        <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-[var(--sn-border)] rounded-xl py-6 hover:border-[var(--sn-purple)] cursor-pointer transition-all">
-                          <Upload className="w-5 h-5 text-[var(--sn-text-muted)] mb-1" />
-                          <span className="text-xs font-bold text-[var(--sn-purple)]">
+                        <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-[var(--az-border)] rounded-xl py-6 hover:border-[var(--az-accent)] cursor-pointer transition-all">
+                          <Upload className="w-5 h-5 text-[var(--az-text-muted)] mb-1" />
+                          <span className="text-xs font-bold text-[var(--az-accent)]">
                             {uploadingAdMedia ? 'Uploading image...' : 'Upload Campaign Photo'}
                           </span>
                           <input type="file" accept="image/*" onChange={handleAdMediaUpload} className="hidden" />
@@ -576,10 +576,10 @@ export default function Marketing() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Campaign Copy</label>
+                      <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Campaign Copy</label>
                       <textarea
                         rows={3}
-                        className="w-full px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] text-sm placeholder:text-[var(--sn-text-muted)] outline-none focus:border-[var(--sn-purple)] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] text-sm placeholder:text-[var(--az-text-muted)] outline-none focus:border-[var(--az-accent)] transition-colors"
                         placeholder="Write clean, engaging pitch text targeting customers..."
                         value={adForm.body}
                         onChange={(e) => setAdForm(prev => ({ ...prev, body: e.target.value }))}
@@ -622,26 +622,26 @@ export default function Marketing() {
                   ) : (
                     <div className="space-y-3">
                       {ads.map((ad) => (
-                        <div key={ad.id} className="flex items-center justify-between border-b border-[var(--sn-border)] pb-3">
+                        <div key={ad.id} className="flex items-center justify-between border-b border-[var(--az-border)] pb-3">
                           <div className="flex items-center gap-3">
                             {ad.mediaUrl && (
                               <img src={ad.mediaUrl} className="w-12 h-12 object-cover rounded-lg" alt="" />
                             )}
                             <div>
-                              <p className="font-bold text-sm text-[var(--sn-text)]">{ad.title}</p>
-                              <p className="text-xs text-[var(--sn-text-muted)] truncate max-w-xs">{ad.body}</p>
+                              <p className="font-bold text-sm text-[var(--az-text)]">{ad.title}</p>
+                              <p className="text-xs text-[var(--az-text-muted)] truncate max-w-xs">{ad.body}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4 text-xs font-semibold text-[var(--sn-text-muted)]">
+                          <div className="flex items-center gap-4 text-xs font-semibold text-[var(--az-text-muted)]">
                             <div>
-                              <p className="text-[var(--sn-text)] text-sm font-bold">{(ad.impressions || 124).toLocaleString()}</p>
+                              <p className="text-[var(--az-text)] text-sm font-bold">{(ad.impressions || 124).toLocaleString()}</p>
                               <p className="text-[10px] uppercase">Views</p>
                             </div>
                             <div>
-                              <p className="text-[var(--sn-purple)] text-sm font-bold">{(ad.clicks || 18).toLocaleString()}</p>
+                              <p className="text-[var(--az-accent)] text-sm font-bold">{(ad.clicks || 18).toLocaleString()}</p>
                               <p className="text-[10px] uppercase">Clicks</p>
                             </div>
-                            <Button size="sm" variant="ghost" className="text-[var(--sn-red)]" onClick={() => handleDeleteAd(ad.id)}>
+                            <Button size="sm" variant="ghost" className="text-[var(--az-danger)]" onClick={() => handleDeleteAd(ad.id)}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -655,36 +655,36 @@ export default function Marketing() {
               {/* Live Card Inline Preview */}
               <div className="lg:col-span-5 space-y-4">
                 <div className="sticky top-6">
-                  <h4 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider mb-2">Live Marketplace Ad Feed Preview</h4>
-                  <div className="rounded-3xl border border-[var(--sn-border)] bg-[var(--az-black)] p-4 max-w-sm mx-auto shadow-2xl overflow-hidden">
+                  <h4 className="text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider mb-2">Live Marketplace Ad Feed Preview</h4>
+                  <div className="rounded-3xl border border-[var(--az-border)] bg-[var(--az-black)] p-4 max-w-sm mx-auto shadow-2xl overflow-hidden">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-[var(--sn-purple-subtle)] flex items-center justify-center font-black text-xs text-[var(--sn-purple)]">
+                      <div className="w-8 h-8 rounded-full bg-[var(--az-accent-subtle)] flex items-center justify-center font-black text-xs text-[var(--az-accent)]">
                         {bizProfile?.businessName?.charAt(0) || 'A'}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-black text-white truncate">{bizProfile?.businessName || 'Azaman Partner'}</p>
-                        <p className="text-[10px] text-[var(--sn-text-muted)] flex items-center gap-1">
-                          Sponsored <Sparkles className="w-2.5 h-2.5 text-[var(--sn-purple)]" />
+                        <p className="text-[10px] text-[var(--az-text-muted)] flex items-center gap-1">
+                          Sponsored <Sparkles className="w-2.5 h-2.5 text-[var(--az-accent)]" />
                         </p>
                       </div>
                     </div>
 
-                    <div className="relative rounded-2xl overflow-hidden aspect-video bg-[var(--sn-card)] border border-[var(--sn-border)] mb-3">
+                    <div className="relative rounded-2xl overflow-hidden aspect-video bg-[var(--az-surface)] border border-[var(--az-border)] mb-3">
                       {adForm.mediaUrl ? (
                         <img src={adForm.mediaUrl} className="w-full h-full object-cover" alt="Preview asset" />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-[var(--sn-text-muted)]">
+                        <div className="w-full h-full flex flex-col items-center justify-center text-[var(--az-text-muted)]">
                           <ImageIcon className="w-8 h-8 mb-1" />
                           <p className="text-[10px]">No image asset uploaded</p>
                         </div>
                       )}
-                      <Badge className="absolute top-2 right-2 text-[9px]" color="var(--sn-purple)">
+                      <Badge className="absolute top-2 right-2 text-[9px]" color="var(--az-accent)">
                         {adForm.template}
                       </Badge>
                     </div>
 
                     <h5 className="text-sm font-extrabold text-white mb-1">{adForm.title || 'Your Eye-Catching Campaign Title'}</h5>
-                    <p className="text-xs text-[var(--sn-text-muted)] line-clamp-3 mb-4 leading-relaxed">
+                    <p className="text-xs text-[var(--az-text-muted)] line-clamp-3 mb-4 leading-relaxed">
                       {adForm.body || 'Pitch details here. Highlight your new seasonal menu, high-luxury suite offer, discount scope, or VIP events.'}
                     </p>
 
@@ -705,10 +705,10 @@ export default function Marketing() {
                 <Card>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold">Follower Broadcast dispatch</h3>
-                    <Badge color="var(--sn-amber)">Weekly Limit Active</Badge>
+                    <Badge color="var(--az-warning)">Weekly Limit Active</Badge>
                   </div>
 
-                  <div className="flex gap-3 bg-[var(--sn-red)]/10 border border-[var(--sn-red)]/20 p-4 rounded-xl mb-6 text-xs leading-relaxed text-[var(--sn-red)]">
+                  <div className="flex gap-3 bg-[var(--az-danger)]/10 border border-[var(--az-danger)]/20 p-4 rounded-xl mb-6 text-xs leading-relaxed text-[var(--az-danger)]">
                     <Clock className="w-5 h-5 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold">Important Rate-Limiting Policy</p>
@@ -726,10 +726,10 @@ export default function Marketing() {
                     />
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Notification Content</label>
+                      <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Notification Content</label>
                       <textarea
                         rows={4}
-                        className="w-full px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] text-sm placeholder:text-[var(--sn-text-muted)] outline-none focus:border-[var(--sn-purple)] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] text-sm placeholder:text-[var(--az-text-muted)] outline-none focus:border-[var(--az-accent)] transition-colors"
                         placeholder="Type direct notification push message..."
                         value={broadcastForm.message}
                         onChange={(e) => setBroadcastForm(prev => ({ ...prev, message: e.target.value }))}
@@ -745,7 +745,7 @@ export default function Marketing() {
               </div>
 
               <div className="lg:col-span-6 space-y-4">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--sn-text-muted)]">Sent Broadcast History</h4>
+                <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--az-text-muted)]">Sent Broadcast History</h4>
                 {broadcastHistory.length === 0 ? (
                   <Card className="p-8 text-center">
                     <Empty icon={Radio} title="No broadcasts sent yet" description="Keep your loyal followers engaged with important updates or exclusive coupons." />
@@ -753,14 +753,14 @@ export default function Marketing() {
                 ) : (
                   <div className="space-y-3">
                     {broadcastHistory.map((bc, idx) => (
-                      <Card key={bc.id || idx} className="border-l-4 border-l-[var(--sn-purple)]">
+                      <Card key={bc.id || idx} className="border-l-4 border-l-[var(--az-accent)]">
                         <div className="flex justify-between items-start">
                           <h5 className="font-extrabold text-sm">{bc.title}</h5>
-                          <span className="text-[10px] text-[var(--sn-text-muted)] font-mono">
+                          <span className="text-[10px] text-[var(--az-text-muted)] font-mono">
                             {new Date(bc.sentAt || Date.now()).toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="text-xs text-[var(--sn-text-muted)] mt-2 leading-relaxed">{bc.message}</p>
+                        <p className="text-xs text-[var(--az-text-muted)] mt-2 leading-relaxed">{bc.message}</p>
                       </Card>
                     ))}
                   </div>
@@ -774,16 +774,16 @@ export default function Marketing() {
             <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
               <Card>
                 <div className="flex items-center gap-3 mb-6">
-                  <Palette className="w-6 h-6 text-[var(--sn-purple)]" />
+                  <Palette className="w-6 h-6 text-[var(--az-accent)]" />
                   <div>
                     <h3 className="text-lg font-bold">Marketplace Accent Styling</h3>
-                    <p className="text-xs text-[var(--sn-text-muted)]">Select your brand color which themes your profile, buttons, and booking pages on the marketplace.</p>
+                    <p className="text-xs text-[var(--az-text-muted)]">Select your brand color which themes your profile, buttons, and booking pages on the marketplace.</p>
                   </div>
                 </div>
 
                 <div className="space-y-6">
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-[var(--sn-text-muted)]">Choose Accent Color</label>
+                    <label className="text-xs font-bold uppercase tracking-wider text-[var(--az-text-muted)]">Choose Accent Color</label>
                     <div className="flex items-center gap-4">
                       <input
                         type="color"
@@ -800,9 +800,9 @@ export default function Marketing() {
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-[var(--sn-border)] bg-[var(--sn-surface)]">
-                    <p className="text-xs font-bold text-[var(--sn-text-muted)] mb-3">Live Interactive Theme Sample Card</p>
-                    <div className="p-4 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] flex items-center justify-between">
+                  <div className="p-4 rounded-xl border border-[var(--az-border)] bg-[var(--az-surface)]">
+                    <p className="text-xs font-bold text-[var(--az-text-muted)] mb-3">Live Interactive Theme Sample Card</p>
+                    <div className="p-4 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div
                           className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm text-white"
@@ -812,7 +812,7 @@ export default function Marketing() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-white">{bizProfile?.businessName || 'Your Business'}</p>
-                          <p className="text-[10px] text-[var(--sn-text-muted)]">Marketplace View</p>
+                          <p className="text-[10px] text-[var(--az-text-muted)]">Marketplace View</p>
                         </div>
                       </div>
                       <button

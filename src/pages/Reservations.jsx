@@ -42,12 +42,12 @@ import {
 } from 'lucide-react';
 
 const RESERVATION_STATUS = {
-  PENDING: { label: 'Pending', color: 'var(--sn-amber)' },
-  CONFIRMED: { label: 'Confirmed', color: 'var(--sn-blue)' },
-  CHECKED_IN: { label: 'Checked In', color: 'var(--sn-purple)' },
-  COMPLETED: { label: 'Completed', color: 'var(--sn-green)' },
-  CANCELLED: { label: 'Cancelled', color: 'var(--sn-red)' },
-  NO_SHOW: { label: 'No-Show', color: 'var(--sn-red)' },
+  PENDING: { label: 'Pending', color: 'var(--az-warning)' },
+  CONFIRMED: { label: 'Confirmed', color: 'var(--az-info)' },
+  CHECKED_IN: { label: 'Checked In', color: 'var(--az-accent)' },
+  COMPLETED: { label: 'Completed', color: 'var(--az-success)' },
+  CANCELLED: { label: 'Cancelled', color: 'var(--az-danger)' },
+  NO_SHOW: { label: 'No-Show', color: 'var(--az-danger)' },
 };
 
 export default function Reservations() {
@@ -297,35 +297,35 @@ export default function Reservations() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--sn-bg)] text-[var(--sn-text)] p-6 animate-fade-in">
+    <div className="min-h-screen bg-[var(--az-bg)] text-[var(--az-text)] p-6 animate-fade-in">
       {/* Upper Dashboard Header & Fast Stats */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--sn-text)] flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-[var(--sn-blue)]" />
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--az-text)] flex items-center gap-2">
+            <Calendar className="w-6 h-6 text-[var(--az-info)]" />
             Reservations Console
           </h1>
-          <p className="text-sm text-[var(--sn-text-muted)]">
+          <p className="text-sm text-[var(--az-text-muted)]">
             Unified status deck, reschedule negotiations, slot previews, and customer trust ratings.
           </p>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
           {/* Overbooking Mode Controller */}
-          <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-[var(--sn-card)] border border-[var(--sn-border)]">
-            <SlidersHorizontal className="w-4 h-4 text-[var(--sn-text-muted)]" />
-            <span className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Overbooking Mode</span>
+          <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-[var(--az-surface)] border border-[var(--az-border)]">
+            <SlidersHorizontal className="w-4 h-4 text-[var(--az-text-muted)]" />
+            <span className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Overbooking Mode</span>
             <button
               onClick={() => overbookingMutation.mutate(!overbookingAllowed)}
               disabled={overbookingMutation.isPending}
               className={cn(
                 "relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                overbookingAllowed ? "bg-[var(--sn-blue)]" : "bg-[var(--sn-border)]"
+                overbookingAllowed ? "bg-[var(--az-info)]" : "bg-[var(--az-border)]"
               )}
             >
               <span
                 className={cn(
-                  "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-[var(--sn-bg)] shadow ring-0 transition duration-200 ease-in-out",
+                  "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-[var(--az-bg)] shadow ring-0 transition duration-200 ease-in-out",
                   overbookingAllowed ? "translate-x-4" : "translate-x-0"
                 )}
               />
@@ -344,7 +344,7 @@ export default function Reservations() {
           <Button
             variant="secondary"
             onClick={() => refetch()}
-            className="p-2.5 rounded-xl border border-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]"
+            className="p-2.5 rounded-xl border border-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-text)]"
             title="Reload Data"
           >
             <RefreshCw className="w-4 h-4" />
@@ -354,17 +354,17 @@ export default function Reservations() {
 
       {/* Numerical Stats Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Widget title="All Bookings" icon={Calendar} iconColor="var(--sn-blue)" loading={isLoading}>
+        <Widget title="All Bookings" icon={Calendar} iconColor="var(--az-info)" loading={isLoading}>
           <WidgetStat value={fmt(stats.total || filteredReservations.length, 0)} label="Total reservation scope" />
         </Widget>
-        <Widget title="Pending Confirmation" icon={Clock} iconColor="var(--sn-amber)" loading={isLoading}>
-          <WidgetStat value={fmt(stats.pending || 0, 0)} label="Requires verification" color="var(--sn-amber)" />
+        <Widget title="Pending Confirmation" icon={Clock} iconColor="var(--az-warning)" loading={isLoading}>
+          <WidgetStat value={fmt(stats.pending || 0, 0)} label="Requires verification" color="var(--az-warning)" />
         </Widget>
-        <Widget title="Checked In" icon={CheckCircle2} iconColor="var(--sn-purple)" loading={isLoading}>
-          <WidgetStat value={fmt(stats.checkedIn || 0, 0)} label="Currently on premises" color="var(--sn-purple)" />
+        <Widget title="Checked In" icon={CheckCircle2} iconColor="var(--az-accent)" loading={isLoading}>
+          <WidgetStat value={fmt(stats.checkedIn || 0, 0)} label="Currently on premises" color="var(--az-accent)" />
         </Widget>
-        <Widget title="No-Shows / Reschedules" icon={UserX} iconColor="var(--sn-red)" loading={isLoading}>
-          <WidgetStat value={fmt(stats.noShows || 0, 0)} label="No-shows reported" color="var(--sn-red)" />
+        <Widget title="No-Shows / Reschedules" icon={UserX} iconColor="var(--az-danger)" loading={isLoading}>
+          <WidgetStat value={fmt(stats.noShows || 0, 0)} label="No-shows reported" color="var(--az-danger)" />
         </Widget>
       </div>
 
@@ -373,15 +373,15 @@ export default function Reservations() {
         <div className="flex-1 min-w-0 space-y-6">
           {/* Hybrid View Selector + Filters Toolbar */}
           <Card className="p-4 space-y-4">
-            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border-b border-[var(--sn-border)] pb-4">
-              <div className="flex items-center gap-1.5 p-1 bg-[var(--sn-bg)] rounded-xl border border-[var(--sn-border)] w-fit">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border-b border-[var(--az-border)] pb-4">
+              <div className="flex items-center gap-1.5 p-1 bg-[var(--az-bg)] rounded-xl border border-[var(--az-border)] w-fit">
                 <button
                   onClick={() => setActiveTab('list')}
                   className={cn(
                     "px-4 py-2 rounded-lg text-xs font-bold transition-all",
                     activeTab === 'list' 
-                      ? "bg-[var(--sn-card)] text-[var(--sn-blue)] border border-[var(--sn-border)] shadow" 
-                      : "text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]"
+                      ? "bg-[var(--az-surface)] text-[var(--az-info)] border border-[var(--az-border)] shadow" 
+                      : "text-[var(--az-text-muted)] hover:text-[var(--az-text)]"
                   )}
                 >
                   Filtered List
@@ -391,8 +391,8 @@ export default function Reservations() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-xs font-bold transition-all",
                     activeTab === 'calendar' 
-                      ? "bg-[var(--sn-card)] text-[var(--sn-blue)] border border-[var(--sn-border)] shadow" 
-                      : "text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]"
+                      ? "bg-[var(--az-surface)] text-[var(--az-info)] border border-[var(--az-border)] shadow" 
+                      : "text-[var(--az-text-muted)] hover:text-[var(--az-text)]"
                   )}
                 >
                   Calendar Hybrid Grid
@@ -404,7 +404,7 @@ export default function Reservations() {
                 <select
                   value={locationId}
                   onChange={(e) => setLocationId(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--sn-bg)] border border-[var(--sn-border)] text-[var(--sn-text)] focus:border-[var(--sn-blue)] outline-none cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--az-bg)] border border-[var(--az-border)] text-[var(--az-text)] focus:border-[var(--az-info)] outline-none cursor-pointer"
                 >
                   <option value="all">All Locations</option>
                   {locationList.map(loc => (
@@ -412,7 +412,7 @@ export default function Reservations() {
                   ))}
                 </select>
 
-                <div className="flex items-center gap-1.5 bg-[var(--sn-bg)] p-1 rounded-lg border border-[var(--sn-border)]">
+                <div className="flex items-center gap-1.5 bg-[var(--az-bg)] p-1 rounded-lg border border-[var(--az-border)]">
                   {['all', 'PENDING', 'CONFIRMED', 'CHECKED_IN', 'NO_SHOW'].map(status => (
                     <button
                       key={status}
@@ -420,8 +420,8 @@ export default function Reservations() {
                       className={cn(
                         "px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors uppercase tracking-wider",
                         statusFilter === status
-                          ? "bg-[var(--sn-blue)] text-[var(--sn-bg)]"
-                          : "text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]"
+                          ? "bg-[var(--az-info)] text-[var(--az-bg)]"
+                          : "text-[var(--az-text-muted)] hover:text-[var(--az-text)]"
                       )}
                     >
                       {status === 'all' ? 'All Status' : status.replace('_', ' ')}
@@ -434,33 +434,33 @@ export default function Reservations() {
             {/* Advanced Filters & Search (Reference / Customer Name) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--sn-text-muted)]" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--az-text-muted)]" />
                 <input
                   type="text"
                   placeholder="Search reservationRef or customer name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl bg-[var(--sn-bg)] border border-[var(--sn-border)] text-[var(--sn-text)] placeholder:text-[var(--sn-text-muted)] outline-none focus:border-[var(--sn-blue)] focus:ring-1 focus:ring-[var(--sn-blue)] transition-colors"
+                  className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl bg-[var(--az-bg)] border border-[var(--az-border)] text-[var(--az-text)] placeholder:text-[var(--az-text-muted)] outline-none focus:border-[var(--az-info)] focus:ring-1 focus:ring-[var(--az-info)] transition-colors"
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-[var(--sn-text-muted)] flex-shrink-0">From:</span>
+                <span className="text-xs font-semibold text-[var(--az-text-muted)] flex-shrink-0">From:</span>
                 <input
                   type="date"
                   value={dateRange.start}
                   onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--sn-bg)] border border-[var(--sn-border)] text-[var(--sn-text)] focus:border-[var(--sn-blue)] outline-none"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--az-bg)] border border-[var(--az-border)] text-[var(--az-text)] focus:border-[var(--az-info)] outline-none"
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-[var(--sn-text-muted)] flex-shrink-0">To:</span>
+                <span className="text-xs font-semibold text-[var(--az-text-muted)] flex-shrink-0">To:</span>
                 <input
                   type="date"
                   value={dateRange.end}
                   onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--sn-bg)] border border-[var(--sn-border)] text-[var(--sn-text)] focus:border-[var(--sn-blue)] outline-none"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--az-bg)] border border-[var(--az-border)] text-[var(--az-text)] focus:border-[var(--az-info)] outline-none"
                 />
               </div>
             </div>
@@ -473,10 +473,10 @@ export default function Reservations() {
               <Skeleton className="h-64 w-full" />
             </div>
           ) : isError ? (
-            <Card className="flex flex-col items-center justify-center py-16 text-center border-[var(--sn-red)] bg-[#ef444405]">
-              <AlertCircle className="w-10 h-10 text-[var(--sn-red)] mb-3" />
-              <p className="text-base font-bold text-[var(--sn-text)]">Failed to retrieve reservations</p>
-              <p className="text-sm text-[var(--sn-text-muted)] mt-1 max-w-sm">
+            <Card className="flex flex-col items-center justify-center py-16 text-center border-[var(--az-danger)] bg-[#ef444405]">
+              <AlertCircle className="w-10 h-10 text-[var(--az-danger)] mb-3" />
+              <p className="text-base font-bold text-[var(--az-text)]">Failed to retrieve reservations</p>
+              <p className="text-sm text-[var(--az-text-muted)] mt-1 max-w-sm">
                 There was a network error fetching your booking details. Please refresh the query deck.
               </p>
               <Button variant="secondary" onClick={() => refetch()} className="mt-4">
@@ -504,30 +504,30 @@ export default function Reservations() {
           ) : activeTab === 'calendar' ? (
             /* Calendar Hybrid View Grid */
             <Card className="p-5">
-              <div className="flex items-center justify-between mb-4 border-b border-[var(--sn-border)] pb-4">
+              <div className="flex items-center justify-between mb-4 border-b border-[var(--az-border)] pb-4">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--sn-text)]">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--az-text)]">
                     {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={prevMonth}
-                    className="p-1.5 rounded-lg border border-[var(--sn-border)] hover:bg-[var(--sn-bg)] transition"
+                    className="p-1.5 rounded-lg border border-[var(--az-border)] hover:bg-[var(--az-bg)] transition"
                   >
-                    <ChevronLeft className="w-4 h-4 text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]" />
+                    <ChevronLeft className="w-4 h-4 text-[var(--az-text-muted)] hover:text-[var(--az-text)]" />
                   </button>
                   <button 
                     onClick={() => setCurrentDate(new Date())}
-                    className="px-2.5 py-1 text-xs font-semibold border border-[var(--sn-border)] rounded-lg hover:bg-[var(--sn-bg)] transition"
+                    className="px-2.5 py-1 text-xs font-semibold border border-[var(--az-border)] rounded-lg hover:bg-[var(--az-bg)] transition"
                   >
                     Today
                   </button>
                   <button 
                     onClick={nextMonth}
-                    className="p-1.5 rounded-lg border border-[var(--sn-border)] hover:bg-[var(--sn-bg)] transition"
+                    className="p-1.5 rounded-lg border border-[var(--az-border)] hover:bg-[var(--az-bg)] transition"
                   >
-                    <ChevronRight className="w-4 h-4 text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]" />
+                    <ChevronRight className="w-4 h-4 text-[var(--az-text-muted)] hover:text-[var(--az-text)]" />
                   </button>
                 </div>
               </div>
@@ -535,7 +535,7 @@ export default function Reservations() {
               {/* Day names headers */}
               <div className="grid grid-cols-7 gap-1.5 text-center mb-1.5">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                  <div key={d} className="text-[10px] font-bold text-[var(--sn-text-muted)] uppercase tracking-widest py-1">
+                  <div key={d} className="text-[10px] font-bold text-[var(--az-text-muted)] uppercase tracking-widest py-1">
                     {d}
                   </div>
                 ))}
@@ -553,20 +553,20 @@ export default function Reservations() {
                       className={cn(
                         "min-h-[110px] p-2 rounded-xl border flex flex-col justify-between transition-all",
                         cell.isCurrentMonth 
-                          ? "bg-[var(--sn-bg)] border-[var(--sn-border)]" 
-                          : "bg-black/10 border-[var(--sn-border)] opacity-40",
-                        isToday && "border-[var(--sn-blue)] ring-1 ring-[var(--sn-blue)]"
+                          ? "bg-[var(--az-bg)] border-[var(--az-border)]" 
+                          : "bg-black/10 border-[var(--az-border)] opacity-40",
+                        isToday && "border-[var(--az-info)] ring-1 ring-[var(--az-info)]"
                       )}
                     >
                       <div className="flex justify-between items-center mb-1">
                         <span className={cn(
                           "text-xs font-bold",
-                          isToday ? "text-[var(--sn-blue)]" : "text-[var(--sn-text-muted)]"
+                          isToday ? "text-[var(--az-info)]" : "text-[var(--az-text-muted)]"
                         )}>
                           {cell.date.getDate()}
                         </span>
                         {dayReservations.length > 0 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[var(--sn-border)] text-[var(--sn-text)] font-semibold">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[var(--az-border)] text-[var(--az-text)] font-semibold">
                             {dayReservations.length}
                           </span>
                         )}
@@ -597,7 +597,7 @@ export default function Reservations() {
                           );
                         })}
                         {dayReservations.length > 3 && (
-                          <div className="text-[9px] text-[var(--sn-text-muted)] text-center font-semibold pt-0.5">
+                          <div className="text-[9px] text-[var(--az-text-muted)] text-center font-semibold pt-0.5">
                             + {dayReservations.length - 3} more
                           </div>
                         )}
@@ -616,51 +616,51 @@ export default function Reservations() {
                 const hasProposedReschedule = res.proposedStartDatetime ? true : false;
 
                 return (
-                  <Card key={res.id} className="p-5 border-[var(--sn-border)] bg-[var(--sn-card)] hover:border-slate-700 transition duration-150">
+                  <Card key={res.id} className="p-5 border-[var(--az-border)] bg-[var(--az-surface)] hover:border-slate-700 transition duration-150">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                       {/* Left: Customer + Location Context */}
                       <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--sn-border)] flex items-center justify-center flex-shrink-0 border border-slate-700">
-                          <span className="text-sm font-bold text-[var(--sn-blue)]">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--az-border)] flex items-center justify-center flex-shrink-0 border border-slate-700">
+                          <span className="text-sm font-bold text-[var(--az-info)]">
                             {(res.customerName || res.azamanId || '?').charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-sm text-[var(--sn-text)]">
+                            <span className="font-bold text-sm text-[var(--az-text)]">
                               {res.customerName || 'Anonymous Guest'}
                             </span>
-                            <Badge color="var(--sn-text-muted)" className="text-[10px] tracking-widest uppercase">
+                            <Badge color="var(--az-text-muted)" className="text-[10px] tracking-widest uppercase">
                               {res.reference || 'No Ref'}
                             </Badge>
                             
                             {/* Reschedule Proposal Indicator Badge */}
                             {hasProposedReschedule && (
-                              <Badge color="var(--sn-amber)" className="animate-pulse text-[10px]">
+                              <Badge color="var(--az-warning)" className="animate-pulse text-[10px]">
                                 Reschedule Proposed
                               </Badge>
                             )}
 
                             {/* Trust Rating Metric Indicator */}
                             {res.customerTrustScore !== undefined && (
-                              <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--sn-blue)] px-2 py-0.5 rounded-full bg-blue-500/10">
+                              <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--az-info)] px-2 py-0.5 rounded-full bg-blue-500/10">
                                 Trust: {res.customerTrustScore}%
                               </div>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-3 text-xs text-[var(--sn-text-muted)] mt-1.5 flex-wrap">
+                          <div className="flex items-center gap-3 text-xs text-[var(--az-text-muted)] mt-1.5 flex-wrap">
                             <span className="flex items-center gap-1 text-[10px] font-medium">
-                              <MapPin className="w-3 h-3 text-[var(--sn-text-muted)]" />
+                              <MapPin className="w-3 h-3 text-[var(--az-text-muted)]" />
                               {locationName}
                             </span>
                             <span className="flex items-center gap-1 text-[10px] font-medium">
-                              <Calendar className="w-3 h-3 text-[var(--sn-text-muted)]" />
+                              <Calendar className="w-3 h-3 text-[var(--az-text-muted)]" />
                               {formatDateTime(res.scheduledFor || res.createdAt)}
                             </span>
                             {res.partySize && (
                               <span className="flex items-center gap-1 text-[10px] font-medium">
-                                <Users className="w-3 h-3 text-[var(--sn-text-muted)]" />
+                                <Users className="w-3 h-3 text-[var(--az-text-muted)]" />
                                 {res.partySize} Guests
                               </span>
                             )}
@@ -668,22 +668,22 @@ export default function Reservations() {
 
                           {/* Message / Proposed rescheduling block info */}
                           {hasProposedReschedule && (
-                            <div className="mt-3 p-3 rounded-xl bg-[var(--sn-bg)] border border-[var(--sn-amber)]/20 flex flex-col gap-1.5">
-                              <div className="flex items-center gap-1.5 text-[var(--sn-amber)] text-xs font-semibold">
+                            <div className="mt-3 p-3 rounded-xl bg-[var(--az-bg)] border border-[var(--az-warning)]/20 flex flex-col gap-1.5">
+                              <div className="flex items-center gap-1.5 text-[var(--az-warning)] text-xs font-semibold">
                                 <Clock className="w-3.5 h-3.5 animate-spin" />
                                 Reschedule Requested by customer
                               </div>
-                              <p className="text-xs text-[var(--sn-text)] flex items-center gap-2">
-                                <span className="line-through text-[var(--sn-text-muted)]">
+                              <p className="text-xs text-[var(--az-text)] flex items-center gap-2">
+                                <span className="line-through text-[var(--az-text-muted)]">
                                   {formatDateTime(res.scheduledFor || res.createdAt)}
                                 </span>
-                                <ArrowRight className="w-3.5 h-3.5 text-[var(--sn-text-muted)]" />
-                                <span className="font-semibold text-[var(--sn-blue)]">
+                                <ArrowRight className="w-3.5 h-3.5 text-[var(--az-text-muted)]" />
+                                <span className="font-semibold text-[var(--az-info)]">
                                   {formatDateTime(res.proposedStartDatetime)}
                                 </span>
                               </p>
                               {res.rescheduleReason && (
-                                <p className="text-xs text-[var(--sn-text-muted)] italic">
+                                <p className="text-xs text-[var(--az-text-muted)] italic">
                                   "{res.rescheduleReason}"
                                 </p>
                               )}
@@ -693,10 +693,10 @@ export default function Reservations() {
                       </div>
 
                       {/* Right Side: Status Badge, Amount, and Action Center */}
-                      <div className="flex items-center justify-between lg:justify-end gap-6 flex-wrap lg:flex-nowrap border-t lg:border-t-0 border-[var(--sn-border)] pt-3 lg:pt-0">
+                      <div className="flex items-center justify-between lg:justify-end gap-6 flex-wrap lg:flex-nowrap border-t lg:border-t-0 border-[var(--az-border)] pt-3 lg:pt-0">
                         <div className="text-left lg:text-right">
-                          <p className="text-xs text-[var(--sn-text-muted)] font-medium">Total Price</p>
-                          <p className="text-base font-bold text-[var(--sn-blue)] tracking-tight az-mono">
+                          <p className="text-xs text-[var(--az-text-muted)] font-medium">Total Price</p>
+                          <p className="text-base font-bold text-[var(--az-info)] tracking-tight az-mono">
                             {res.amountUsdc ? fmtUSDC(res.amountUsdc) : "—"}
                           </p>
                           <div className="mt-1">
@@ -708,13 +708,13 @@ export default function Reservations() {
                         <div className="flex items-center gap-2 flex-wrap">
                           {/* Accept / Reject Customer Proposed Reschedule */}
                           {hasProposedReschedule && (
-                            <div className="flex items-center gap-1.5 p-1 bg-[var(--sn-bg)] border border-[var(--sn-amber)]/35 rounded-xl">
+                            <div className="flex items-center gap-1.5 p-1 bg-[var(--az-bg)] border border-[var(--az-warning)]/35 rounded-xl">
                               <Button
                                 size="sm"
                                 variant="primary"
                                 onClick={() => respondRescheduleMutation.mutate({ id: res.id, accept: true })}
                                 disabled={respondRescheduleMutation.isPending}
-                                className="px-2.5 py-1 text-[10px] bg-[var(--sn-green)] text-white hover:bg-emerald-600 h-7"
+                                className="px-2.5 py-1 text-[10px] bg-[var(--az-success)] text-white hover:bg-emerald-600 h-7"
                               >
                                 Accept Prop
                               </Button>
@@ -723,7 +723,7 @@ export default function Reservations() {
                                 variant="secondary"
                                 onClick={() => respondRescheduleMutation.mutate({ id: res.id, accept: false })}
                                 disabled={respondRescheduleMutation.isPending}
-                                className="px-2.5 py-1 text-[10px] text-[var(--sn-red)] border-[var(--sn-red)]/40 hover:bg-[var(--sn-red)]/10 h-7"
+                                className="px-2.5 py-1 text-[10px] text-[var(--az-danger)] border-[var(--az-danger)]/40 hover:bg-[var(--az-danger)]/10 h-7"
                               >
                                 Decline Prop
                               </Button>
@@ -751,7 +751,7 @@ export default function Reservations() {
                               variant="outline"
                               onClick={() => checkInMutation.mutate(res.id)}
                               disabled={checkInMutation.isPending}
-                              className="text-xs h-8 border-[var(--sn-blue)] text-[var(--sn-blue)] hover:bg-[var(--sn-blue)]/10"
+                              className="text-xs h-8 border-[var(--az-info)] text-[var(--az-info)] hover:bg-[var(--az-info)]/10"
                             >
                               Check-In Guest
                             </Button>
@@ -763,7 +763,7 @@ export default function Reservations() {
                               variant="outline"
                               onClick={() => checkOutMutation.mutate(res.id)}
                               disabled={checkOutMutation.isPending}
-                              className="text-xs h-8 border-[var(--sn-green)] text-[var(--sn-green)] hover:bg-[var(--sn-green)]/10"
+                              className="text-xs h-8 border-[var(--az-success)] text-[var(--az-success)] hover:bg-[var(--az-success)]/10"
                             >
                               Check-Out
                             </Button>
@@ -778,7 +778,7 @@ export default function Reservations() {
                                 setRescheduleReservation(res);
                                 setRescheduleDate(res.scheduledFor ? new Date(res.scheduledFor).toISOString().slice(0, 16) : '');
                               }}
-                              className="text-xs h-8 text-[var(--sn-amber)] border-[var(--sn-amber)]/20 hover:bg-[var(--sn-amber)]/5"
+                              className="text-xs h-8 text-[var(--az-warning)] border-[var(--az-warning)]/20 hover:bg-[var(--az-warning)]/5"
                             >
                               Reschedule
                             </Button>
@@ -790,7 +790,7 @@ export default function Reservations() {
                               size="sm"
                               variant="secondary"
                               onClick={() => setNoShowReservation(res)}
-                              className="text-xs h-8 text-[var(--sn-red)] border-[var(--sn-red)]/20 hover:bg-[var(--sn-red)]/5"
+                              className="text-xs h-8 text-[var(--az-danger)] border-[var(--az-danger)]/20 hover:bg-[var(--az-danger)]/5"
                             >
                               No-Show
                             </Button>
@@ -800,7 +800,7 @@ export default function Reservations() {
                           {['PENDING', 'CONFIRMED'].includes(res.status) && (
                             <button
                               onClick={() => setCancelReservation(res)}
-                              className="p-2 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-red)] transition-colors h-8 w-8 flex items-center justify-center border border-slate-800"
+                              className="p-2 rounded-lg hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-danger)] transition-colors h-8 w-8 flex items-center justify-center border border-slate-800"
                               title="Decline/Cancel Booking"
                             >
                               <XCircle className="w-4 h-4" />
@@ -819,17 +819,17 @@ export default function Reservations() {
         {/* Collapsible Slots Preview Side Panel */}
         {showSlotsPanel && (
           <div className="w-[340px] flex-shrink-0 animate-scale-in">
-            <Card className="sticky top-6 p-4 border-[var(--sn-border)] bg-[var(--sn-card)] space-y-4">
-              <div className="flex items-center justify-between border-b border-[var(--sn-border)] pb-3">
+            <Card className="sticky top-6 p-4 border-[var(--az-border)] bg-[var(--az-surface)] space-y-4">
+              <div className="flex items-center justify-between border-b border-[var(--az-border)] pb-3">
                 <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-[var(--sn-blue)]" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--sn-text)]">
+                  <SlidersHorizontal className="w-4 h-4 text-[var(--az-info)]" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--az-text)]">
                     Slots Monitor (7 Days)
                   </h3>
                 </div>
                 <button
                   onClick={() => setShowSlotsPanel(false)}
-                  className="text-xs font-bold text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]"
+                  className="text-xs font-bold text-[var(--az-text-muted)] hover:text-[var(--az-text)]"
                 >
                   Close
                 </button>
@@ -843,7 +843,7 @@ export default function Reservations() {
                 </div>
               ) : slotsPreview.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-xs text-[var(--sn-text-muted)]">No slot configurations listed on the server.</p>
+                  <p className="text-xs text-[var(--az-text-muted)]">No slot configurations listed on the server.</p>
                 </div>
               ) : (
                 <div className="space-y-3 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
@@ -853,25 +853,25 @@ export default function Reservations() {
                       className={cn(
                         "p-3 rounded-xl border flex flex-col gap-1.5 transition-all",
                         slot.isOpen 
-                          ? "bg-[var(--sn-bg)] border-[var(--sn-border)]" 
+                          ? "bg-[var(--az-bg)] border-[var(--az-border)]" 
                           : "bg-red-500/5 border-red-500/15 opacity-60"
                       )}
                     >
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-[var(--sn-text)]">
+                        <span className="text-xs font-bold text-[var(--az-text)]">
                           {slot.date ? new Date(slot.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) : `Day ${index + 1}`}
                         </span>
                         <Badge 
-                          color={slot.isOpen ? "var(--sn-green)" : "var(--sn-red)"}
+                          color={slot.isOpen ? "var(--az-success)" : "var(--az-danger)"}
                           className="text-[9px] tracking-wider uppercase font-semibold"
                         >
                           {slot.isOpen ? "Open" : "Closed"}
                         </Badge>
                       </div>
 
-                      <div className="flex items-center justify-between text-[10px] text-[var(--sn-text-muted)]">
+                      <div className="flex items-center justify-between text-[10px] text-[var(--az-text-muted)]">
                         <span className="flex items-center gap-1 font-medium">
-                          <Users className="w-3 h-3 text-[var(--sn-text-muted)]" />
+                          <Users className="w-3 h-3 text-[var(--az-text-muted)]" />
                           {slot.bookedCount || 0} Booked
                         </span>
                         <span>
@@ -884,8 +884,8 @@ export default function Reservations() {
               )}
 
               <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 flex gap-2">
-                <Info className="w-4 h-4 text-[var(--sn-blue)] flex-shrink-0 mt-0.5" />
-                <p className="text-[10px] text-[var(--sn-text-muted)] leading-normal">
+                <Info className="w-4 h-4 text-[var(--az-info)] flex-shrink-0 mt-0.5" />
+                <p className="text-[10px] text-[var(--az-text-muted)] leading-normal">
                   This preview lets you audit what external customers see on the main marketplace scheduling feed.
                 </p>
               </div>
@@ -903,12 +903,12 @@ export default function Reservations() {
       >
         {cancelReservation && (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-[var(--sn-bg)] border border-[var(--sn-border)]">
-              <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Reservation Reference</p>
-              <p className="text-sm font-bold text-[var(--sn-text)] mt-0.5">{cancelReservation.reference}</p>
+            <div className="p-3.5 rounded-xl bg-[var(--az-bg)] border border-[var(--az-border)]">
+              <p className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Reservation Reference</p>
+              <p className="text-sm font-bold text-[var(--az-text)] mt-0.5">{cancelReservation.reference}</p>
               
-              <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider mt-3">Customer Name</p>
-              <p className="text-sm font-bold text-[var(--sn-text)] mt-0.5">{cancelReservation.customerName || 'Anonymous'}</p>
+              <p className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider mt-3">Customer Name</p>
+              <p className="text-sm font-bold text-[var(--az-text)] mt-0.5">{cancelReservation.customerName || 'Anonymous'}</p>
             </div>
 
             <Textarea
@@ -920,8 +920,8 @@ export default function Reservations() {
             />
 
             <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-              <Info className="w-4 h-4 text-[var(--sn-amber)] flex-shrink-0" />
-              <p className="text-[11px] text-[var(--sn-text-muted)]">
+              <Info className="w-4 h-4 text-[var(--az-warning)] flex-shrink-0" />
+              <p className="text-[11px] text-[var(--az-text-muted)]">
                 The customer will be notified, and the smart contract escrow balance will be fully refunded.
               </p>
             </div>
@@ -937,7 +937,7 @@ export default function Reservations() {
                 variant="primary"
                 onClick={() => cancelMutation.mutate({ id: cancelReservation.id, reason: cancelReason })}
                 disabled={cancelMutation.isPending || !cancelReason}
-                className="bg-[var(--sn-red)] text-white hover:bg-red-600"
+                className="bg-[var(--az-danger)] text-white hover:bg-red-600"
               >
                 Confirm Cancellation
               </Button>
@@ -955,9 +955,9 @@ export default function Reservations() {
       >
         {rescheduleReservation && (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-[var(--sn-bg)] border border-[var(--sn-border)]">
-              <p className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Current Schedule</p>
-              <p className="text-sm font-bold text-[var(--sn-text)] mt-0.5">
+            <div className="p-3.5 rounded-xl bg-[var(--az-bg)] border border-[var(--az-border)]">
+              <p className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Current Schedule</p>
+              <p className="text-sm font-bold text-[var(--az-text)] mt-0.5">
                 {formatDateTime(rescheduleReservation.scheduledFor || rescheduleReservation.createdAt)}
               </p>
             </div>
@@ -1011,23 +1011,23 @@ export default function Reservations() {
       >
         {noShowReservation && (
           <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-[var(--sn-bg)] border border-red-500/10 flex flex-col gap-3">
-              <div className="flex items-center gap-2 text-[var(--sn-red)] font-bold text-sm">
-                <ShieldAlert className="w-5 h-5 text-[var(--sn-red)]" />
+            <div className="p-4 rounded-xl bg-[var(--az-bg)] border border-red-500/10 flex flex-col gap-3">
+              <div className="flex items-center gap-2 text-[var(--az-danger)] font-bold text-sm">
+                <ShieldAlert className="w-5 h-5 text-[var(--az-danger)]" />
                 Deductible Smart Penalty Warnings
               </div>
 
               <div className="grid grid-cols-2 gap-3 mt-1 text-xs">
-                <div className="bg-[var(--sn-card)] p-2.5 rounded-lg border border-[var(--sn-border)]">
-                  <span className="text-[var(--sn-text-muted)] block text-[10px] uppercase tracking-wider">Computed Penalty</span>
-                  <span className="text-sm font-bold text-[var(--sn-text)] az-mono">
+                <div className="bg-[var(--az-surface)] p-2.5 rounded-lg border border-[var(--az-border)]">
+                  <span className="text-[var(--az-text-muted)] block text-[10px] uppercase tracking-wider">Computed Penalty</span>
+                  <span className="text-sm font-bold text-[var(--az-text)] az-mono">
                     {fmtUSDC(noShowReservation.noShowPenaltyUsdc || noShowReservation.penaltyAmountUsdc || 0)}
                   </span>
                 </div>
 
-                <div className="bg-[var(--sn-card)] p-2.5 rounded-lg border border-[var(--sn-border)]">
-                  <span className="text-[var(--sn-text-muted)] block text-[10px] uppercase tracking-wider">Penalty Percentage</span>
-                  <span className="text-sm font-bold text-[var(--sn-text)] az-mono">
+                <div className="bg-[var(--az-surface)] p-2.5 rounded-lg border border-[var(--az-border)]">
+                  <span className="text-[var(--az-text-muted)] block text-[10px] uppercase tracking-wider">Penalty Percentage</span>
+                  <span className="text-sm font-bold text-[var(--az-text)] az-mono">
                     {noShowReservation.noShowPenaltyPct || 0}%
                   </span>
                 </div>
@@ -1046,11 +1046,11 @@ export default function Reservations() {
                     Customer Trust Rating: {noShowReservation.customerTrustScore}%
                   </div>
                   {noShowReservation.customerTrustScore < 80 ? (
-                    <p className="text-[10px] text-[var(--sn-red)] leading-normal">
+                    <p className="text-[10px] text-[var(--az-danger)] leading-normal">
                       This customer has a history of high cancel / no-show percentages. Full penalty deduction is highly recommended.
                     </p>
                   ) : (
-                    <p className="text-[10px] text-[var(--sn-text-muted)] leading-normal">
+                    <p className="text-[10px] text-[var(--az-text-muted)] leading-normal">
                       This customer has maintained an exemplary rating of creditworthy transactions.
                     </p>
                   )}
@@ -1058,7 +1058,7 @@ export default function Reservations() {
               )}
             </div>
 
-            <p className="text-xs text-[var(--sn-text-muted)] leading-relaxed">
+            <p className="text-xs text-[var(--az-text-muted)] leading-relaxed">
               Marking this reservation as No-Show triggers an immediate lock-and-charge function. The computed percentage penalty amount will be drawn from escrow to reimburse your business.
             </p>
 
@@ -1073,7 +1073,7 @@ export default function Reservations() {
                 variant="primary"
                 onClick={() => noShowMutation.mutate(noShowReservation.id)}
                 disabled={noShowMutation.isPending}
-                className="bg-[var(--sn-red)] text-white hover:bg-red-600"
+                className="bg-[var(--az-danger)] text-white hover:bg-red-600"
               >
                 Confirm Penalty Deduction
               </Button>

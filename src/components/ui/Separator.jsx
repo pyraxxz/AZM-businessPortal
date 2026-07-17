@@ -5,7 +5,7 @@ export function Separator({ orientation = 'horizontal', className }) {
     <div
       className={cn(
         orientation === 'horizontal' ? 'w-full h-px' : 'h-full w-px',
-        'bg-[var(--sn-border)]',
+        'bg-[var(--az-border)]',
         className
       )}
     />

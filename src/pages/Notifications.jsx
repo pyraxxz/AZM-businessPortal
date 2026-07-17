@@ -24,19 +24,19 @@ const FILTER_CHIPS = [
 ];
 
 const TYPE_META = {
-  NEW_ORDER: { icon: ShoppingBag, color: 'var(--sn-purple)', label: 'Order' },
-  ORDER_FUNDED: { icon: Wallet, color: 'var(--sn-blue)', label: 'Payment' },
-  ORDER_SATISFIED: { icon: CheckCircle2, color: 'var(--sn-purple)', label: 'Settlement' },
-  ORDER_DISPUTED: { icon: AlertTriangle, color: 'var(--sn-red)', label: 'Dispute' },
-  ORDER_SETTLED: { icon: CheckCircle2, color: 'var(--sn-purple)', label: 'Settled' },
-  ORDER_REFUNDED: { icon: RotateCcw, color: 'var(--sn-blue)', label: 'Refund' },
-  ORDER_CANCELLED: { icon: XCircle, color: 'var(--sn-text-muted)', label: 'Cancelled' },
-  KYB_STATUS_CHANGED: { icon: ShieldCheck, color: 'var(--sn-blue)', label: 'Verification' },
-  INVENTORY_LOW: { icon: AlertTriangle, color: 'var(--sn-amber)', label: 'Inventory' },
-  SHIFT_ALERT: { icon: Clock, color: 'var(--sn-blue)', label: 'Shift' },
-  REVIEW_NEW: { icon: HelpCircle, color: 'var(--sn-purple)', label: 'Review' },
-  RESERVATION_PENDING: { icon: CalendarCheck, color: 'var(--sn-blue)', label: 'Reservation' },
-  MAINTENANCE: { icon: AlertTriangle, color: 'var(--sn-red)', label: 'Maintenance' },
+  NEW_ORDER: { icon: ShoppingBag, color: 'var(--az-accent)', label: 'Order' },
+  ORDER_FUNDED: { icon: Wallet, color: 'var(--az-info)', label: 'Payment' },
+  ORDER_SATISFIED: { icon: CheckCircle2, color: 'var(--az-accent)', label: 'Settlement' },
+  ORDER_DISPUTED: { icon: AlertTriangle, color: 'var(--az-danger)', label: 'Dispute' },
+  ORDER_SETTLED: { icon: CheckCircle2, color: 'var(--az-accent)', label: 'Settled' },
+  ORDER_REFUNDED: { icon: RotateCcw, color: 'var(--az-info)', label: 'Refund' },
+  ORDER_CANCELLED: { icon: XCircle, color: 'var(--az-text-muted)', label: 'Cancelled' },
+  KYB_STATUS_CHANGED: { icon: ShieldCheck, color: 'var(--az-info)', label: 'Verification' },
+  INVENTORY_LOW: { icon: AlertTriangle, color: 'var(--az-warning)', label: 'Inventory' },
+  SHIFT_ALERT: { icon: Clock, color: 'var(--az-info)', label: 'Shift' },
+  REVIEW_NEW: { icon: HelpCircle, color: 'var(--az-accent)', label: 'Review' },
+  RESERVATION_PENDING: { icon: CalendarCheck, color: 'var(--az-info)', label: 'Reservation' },
+  MAINTENANCE: { icon: AlertTriangle, color: 'var(--az-danger)', label: 'Maintenance' },
 };
 
 export default function Notifications() {
@@ -149,17 +149,17 @@ export default function Notifications() {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--sn-border)] pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--az-border)] pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-[var(--sn-text)] tracking-tight">Notifications Center</h1>
+            <h1 className="text-2xl font-bold text-[var(--az-text)] tracking-tight">Notifications Center</h1>
             {unreadCount > 0 && (
-              <Badge color="var(--sn-purple)" bg="var(--sn-purple-subtle)">
+              <Badge color="var(--az-accent)" bg="var(--az-accent-subtle)">
                 {unreadCount} Unread
               </Badge>
             )}
           </div>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">
             Real-time feed of your business events, alerts, and operational signals.
           </p>
         </div>
@@ -179,7 +179,7 @@ export default function Notifications() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-[var(--sn-border)]">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-[var(--az-border)]">
         {FILTER_CHIPS.map((chip) => {
           const active = filter === chip.key;
           return (
@@ -189,8 +189,8 @@ export default function Notifications() {
               className={cn(
                 'px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border',
                 active
-                  ? 'bg-[var(--sn-purple-subtle)] text-[var(--sn-purple)] border-[var(--sn-purple)]'
-                  : 'bg-[var(--sn-card)] text-[var(--sn-text-muted)] border-[var(--sn-border)] hover:text-[var(--sn-text)]'
+                  ? 'bg-[var(--az-accent-subtle)] text-[var(--az-accent)] border-[var(--az-accent)]'
+                  : 'bg-[var(--az-surface)] text-[var(--az-text-muted)] border-[var(--az-border)] hover:text-[var(--az-text)]'
               )}
             >
               {chip.label}
@@ -213,10 +213,10 @@ export default function Notifications() {
           ))}
         </div>
       ) : error ? (
-        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-[var(--sn-red)]">
-          <AlertTriangle className="w-12 h-12 text-[var(--sn-red)] mb-4" />
+        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-[var(--az-danger)]">
+          <AlertTriangle className="w-12 h-12 text-[var(--az-danger)] mb-4" />
           <h3 className="text-lg font-bold">Failed to load notifications</h3>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1 max-w-sm">
+          <p className="text-sm text-[var(--az-text-muted)] mt-1 max-w-sm">
             We couldn't retrieve your notifications from the backend API.
           </p>
           <Button className="mt-4" onClick={() => refetch()}>
@@ -235,25 +235,25 @@ export default function Notifications() {
         <div className="space-y-8">
           {groupedNotifications.map((group) => (
             <div key={group.title} className="space-y-3 animate-slide-in">
-              <h3 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider pl-1">
+              <h3 className="text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider pl-1">
                 {group.title}
               </h3>
-              <div className="rounded-2xl border border-[var(--sn-border)] overflow-hidden divide-y divide-[var(--sn-border)] bg-[var(--sn-surface)]">
+              <div className="rounded-2xl border border-[var(--az-border)] overflow-hidden divide-y divide-[var(--az-border)] bg-[var(--az-surface)]">
                 {group.items.map((n) => {
-                  const meta = TYPE_META[n.type] || { icon: Bell, color: 'var(--sn-text-muted)', label: 'Alert' };
+                  const meta = TYPE_META[n.type] || { icon: Bell, color: 'var(--az-text-muted)', label: 'Alert' };
                   const Icon = meta.icon;
                   return (
                     <div
                       key={n.id}
                       onClick={() => handleNotificationClick(n)}
                       className={cn(
-                        'flex items-start gap-4 p-5 hover:bg-[var(--sn-hover)] cursor-pointer transition-all relative',
-                        !n.isRead && 'bg-[var(--sn-purple-subtle)]/30'
+                        'flex items-start gap-4 p-5 hover:bg-[var(--az-bg-alt)] cursor-pointer transition-all relative',
+                        !n.isRead && 'bg-[var(--az-accent-subtle)]/30'
                       )}
                     >
                       {/* Left border indicator for unread */}
                       {!n.isRead && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--sn-purple)]" />
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--az-accent)]" />
                       )}
 
                       {/* Icon */}
@@ -270,14 +270,14 @@ export default function Notifications() {
                           <span className="text-xs font-bold uppercase tracking-wider" style={{ color: meta.color }}>
                             {meta.label}
                           </span>
-                          <span className="text-[10px] text-[var(--sn-text-muted)]">
+                          <span className="text-[10px] text-[var(--az-text-muted)]">
                             {relativeTime(n.createdAt || n.created_date)}
                           </span>
                         </div>
-                        <h4 className="text-sm font-semibold text-[var(--sn-text)] mt-1">
+                        <h4 className="text-sm font-semibold text-[var(--az-text)] mt-1">
                           {n.title || 'Notification Alert'}
                         </h4>
-                        <p className="text-xs text-[var(--sn-text-muted)] mt-1 leading-relaxed">
+                        <p className="text-xs text-[var(--az-text-muted)] mt-1 leading-relaxed">
                           {n.body || n.description}
                         </p>
                       </div>
@@ -290,7 +290,7 @@ export default function Notifications() {
                               e.stopPropagation();
                               markOne.mutate(n.id);
                             }}
-                            className="p-1.5 rounded-lg border border-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-purple)] hover:border-[var(--sn-purple)] transition-all bg-[var(--sn-card)]"
+                            className="p-1.5 rounded-lg border border-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-accent)] hover:border-[var(--az-accent)] transition-all bg-[var(--az-surface)]"
                             title="Mark as read"
                           >
                             <Check className="w-4 h-4" />

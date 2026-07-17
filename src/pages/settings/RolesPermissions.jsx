@@ -68,8 +68,8 @@ export default function RolesPermissions() {
 
   // ── Templates view ────────────────────────────────────────────────────────
   const templatesContent = isLoading ? (
-    <div className="flex items-center justify-center py-12 text-[var(--sn-text-muted)]">
-      <div className="w-6 h-6 border-2 border-[var(--sn-border)] border-t-[var(--sn-purple)] rounded-full animate-spin mr-3" />
+    <div className="flex items-center justify-center py-12 text-[var(--az-text-muted)]">
+      <div className="w-6 h-6 border-2 border-[var(--az-border)] border-t-[var(--az-accent)] rounded-full animate-spin mr-3" />
       Loading templates...
     </div>
   ) : (
@@ -80,17 +80,17 @@ export default function RolesPermissions() {
           <Card key={key} className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-[var(--sn-text)]">{tpl.label}</h3>
-                <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">{tpl.description}</p>
+                <h3 className="font-semibold text-[var(--az-text)]">{tpl.label}</h3>
+                <p className="text-xs text-[var(--az-text-muted)] mt-0.5">{tpl.description}</p>
               </div>
               {tpl.system ? (
                 <Badge className="text-xs"><Lock className="w-3 h-3 mr-1 inline" /> System</Badge>
               ) : (
-                <Badge color="var(--sn-text-muted)" className="text-xs">Custom</Badge>
+                <Badge color="var(--az-text-muted)" className="text-xs">Custom</Badge>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-[var(--sn-text-muted)]">
-              <Check className="w-3.5 h-3.5 text-[var(--sn-purple)]" />
+            <div className="flex items-center gap-2 text-xs text-[var(--az-text-muted)]">
+              <Check className="w-3.5 h-3.5 text-[var(--az-accent)]" />
               {tpl.permissions.includes('*')
                 ? 'All permissions'
                 : `${tpl.permissions.length} permissions`}
@@ -104,7 +104,7 @@ export default function RolesPermissions() {
                     grouped[mod].some(k => k.key === p)
                   );
                   if (!hasModulePerms) return null;
-                  return <Badge key={mod} color="var(--sn-text-muted)" className="text-xs">{mod}</Badge>;
+                  return <Badge key={mod} color="var(--az-text-muted)" className="text-xs">{mod}</Badge>;
                 })
               )}
             </div>
@@ -114,21 +114,21 @@ export default function RolesPermissions() {
 
       {/* Permission matrix table */}
       <Card className="overflow-hidden p-0">
-        <div className="px-4 py-3 border-b border-[var(--sn-border)]">
-          <h3 className="text-sm font-semibold text-[var(--sn-text)]">Permission Matrix</h3>
-          <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">
+        <div className="px-4 py-3 border-b border-[var(--az-border)]">
+          <h3 className="text-sm font-semibold text-[var(--az-text)]">Permission Matrix</h3>
+          <p className="text-xs text-[var(--az-text-muted)] mt-0.5">
             Every permission key available in the system, grouped by module.
           </p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--sn-border)] bg-[var(--sn-card)]">
-                <th className="text-left px-4 py-2 font-semibold text-[var(--sn-text)] sticky left-0 bg-[var(--sn-card)] z-10">
+              <tr className="border-b border-[var(--az-border)] bg-[var(--az-surface)]">
+                <th className="text-left px-4 py-2 font-semibold text-[var(--az-text)] sticky left-0 bg-[var(--az-surface)] z-10">
                   Permission
                 </th>
                 {Object.entries(templates).map(([key, tpl]) => (
-                  <th key={key} className="px-3 py-2 text-center font-semibold text-xs text-[var(--sn-text-muted)] min-w-[100px]">
+                  <th key={key} className="px-3 py-2 text-center font-semibold text-xs text-[var(--az-text-muted)] min-w-[100px]">
                     {tpl.label}
                   </th>
                 ))}
@@ -150,27 +150,27 @@ export default function RolesPermissions() {
   const tableRows = [];
   moduleNames.forEach(mod => {
     tableRows.push(
-      <tr key={`mod-${mod}`} className="border-b border-[var(--sn-border)] bg-[var(--sn-purple-subtle)]">
-        <td colSpan={Object.keys(templates).length + 1} className="px-4 py-1.5 font-semibold text-xs text-[var(--sn-purple)] uppercase tracking-wide">
+      <tr key={`mod-${mod}`} className="border-b border-[var(--az-border)] bg-[var(--az-accent-subtle)]">
+        <td colSpan={Object.keys(templates).length + 1} className="px-4 py-1.5 font-semibold text-xs text-[var(--az-accent)] uppercase tracking-wide">
           {mod}
         </td>
       </tr>
     );
     grouped[mod].forEach(perm => {
       tableRows.push(
-        <tr key={perm.key} className="border-b border-[var(--sn-border)] hover:bg-[var(--sn-card)]">
-          <td className="px-4 py-2 text-[var(--sn-text)]">
+        <tr key={perm.key} className="border-b border-[var(--az-border)] hover:bg-[var(--az-surface)]">
+          <td className="px-4 py-2 text-[var(--az-text)]">
             <div className="font-medium">{perm.label}</div>
-            <div className="text-xs text-[var(--sn-text-muted)] font-mono">{perm.key}</div>
+            <div className="text-xs text-[var(--az-text-muted)] font-mono">{perm.key}</div>
           </td>
           {Object.entries(templates).map(([tKey, tpl]) => {
             const has = tpl.permissions.includes('*') || tpl.permissions.includes(perm.key);
             return (
               <td key={tKey} className="px-3 py-2 text-center">
                 {has ? (
-                  <Check className="w-4 h-4 text-[var(--sn-purple)] mx-auto" />
+                  <Check className="w-4 h-4 text-[var(--az-accent)] mx-auto" />
                 ) : (
-                  <span className="text-[var(--sn-text-muted)] opacity-30">—</span>
+                  <span className="text-[var(--az-text-muted)] opacity-30">—</span>
                 )}
               </td>
             );
@@ -182,8 +182,8 @@ export default function RolesPermissions() {
 
   // Replace the templates content table body with the flattened rows
   const templatesContentFixed = isLoading ? (
-    <div className="flex items-center justify-center py-12 text-[var(--sn-text-muted)]">
-      <div className="w-6 h-6 border-2 border-[var(--sn-border)] border-t-[var(--sn-purple)] rounded-full animate-spin mr-3" />
+    <div className="flex items-center justify-center py-12 text-[var(--az-text-muted)]">
+      <div className="w-6 h-6 border-2 border-[var(--az-border)] border-t-[var(--az-accent)] rounded-full animate-spin mr-3" />
       Loading templates...
     </div>
   ) : (
@@ -193,17 +193,17 @@ export default function RolesPermissions() {
           <Card key={key} className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-[var(--sn-text)]">{tpl.label}</h3>
-                <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">{tpl.description}</p>
+                <h3 className="font-semibold text-[var(--az-text)]">{tpl.label}</h3>
+                <p className="text-xs text-[var(--az-text-muted)] mt-0.5">{tpl.description}</p>
               </div>
               {tpl.system ? (
                 <Badge className="text-xs"><Lock className="w-3 h-3 mr-1 inline" /> System</Badge>
               ) : (
-                <Badge color="var(--sn-text-muted)" className="text-xs">Custom</Badge>
+                <Badge color="var(--az-text-muted)" className="text-xs">Custom</Badge>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-[var(--sn-text-muted)]">
-              <Check className="w-3.5 h-3.5 text-[var(--sn-purple)]" />
+            <div className="flex items-center gap-2 text-xs text-[var(--az-text-muted)]">
+              <Check className="w-3.5 h-3.5 text-[var(--az-accent)]" />
               {tpl.permissions.includes('*') ? 'All permissions' : `${tpl.permissions.length} permissions`}
             </div>
           </Card>
@@ -211,16 +211,16 @@ export default function RolesPermissions() {
       </div>
 
       <Card className="overflow-hidden p-0">
-        <div className="px-4 py-3 border-b border-[var(--sn-border)]">
-          <h3 className="text-sm font-semibold text-[var(--sn-text)]">Permission Matrix</h3>
+        <div className="px-4 py-3 border-b border-[var(--az-border)]">
+          <h3 className="text-sm font-semibold text-[var(--az-text)]">Permission Matrix</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--sn-border)] bg-[var(--sn-card)]">
-                <th className="text-left px-4 py-2 font-semibold text-[var(--sn-text)] sticky left-0 bg-[var(--sn-card)] z-10">Permission</th>
+              <tr className="border-b border-[var(--az-border)] bg-[var(--az-surface)]">
+                <th className="text-left px-4 py-2 font-semibold text-[var(--az-text)] sticky left-0 bg-[var(--az-surface)] z-10">Permission</th>
                 {Object.entries(templates).map(([key, tpl]) => (
-                  <th key={key} className="px-3 py-2 text-center font-semibold text-xs text-[var(--sn-text-muted)] min-w-[100px]">{tpl.label}</th>
+                  <th key={key} className="px-3 py-2 text-center font-semibold text-xs text-[var(--az-text-muted)] min-w-[100px]">{tpl.label}</th>
                 ))}
               </tr>
             </thead>
@@ -235,8 +235,8 @@ export default function RolesPermissions() {
   const customContent = canManage ? (
     <Card className="p-5 space-y-4">
       <div>
-        <h3 className="font-semibold text-[var(--sn-text)] mb-1">Create Custom Template</h3>
-        <p className="text-sm text-[var(--sn-text-muted)]">
+        <h3 className="font-semibold text-[var(--az-text)] mb-1">Create Custom Template</h3>
+        <p className="text-sm text-[var(--az-text-muted)]">
           Build a custom role template for positions like "Night Shift Supervisor".
         </p>
       </div>
@@ -246,7 +246,7 @@ export default function RolesPermissions() {
       </div>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-semibold text-[var(--sn-text)]">Select Permissions</label>
+          <label className="text-sm font-semibold text-[var(--az-text)]">Select Permissions</label>
           <div className="flex gap-2">
             <Button size="sm" variant="ghost" onClick={() => {
               const allKeys = Object.values(grouped).flat().map(k => k.key);
@@ -256,9 +256,9 @@ export default function RolesPermissions() {
           </div>
         </div>
         {moduleNames.map(mod => (
-          <div key={mod} className="border border-[var(--sn-border)] rounded-lg p-3">
+          <div key={mod} className="border border-[var(--az-border)] rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-[var(--sn-purple)] uppercase tracking-wide">{mod}</span>
+              <span className="text-xs font-semibold text-[var(--az-accent)] uppercase tracking-wide">{mod}</span>
               <Switch
                 checked={grouped[mod].every(k => selectedPerms.has(k.key))}
                 onChange={() => {
@@ -274,7 +274,7 @@ export default function RolesPermissions() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {grouped[mod].map(perm => (
-                <label key={perm.key} className="flex items-center gap-2 cursor-pointer text-sm text-[var(--sn-text)] hover:bg-[var(--sn-card)] rounded px-2 py-1">
+                <label key={perm.key} className="flex items-center gap-2 cursor-pointer text-sm text-[var(--az-text)] hover:bg-[var(--az-surface)] rounded px-2 py-1">
                   <Switch checked={selectedPerms.has(perm.key)} onChange={() => togglePerm(perm.key)} />
                   <span className="truncate">{perm.label}</span>
                 </label>
@@ -284,7 +284,7 @@ export default function RolesPermissions() {
         ))}
       </div>
       <div className="flex items-center justify-between pt-2">
-        <span className="text-sm text-[var(--sn-text-muted)]">
+        <span className="text-sm text-[var(--az-text-muted)]">
           {selectedPerms.size} permission{selectedPerms.size !== 1 ? 's' : ''} selected
         </span>
         <Button
@@ -305,9 +305,9 @@ export default function RolesPermissions() {
     </Card>
   ) : (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <Lock className="w-10 h-10 text-[var(--sn-text-muted)] opacity-40 mb-3" />
-      <h3 className="font-semibold text-[var(--sn-text)]">Owner Only</h3>
-      <p className="text-sm text-[var(--sn-text-muted)] mt-1">Only the owner can create custom templates.</p>
+      <Lock className="w-10 h-10 text-[var(--az-text-muted)] opacity-40 mb-3" />
+      <h3 className="font-semibold text-[var(--az-text)]">Owner Only</h3>
+      <p className="text-sm text-[var(--az-text-muted)] mt-1">Only the owner can create custom templates.</p>
     </div>
   );
 
@@ -319,10 +319,10 @@ export default function RolesPermissions() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Shield className="w-6 h-6 text-[var(--sn-purple)]" />
+        <Shield className="w-6 h-6 text-[var(--az-accent)]" />
         <div>
-          <h2 className="text-lg font-bold text-[var(--sn-text)]">Roles & Permissions</h2>
-          <p className="text-sm text-[var(--sn-text-muted)]">
+          <h2 className="text-lg font-bold text-[var(--az-text)]">Roles & Permissions</h2>
+          <p className="text-sm text-[var(--az-text-muted)]">
             Define what each role can do. System templates are locked; create custom templates for unique positions.
           </p>
         </div>
