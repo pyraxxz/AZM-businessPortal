@@ -125,7 +125,7 @@ export default function Layout() {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('az-dark-mode');
     if (saved !== null) return JSON.parse(saved);
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return false; // light is the real default
   });
 
   // Apply / remove .dark class on <html>
@@ -174,11 +174,22 @@ export default function Layout() {
   const isOwner = user?.role === 'owner' || user?.role === 'admin';
 
   // Filter items by permission & businessType rules
+  const bizType = bizProfile?.businessType?.toUpperCase();
+  const isHotel = ['HOTEL'].includes(bizType);
+  const isRestaurant = ['RESTAURANT', 'DINE_IN', 'CAFE'].includes(bizType);
+  const isTransit = ['TRANSIT', 'LOGISTICS'].includes(bizType);
+
   const filteredNavItems = ALL_NAVIGATION_ITEMS.filter(item => {
+    // Hide hotel-only items for non-hotel businesses
+    if (item.perm === 'hotel.view' && !isHotel && !isRestaurant) return false;
+    // Hide restaurant-only items for non-restaurant businesses
+    if (item.perm === 'restaurant.view' && !isRestaurant && !isHotel) return false;
+    // Hide transit-only items for non-transit businesses
+    if (item.perm === 'transit.view' && !isTransit) return false;
+
     // POS is only visible for restaurant/hotel businesses
     if (item.label === 'POS') {
-      const isFoodOrHotel = ['RESTAURANT', 'HOTEL', 'DINE_IN', 'CAFE'].includes(bizProfile?.businessType?.toUpperCase());
-      if (!isFoodOrHotel) return false;
+      if (!isRestaurant && !isHotel) return false;
     }
 
     if (!item.perm) return true;

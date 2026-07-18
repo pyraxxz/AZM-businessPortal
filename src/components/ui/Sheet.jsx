@@ -1,7 +1,14 @@
+import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
 export function Sheet({ open, onClose, title, children, side = 'right', width = 'max-w-md', className }) {
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (e.key === 'Escape') onClose?.(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open, onClose]);
   if (!open) return null;
   const sideClass = side === 'right' ? 'right-0' : 'left-0';
   const animation = side === 'right' ? 'animate-slide-in-right' : 'animate-slide-in-left';

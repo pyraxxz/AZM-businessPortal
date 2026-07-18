@@ -13,7 +13,7 @@
       (function() {
         try {
           var saved = localStorage.getItem('az-dark-mode');
-          var dark = saved !== null ? JSON.parse(saved) : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var dark = saved !== null ? JSON.parse(saved) : false; // light is the real default
           if (dark) document.documentElement.classList.add('dark');
         } catch (e) {}
       })();

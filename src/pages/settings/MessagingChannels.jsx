@@ -4,7 +4,7 @@
  * Configure per-notification-type delivery preference.
  * View monthly send cost.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { request } from '@/lib/apiCore';
@@ -92,37 +92,106 @@ export default function MessagingChannels() {
     retry: 1,
   });
 
+  // Fetch existing messaging config on mount
+  const { data: msgConfig } = useQuery({
+    queryKey: ['messaging-config'],
+    queryFn: async () => { const r = await request('/api/business-os/messaging-config'); return r; },
+    staleTime: 60_000,
+  });
+
+  // Sync config from backend
+  useEffect(() => {
+    if (msgConfig) {
+      setWaConnected(msgConfig.waConnected || false);
+      setWaNumber(msgConfig.waPhoneNumber || '');
+      setSmsConnected(msgConfig.smsConnected || false);
+      setSmsSenderId(msgConfig.smsSenderId || '');
+    }
+  }, [msgConfig]);
+
+  // Fetch notification routing preferences
+  const { data: routingPrefs } = useQuery({
+    queryKey: ['messaging-routing'],
+    queryFn: async () => { const r = await request('/api/business-os/messaging-config/preferences'); return r; },
+    staleTime: 60_000,
+  });
+
+  useEffect(() => {
+    if (routingPrefs?.preferences) {
+      setNotifPrefs(prev => {
+        const merged = {};
+        NOTIF_TYPES.forEach(t => {
+          merged[t.id] = { app: true, whatsapp: false, sms: false, ...prev[t.id], ...routingPrefs.preferences[t.id] };
+        });
+        return merged;
+      });
+    }
+  }, [routingPrefs]);
+
+  // Save routing preference changes
+  const savePrefs = useMutation({
+    mutationFn: async (prefs) => {
+      return request('/api/business-os/messaging-config/preferences', 'PATCH', { preferences: prefs });
+    },
+    onSuccess: () => toast.success('Routing preferences saved'),
+    onError: (e) => toast.error(e.message || 'Failed to save preferences'),
+  });
+
   const handleConnectWA = async () => {
     if (!waNumber || !waApiKey) { toast.error('Enter phone number and API key'); return; }
     setWaConnecting(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setWaConnected(true);
-    setWaConnecting(false);
-    toast.success('WhatsApp Business connected');
+    try {
+      const r = await request('/api/business-os/messaging-config/whatsapp', 'POST', {
+        action: 'connect', phoneNumber: waNumber, apiKey: waApiKey,
+      });
+      setWaConnected(true);
+      toast.success('WhatsApp Business connected');
+    } catch (e) {
+      toast.error(e.message || 'Failed to connect WhatsApp');
+    } finally {
+      setWaConnecting(false);
+    }
   };
 
   const handleConnectSMS = async () => {
     if (!smsApiKey || !smsSenderId) { toast.error('Enter API key and sender ID'); return; }
     setSmsConnecting(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setSmsConnected(true);
-    setSmsConnecting(false);
-    toast.success('SMS gateway connected');
+    try {
+      const r = await request('/api/business-os/messaging-config/sms', 'POST', {
+        action: 'connect', apiKey: smsApiKey, senderId: smsSenderId, provider: 'africas_talking',
+      });
+      setSmsConnected(true);
+      toast.success('SMS gateway connected');
+    } catch (e) {
+      toast.error(e.message || 'Failed to connect SMS gateway');
+    } finally {
+      setSmsConnecting(false);
+    }
   };
 
   const handleTestSend = async () => {
     if (!testNumber) { toast.error('Enter a phone number'); return; }
     setTesting(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setTesting(false);
-    toast.success(`Test message sent to ${testNumber}`);
+    try {
+      const channel = waConnected ? 'whatsapp' : 'sms';
+      const r = await request('/api/business-os/messaging-config/test', 'POST', {
+        phoneNumber: testNumber, channel,
+      });
+      toast.success(`Test message sent to ${testNumber}`);
+    } catch (e) {
+      toast.error(e.message || 'Failed to send test message');
+    } finally {
+      setTesting(false);
+    }
   };
 
   const togglePref = (type, channel) => {
-    setNotifPrefs(prev => ({
-      ...prev,
-      [type]: { ...prev[type], [channel]: !prev[type][channel] },
-    }));
+    setNotifPrefs(prev => {
+      const updated = { ...prev, [type]: { ...prev[type], [channel]: !prev[type][channel] } };
+      // Persist to backend (debounced by React Query)
+      savePrefs.mutate({ [type]: { ...updated[type] } });
+      return updated;
+    });
   };
 
   return (
@@ -180,7 +249,7 @@ export default function MessagingChannels() {
             </p>
           </div>
 
-          <button onClick={waConnected ? () => { setWaConnected(false); toast.success('WhatsApp disconnected'); } : handleConnectWA}
+          <button onClick={waConnected ? async () => { await request('/api/business-os/messaging-config/whatsapp', 'POST', { action: 'disconnect' }); setWaConnected(false); toast.success('WhatsApp disconnected'); } : handleConnectWA}
             disabled={waConnecting}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
             style={{ background: waConnected ? 'var(--az-danger)' : '#25D366' }}>
@@ -223,7 +292,7 @@ export default function MessagingChannels() {
               </div>
             </div>
           </div>
-          <button onClick={smsConnected ? () => { setSmsConnected(false); toast.success('SMS gateway disconnected'); } : handleConnectSMS}
+          <button onClick={smsConnected ? async () => { await request('/api/business-os/messaging-config/sms', 'POST', { action: 'disconnect' }); setSmsConnected(false); toast.success('SMS gateway disconnected'); } : handleConnectSMS}
             disabled={smsConnecting}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
             style={{ background: smsConnected ? 'var(--az-danger)' : 'var(--az-info)' }}>

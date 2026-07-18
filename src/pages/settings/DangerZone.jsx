@@ -117,8 +117,33 @@ export default function DangerZone() {
               Download a zip of your orders, invoices, reviews, and employee records. Useful for accounting or migration.
             </p>
           </div>
-          <Button variant="outline" disabled>
-            Coming Soon
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem('biz_token');
+                const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://azaman-backend-9d3u.onrender.com' : 'http://localhost:3000');
+                const res = await fetch(`${BASE_URL}/api/business-os/export`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) throw new Error('Export failed');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'business_data_export.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast.success('Export downloaded successfully');
+              } catch (e) {
+                toast.error('Export failed: ' + e.message);
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-1.5" />
+            Export Data
           </Button>
         </div>
       </Card>

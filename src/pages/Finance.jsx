@@ -8,6 +8,7 @@ import {
   PiggyBank, Shield, ArrowRight, Clock, CheckCircle2
 } from 'lucide-react';
 import { financeApi, employeeApi } from '@/lib/marketplaceApi';
+import { request } from '@/lib/apiCore';
 import { fmtUSDC, fmtUSDC as fmtUsd } from '@/lib/utils';
 import { usePermission } from '@/hooks/usePermission';
 import { useAuth } from '@/lib/AuthContext';
@@ -957,14 +958,94 @@ function PayrollTab() {
 }
 
 // ── Payout Settings Tab ───────────────────────────────────────────────────
+const PAYOUT_TYPES = [
+  { value: 'BANK', label: 'Bank Account' },
+  { value: 'MOMO', label: 'Mobile Money' },
+  { value: 'BINANCE_PAY', label: 'Binance Pay' },
+  { value: 'TRC20', label: 'TRC20 (USDT)' },
+  { value: 'ERC20', label: 'ERC20 (USDT)' },
+];
+
 function PayoutTab({ canManage }) {
+  const { toast } = useToast();
+  const [destinations, setDestinations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ nickname: '', destinationType: 'BANK', destinationAddress: '', isExternalCrypto: false });
+
+  const loadDestinations = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await request('/api/payout-destinations');
+      setDestinations(data?.destinations || []);
+    } catch (err) {
+      toast.error(err.message || 'Failed to load payout destinations');
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => { loadDestinations(); }, [loadDestinations]);
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!form.nickname.trim() || !form.destinationAddress.trim()) {
+      toast.error('Nickname and destination address are required');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await request('/api/payout-destinations', {
+        method: 'POST',
+        body: JSON.stringify(form),
+      });
+      toast.success('Payout destination added');
+      setShowAdd(false);
+      setForm({ nickname: '', destinationType: 'BANK', destinationAddress: '', isExternalCrypto: false });
+      loadDestinations();
+    } catch (err) {
+      toast.error(err.message || 'Failed to add destination');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Remove this payout destination?')) return;
+    try {
+      await request(`/api/payout-destinations/${id}`, { method: 'DELETE' });
+      toast.success('Destination removed');
+      loadDestinations();
+    } catch (err) {
+      toast.error(err.message || 'Failed to remove destination');
+    }
+  };
+
+  const handleSetDefault = async (id) => {
+    try {
+      await request(`/api/payout-destinations/${id}/default`, { method: 'PATCH' });
+      toast.success('Default destination updated');
+      loadDestinations();
+    } catch (err) {
+      toast.error(err.message || 'Failed to set default');
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-bold text-[var(--az-text)]">Payout Destination Settings</h2>
-        <p className="text-sm text-[var(--az-text-muted)] mt-1">
-          Manage where your business receives its funds. Changes require owner re-authentication.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-[var(--az-text)]">Payout Destination Settings</h2>
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">
+            Manage where your business receives its funds. Changes require owner re-authentication.
+          </p>
+        </div>
+        {canManage && (
+          <Button size="sm" onClick={() => setShowAdd(s => !s)}>
+            <Plus className="w-4 h-4 mr-1.5" /> Add Destination
+          </Button>
+        )}
       </div>
 
       {/* Security Warning */}
@@ -978,12 +1059,87 @@ function PayoutTab({ canManage }) {
         </div>
       </div>
 
-      <Empty
-        icon={Building2}
-        title="Payout destinations coming soon"
-        description="Bank account, mobile money, and on-chain destinations will be configurable here."
-        action={canManage && <Button variant="secondary" size="sm" disabled>Configure Destinations</Button>}
-      />
+      {/* Add Form */}
+      {showAdd && canManage && (
+        <Card className="p-5 space-y-4">
+          <h3 className="font-bold text-sm">New Payout Destination</h3>
+          <form onSubmit={handleAdd} className="space-y-3">
+            <Input
+              placeholder="Nickname (e.g. 'Main Bank Account')"
+              value={form.nickname}
+              onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))}
+            />
+            <Select
+              value={form.destinationType}
+              onChange={e => {
+                const type = e.target.value;
+                setForm(f => ({ ...f, destinationType: type, isExternalCrypto: ['TRC20','ERC20','BINANCE_PAY'].includes(type) }));
+              }}
+            >
+              {PAYOUT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </Select>
+            <Input
+              placeholder="Destination address (account number, wallet address, phone number)"
+              value={form.destinationAddress}
+              onChange={e => setForm(f => ({ ...f, destinationAddress: e.target.value }))}
+            />
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" disabled={submitting}>
+                {submitting ? 'Saving...' : 'Save Destination'}
+              </Button>
+              <Button type="button" variant="secondary" size="sm" onClick={() => setShowAdd(false)}>Cancel</Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
+      {/* Destinations List */}
+      {loading ? (
+        <Card className="p-8 text-center">
+          <Skeleton className="h-16 w-full" />
+        </Card>
+      ) : destinations.length === 0 ? (
+        <Empty
+          icon={Building2}
+          title="No payout destinations yet"
+          description="Add a bank account, mobile money, or on-chain wallet to receive your business payouts."
+        />
+      ) : (
+        <div className="space-y-3">
+          {destinations.map(dest => (
+            <Card key={dest.id} className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-az-accent/10">
+                  {dest.isExternalCrypto
+                    ? <Wallet className="w-5 h-5 text-az-accent" />
+                    : <Building2 className="w-5 h-5 text-az-accent" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-sm">{dest.nickname}</p>
+                    {dest.isDefault && <Badge variant="success" size="sm">Default</Badge>}
+                  </div>
+                  <p className="text-xs text-[var(--az-text-muted)] font-mono mt-0.5">
+                    {dest.destinationType} • {dest.destinationAddress?.substring(0, 20)}{dest.destinationAddress?.length > 20 ? '...' : ''}
+                  </p>
+                </div>
+              </div>
+              {canManage && (
+                <div className="flex items-center gap-2">
+                  {!dest.isDefault && (
+                    <Button variant="secondary" size="sm" onClick={() => handleSetDefault(dest.id)}>
+                      Set Default
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(dest.id)}>
+                    <Trash2 className="w-4 h-4 text-az-danger" />
+                  </Button>
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,52 +1,55 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+const Login = lazy(() => import('@/pages/Login'));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Orders = lazy(() => import('@/pages/Orders'));
+const OrderDetail = lazy(() => import('@/pages/OrderDetail'));
+const Products = lazy(() => import('@/pages/Products'));
+const Invoices = lazy(() => import('@/pages/Invoices'));
+const Locations = lazy(() => import('@/pages/Locations'));
+const KYB = lazy(() => import('@/pages/KYB'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Notifications = lazy(() => import('@/pages/Notifications'));
+const Onboarding = lazy(() => import('@/pages/Onboarding'));
+const TransitTrips = lazy(() => import('@/pages/TransitTrips'));
+const Reservations = lazy(() => import('@/pages/Reservations'));
+const CheckIn = lazy(() => import('@/pages/CheckIn'));
+const Reviews = lazy(() => import('@/pages/Reviews'));
+const DineIn = lazy(() => import('@/pages/DineIn'));
+const Guests = lazy(() => import('@/pages/Guests'));
+const Marketing = lazy(() => import('@/pages/Marketing'));
+const FinanceV2 = lazy(() => import('@/pages/FinanceV2'));
+const Showcase = lazy(() => import('@/pages/Showcase'));
+const Employees = lazy(() => import('@/pages/employees/Employees'));
+const Scheduling = lazy(() => import('@/pages/employees/Scheduling'));
+const Payroll = lazy(() => import('@/pages/employees/Payroll'));
+const TimeOff = lazy(() => import('@/pages/employees/TimeOff'));
+const HotelRooms = lazy(() => import('@/pages/HotelRooms'));
+const HotelHousekeeping = lazy(() => import('@/pages/HotelHousekeeping'));
+const HotelFrontDesk = lazy(() => import('@/pages/HotelFrontDesk'));
+const RestaurantKitchen = lazy(() => import('@/pages/RestaurantKitchen'));
+const RestaurantTables = lazy(() => import('@/pages/RestaurantTables'));
+const TransitFleet = lazy(() => import('@/pages/TransitFleet'));
+const TransitDrivers = lazy(() => import('@/pages/TransitDrivers'));
+const TransitManifests = lazy(() => import('@/pages/TransitManifests'));
+const TransitCargo = lazy(() => import('@/pages/TransitCargo'));
+const RestaurantInventory = lazy(() => import('@/pages/RestaurantInventory'));
+const Messages = lazy(() => import('@/pages/Messages'));
+const Analytics = lazy(() => import('@/pages/Analytics'));
+const Developer = lazy(() => import('@/pages/settings/Developer'));
+const BusinessGroups = lazy(() => import('@/pages/BusinessGroups'));
+const MessagingChannels = lazy(() => import('@/pages/settings/MessagingChannels'));
+const WebOrdering = lazy(() => import('@/pages/marketing/WebOrdering'));
+const POS = lazy(() => import('@/pages/POS'));
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ErrorBoundary, { SectionBoundary } from '@/components/ErrorBoundary';
 import { ToastProvider } from '@/components/ui/Toast';
 import Layout from '@/components/layout/Layout';
-import Login from '@/pages/Login';
-import Dashboard from '@/pages/Dashboard';
-import Orders from '@/pages/Orders';
-import OrderDetail from '@/pages/OrderDetail';
-import Products from '@/pages/Products';
-import Invoices from '@/pages/Invoices';
-import Locations from '@/pages/Locations';
-import KYB from '@/pages/KYB';
-import Settings from '@/pages/Settings';
-import Notifications from '@/pages/Notifications';
-import Onboarding from '@/pages/Onboarding';
-import TransitTrips from '@/pages/TransitTrips';
-import Reservations from '@/pages/Reservations';
-import CheckIn from '@/pages/CheckIn';
-import Reviews from '@/pages/Reviews';
-import DineIn from '@/pages/DineIn';
-import Guests from '@/pages/Guests';
-import Marketing from '@/pages/Marketing';
-import FinanceV2 from '@/pages/FinanceV2';
-import Showcase from '@/pages/Showcase';
-import Employees from '@/pages/employees/Employees';
-import Scheduling from '@/pages/employees/Scheduling';
-import Payroll from '@/pages/employees/Payroll';
-import TimeOff from '@/pages/employees/TimeOff';
-import HotelRooms from '@/pages/HotelRooms';
-import HotelHousekeeping from '@/pages/HotelHousekeeping';
-import HotelFrontDesk from '@/pages/HotelFrontDesk';
-import RestaurantKitchen from '@/pages/RestaurantKitchen';
-import RestaurantTables from '@/pages/RestaurantTables';
-import TransitFleet from '@/pages/TransitFleet';
-import TransitDrivers from '@/pages/TransitDrivers';
-import TransitManifests from '@/pages/TransitManifests';
-import TransitCargo from '@/pages/TransitCargo';
-import RestaurantInventory from '@/pages/RestaurantInventory';
-import Messages from '@/pages/Messages';
 import { AppBackground } from '@/components/AppBackground';
-import Analytics from '@/pages/Analytics';
-import Developer from '@/pages/settings/Developer';
-import BusinessGroups from '@/pages/BusinessGroups';
-import MessagingChannels from '@/pages/settings/MessagingChannels';
-import WebOrdering from '@/pages/marketing/WebOrdering';
-import POS from '@/pages/POS';
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -73,23 +76,28 @@ function AppRoutes() {
 
   if (!authed) {
     return (
+      <Suspense fallback={<div className="flex items-center justify-center h-screen" style={{ background: 'var(--az-bg)' }}><div className="animate-pulse text-sm" style={{ color: 'var(--az-text-muted)' }}>Loading…</div></div>}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="*"      element={<Navigate to="/login" replace />} />
       </Routes>
+      </Suspense>
     );
   }
 
   if (!isAdmin && !bizProfile) {
     return (
+      <Suspense fallback={<div className="flex items-center justify-center h-screen" style={{ background: 'var(--az-bg)' }}><div className="animate-pulse text-sm" style={{ color: 'var(--az-text-muted)' }}>Loading…</div></div>}>
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="*"           element={<Navigate to="/onboarding" replace />} />
       </Routes>
+      </Suspense>
     );
   }
 
   return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen" style={{ background: 'var(--az-bg)' }}><div className="animate-pulse text-sm" style={{ color: 'var(--az-text-muted)' }}>Loading…</div></div>}>
     <Routes>
       <Route element={<Layout />}>
         <Route path="/"               element={<Dashboard />} />
@@ -137,6 +145,7 @@ function AppRoutes() {
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
       <Route path="*"           element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 }
 
@@ -154,6 +163,7 @@ export default function App() {
               expanded 
               position="top-center" 
               expand={true}
+              theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
               toastOptions={{
                 className: 'sentry-toast',
                 style: {

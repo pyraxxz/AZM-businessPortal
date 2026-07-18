@@ -196,8 +196,8 @@ export default function POS() {
   const placeOrderMutation = useMutation({
     mutationFn: async ({ method, cashGiven, azmAmount }) => {
       const payload = {
-        items: cart.map(i => ({ productId: i.id, name: i.name, qty: i.qty, unitPrice: i.price })),
-        paymentMethod: method, totalAmount: total,
+        items: cart.map(i => ({ productId: i.id, qty: i.qty })),
+        paymentMethod: method,
         cashGiven: method !== 'AZM' ? cashGiven : undefined,
         azmAmount: method !== 'CASH' ? azmAmount : undefined,
         idempotencyKey: crypto.randomUUID(), source: 'POS',
@@ -207,7 +207,7 @@ export default function POS() {
         refreshOutbox();
         return { offline: true };
       }
-      return request('/api/business/pos/order', { method: 'POST', body: JSON.stringify(payload) });
+      return request('/api/business-os/pos/order', { method: 'POST', body: JSON.stringify(payload) });
     },
     onSuccess: (data, vars) => {
       setCompletedOrder({ items: cart, total, paymentMethod: vars.method, cashGiven: vars.cashGiven, offline: data?.offline || false });
@@ -223,17 +223,25 @@ export default function POS() {
     const syncOutbox = async () => {
       setSyncing(true);
       const box = readOutbox(); const remaining = [];
+      let synced = 0;
       for (const item of box) {
         if (item.type === 'CREATE_ORDER') {
-          try { await request('/api/business/pos/order', { method: 'POST', body: JSON.stringify(item.payload) }); }
-          catch { remaining.push({ ...item, status: 'FAILED' }); }
+          try {
+            await request('/api/business-os/pos/order', { method: 'POST', body: JSON.stringify(item.payload) });
+            synced++;
+          } catch (e) {
+            const retries = (item.retryCount || 0) + 1;
+            if (retries < 3) remaining.push({ ...item, status: 'FAILED', retryCount: retries });
+            // After 3 retries, drop the item to avoid infinite loop
+          }
         }
       }
       writeOutbox(remaining); refreshOutbox(); setSyncing(false);
-      if (remaining.length === 0 && box.length > 0) { toast.success(`${box.length} offline order(s) synced!`); qc.invalidateQueries({ queryKey: ['orders'] }); }
+      if (synced > 0) { toast.success(`${synced} offline order(s) synced!`); qc.invalidateQueries({ queryKey: ['orders'] }); }
+      if (remaining.length > 0) toast.warning(`${remaining.length} order(s) failed to sync — will retry.`);
     };
     syncOutbox();
-  }, [online]);
+  }, [online, outboxCount]);
 
   return (
     <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 4rem)', background: 'var(--az-bg)' }}>

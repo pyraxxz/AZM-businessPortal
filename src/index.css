@@ -73,47 +73,47 @@
 
   /* ── Dark Mode activation ── */
   html.dark, body.dark, .dark {
-    --az-bg:            #0F0E13;
-    --az-bg-alt:        #15141C;
-    --az-surface:       rgba(30, 28, 38, 0.65);
-    --az-surface-solid: #1E1C26;
-    --az-border:        rgba(255, 255, 255, 0.08);
-    --az-border-strong: rgba(255, 255, 255, 0.14);
-    --az-text:           #F0F0F5;
-    --az-text-secondary: #C6BDCF;
-    --az-text-muted:     #776589;
+    --az-bg:             #0A0A0B;
+    --az-bg-alt:         #131314;
+    --az-surface:        rgba(24, 24, 26, 0.70);
+    --az-surface-solid:  #1C1C1F;
+    --az-border:         rgba(255, 255, 255, 0.08);
+    --az-border-strong:  rgba(255, 255, 255, 0.14);
+    --az-text:           #F5F5F6;
+    --az-text-secondary: #A8A8AD;
+    --az-text-muted:     #6E6E74;
 
-    --az-accent:         #6C4FD1;
-    --az-accent-hover:   #7C61DD;
-    --az-accent-subtle:  rgba(108, 79, 209, 0.12);
-    --az-accent-border:  rgba(108, 79, 209, 0.32);
+    --az-accent:         #7C5CFA;
+    --az-accent-hover:   #8E71FB;
+    --az-accent-subtle:  rgba(124, 92, 250, 0.14);
+    --az-accent-border:  rgba(124, 92, 250, 0.32);
 
-    --az-success:        #1FA37A;
-    --az-success-subtle: rgba(31, 163, 122, 0.12);
-    --az-warning:        #E2A33D;
-    --az-warning-subtle: rgba(226, 163, 61, 0.15);
-    --az-danger:         #E15361;
-    --az-danger-subtle:  rgba(225, 83, 97, 0.12);
-    --az-info:           #3D74DB;
+    --az-success:        #2ED3A8;
+    --az-success-subtle: rgba(46, 211, 168, 0.14);
+    --az-warning:        #F0B429;
+    --az-warning-subtle: rgba(240, 180, 41, 0.15);
+    --az-danger:         #F0616D;
+    --az-danger-subtle:  rgba(240, 97, 109, 0.14);
+    --az-info:           #5B93EC;
 
     /* Legacy aliases in dark mode */
-    --az-black:          #16141c;
-    --az-card:           #1e1c26;
-    --az-card-elevated:  #211f2a;
-    --az-border-bright:  #3d3a47;
+    --az-black:          #0A0A0B;
+    --az-card:           #1C1C1F;
+    --az-card-elevated:  #232326;
+    --az-border-bright:  rgba(255, 255, 255, 0.18);
     --az-text-primary:   var(--az-text);
-    --az-emerald:        #33BF9E;
-    --az-emerald-dim:    rgba(51, 191, 158, 0.1);
-    --az-emerald-glow:   rgba(51, 191, 158, 0.2);
+    --az-emerald:        #2ED3A8;
+    --az-emerald-dim:    rgba(46, 211, 168, 0.1);
+    --az-emerald-glow:   rgba(46, 211, 168, 0.2);
     --az-blue:           var(--az-info);
-    --az-blue-dim:       rgba(61, 116, 219, 0.1);
+    --az-blue-dim:       rgba(91, 147, 236, 0.1);
     --az-purple:         var(--az-accent);
     --az-amber:          var(--az-warning);
     --az-amber-dim:      var(--az-warning-subtle);
     --az-red:            var(--az-danger);
     --az-red-dim:        var(--az-danger-subtle);
     --az-cyan:           var(--az-info);
-    --az-cyan-dim:       rgba(61, 116, 219, 0.1);
+    --az-cyan-dim:       rgba(91, 147, 236, 0.1);
 
     --background:          var(--az-bg);
     --foreground:          var(--az-text);
