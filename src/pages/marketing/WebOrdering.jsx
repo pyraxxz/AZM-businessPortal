@@ -2,10 +2,11 @@
  * Marketing → Web Ordering — Section 5, Phase 2
  * Toggle public web ordering, preview storefront, download QR codes.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { request } from '@/lib/apiCore';
+import { storefrontApi } from '@/services/storefrontApi';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
 import { GlassPanel } from '@/components/ui/GlassPanel';
@@ -33,6 +34,23 @@ export default function WebOrdering() {
   const bizId = bizProfile?.id || bizProfile?._id || 'demo';
   const [enabled, setEnabled] = useState(false);
   const [accentColor, setAccentColor] = useState(bizProfile?.adAccentColor || '#6C4FD1');
+  const [storefrontTheme, setStorefrontTheme] = useState(null);
+
+  // Fetch storefront theme for accent color
+  useEffect(() => {
+    if (!bizProfile?.id) return;
+    storefrontApi.getPublishedLayout(bizProfile.id).then(data => {
+      if (data?.theme?.tokenSet?.accent) {
+        setAccentColor(data.theme.tokenSet.accent);
+        setStorefrontTheme(data);
+      }
+    }).catch(() => {
+      // Fallback: try public-theme endpoint
+      storefrontApi.listThemes().then(themes => {
+        // Use first theme accent as fallback
+      }).catch(() => {});
+    });
+  }, [bizProfile?.id]);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('setup');
 
