@@ -1,4 +1,5 @@
 // Lightweight UI primitives — no Radix dependency for simple cases
+import { useEffect } from "react";
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
