@@ -50,7 +50,7 @@ import {
   FileSpreadsheet,
   MessageSquare,
   ShoppingCart,
-  BarChart2, Code2, Globe, Layers, Moon, Sun } from 'lucide-react';
+  BarChart2, Code2, Globe, Layers, Moon, Sun, Store } from "lucide-react";
 
 const SECTION_HEADERS = {
   overview: 'Overview',
