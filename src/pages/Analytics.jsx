@@ -349,6 +349,140 @@ export default function Analytics() {
           </GlassPanel>
         </motion.div>
 
+        {/* ── Comparative View: This Week vs Last Week ──────────────────────── */}
+        <motion.div variants={item}>
+          <GlassPanel className="p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-sm font-bold text-az-text">Comparative Performance</h3>
+                <p className="text-xs text-az-text-muted mt-0.5">This week vs last week · This month vs last month</p>
+              </div>
+            </div>
+            {(() => {
+              const now = new Date();
+              const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay()); weekStart.setHours(0,0,0,0);
+              const lastWeekStart = new Date(weekStart); lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+              const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+              const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+              const inRange = (o, start, end) => {
+                const d = new Date(o.createdAt);
+                return d >= start && d < end;
+              };
+
+              const completed = allOrders.filter(o => o.status === 'COMPLETED');
+              const thisWeek = completed.filter(o => inRange(o, weekStart, now));
+              const lastWeek = completed.filter(o => inRange(o, lastWeekStart, weekStart));
+              const thisMonth = completed.filter(o => inRange(o, monthStart, now));
+              const lastMonth = completed.filter(o => inRange(o, lastMonthStart, monthStart));
+
+              const sumRev = arr => arr.reduce((s, o) => s + (Number(o.amountUsdc) || 0), 0);
+              const avgOrder = arr => arr.length > 0 ? sumRev(arr) / arr.length : 0;
+              const pct = (curr, prev) => prev > 0 ? ((curr - prev) / prev) * 100 : (curr > 0 ? 100 : 0);
+
+              const metrics = [
+                { label: 'Orders', thisW: thisWeek.length, lastW: lastWeek.length, thisM: thisMonth.length, lastM: lastMonth.length, fmt: v => fmt(v, 0) },
+                { label: 'Revenue', thisW: sumRev(thisWeek), lastW: sumRev(lastWeek), thisM: sumRev(thisMonth), lastM: sumRev(lastMonth), fmt: v => fmtUSDC(v) },
+                { label: 'Avg Order Value', thisW: avgOrder(thisWeek), lastW: avgOrder(lastWeek), thisM: avgOrder(thisMonth), lastM: avgOrder(lastMonth), fmt: v => fmtUSDC(v) },
+              ];
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {metrics.map(m => {
+                    const wDelta = pct(m.thisW, m.lastW);
+                    const mDelta = pct(m.thisM, m.lastM);
+                    return (
+                      <div key={m.label} className="p-4 rounded-az-md border border-az-border bg-az-surface">
+                        <p className="text-xs font-semibold text-az-text-muted uppercase tracking-wider mb-3">{m.label}</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-az-text-muted">This week</span>
+                            <span className="text-sm font-bold text-az-text font-mono">{m.fmt(m.thisW)}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-az-text-muted">Last week</span>
+                            <span className="text-xs text-az-text-muted font-mono">{m.fmt(m.lastW)}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`text-[11px] font-medium ${wDelta >= 0 ? 'text-az-success' : 'text-az-danger'}`}>
+                              {wDelta >= 0 ? '▲' : '▼'} {Math.abs(wDelta).toFixed(1)}%
+                            </span>
+                            <span className="text-[11px] text-az-text-muted">vs last week</span>
+                          </div>
+                          <div className="border-t border-az-border pt-2 mt-2 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-az-text-muted">This month</span>
+                              <span className="text-sm font-bold text-az-text font-mono">{m.fmt(m.thisM)}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-az-text-muted">Last month</span>
+                              <span className="text-xs text-az-text-muted font-mono">{m.fmt(m.lastM)}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className={`text-[11px] font-medium ${mDelta >= 0 ? 'text-az-success' : 'text-az-danger'}`}>
+                                {mDelta >= 0 ? '▲' : '▼'} {Math.abs(mDelta).toFixed(1)}%
+                              </span>
+                              <span className="text-[11px] text-az-text-muted">vs last month</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+          </GlassPanel>
+        </motion.div>
+
+        {/* ── Top Items by Volume ───────────────────────────────────────────── */}
+        <motion.div variants={item}>
+          <GlassPanel className="p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-sm font-bold text-az-text">Top Products by Volume</h3>
+                <p className="text-xs text-az-text-muted mt-0.5">Best-selling items from completed orders</p>
+              </div>
+            </div>
+            {(() => {
+              const counts = {};
+              const revenue = {};
+              allOrders.filter(o => o.status === 'COMPLETED').forEach(o => {
+                const name = o.productName || o.items?.[0]?.name || o.azamanId || 'Unknown';
+                counts[name] = (counts[name] || 0) + 1;
+                revenue[name] = (revenue[name] || 0) + (Number(o.amountUsdc) || 0);
+              });
+              const top = Object.entries(counts)
+                .map(([name, count]) => ({ name, count, revenue: revenue[name] }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+              const maxCount = Math.max(...top.map(t => t.count), 1);
+
+              if (top.length === 0) {
+                return <p className="text-sm text-az-text-muted text-center py-8">No completed orders yet to rank products.</p>;
+              }
+              return (
+                <div className="space-y-2">
+                  {top.map((t, i) => (
+                    <div key={t.name} className="flex items-center gap-3 p-3 rounded-az-md border border-az-border hover:bg-az-surface-solid transition-colors">
+                      <span className="text-lg font-bold text-az-text-muted w-6 text-center flex-shrink-0">{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-az-text truncate">{t.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex-1 h-1.5 bg-az-border rounded-full overflow-hidden">
+                            <div className="h-full rounded-full" style={{ width: `${(t.count / maxCount) * 100}%`, background: 'var(--az-accent)' }} />
+                          </div>
+                          <span className="text-[11px] text-az-text-muted flex-shrink-0">{t.count} orders · {fmtUSDC(t.revenue)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </GlassPanel>
+        </motion.div>
+
       </motion.div>
     </ErrorBoundary>
   );

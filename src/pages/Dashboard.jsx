@@ -11,7 +11,7 @@
  */
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { orders as ordersApi, invoices as invoicesApi } from '@/lib/api';
+import { orders as ordersApi, invoices as invoicesApi, request } from '@/lib/api';
 import { reservations as resApi, transit as transitApi, checkIn as checkInApi, reviews as reviewsApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
 import { Widget, WidgetStat, WidgetRow } from '@/components/ui/Widget';
@@ -30,7 +30,7 @@ import {
   Receipt, DollarSign, Bus, Users, CalendarCheck,
   QrCode, Star, UserCheck, UserX, Route, Sparkles,
   UtensilsCrossed, Building2, Briefcase, Store,
-  Utensils, Hotel, ArrowUpRight
+  Utensils, Hotel, ArrowUpRight, Plus, CalendarPlus, UserPlus, Tag
 } from 'lucide-react';
 
 // ── Revenue computation ──────────────────────────────────────────────────────
@@ -79,6 +79,106 @@ const itemVariants = {
   hidden: { opacity: 0, y: 15 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
 };
+
+// ── At-Risk Widget ───────────────────────────────────────────────────────────
+function AtRiskWidget() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['at-risk'],
+    queryFn: () => request('/api/business-os/dashboard/at-risk'),
+    refetchInterval: 60_000, // refresh every minute
+  });
+
+  const items = data?.items || [];
+
+  if (isLoading) {
+    return (
+      <GlassPanel className="p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border animate-pulse" />
+          <div className="h-4 w-32 rounded bg-az-bg-alt animate-pulse" />
+        </div>
+      </GlassPanel>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <GlassPanel className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+            <CheckCircle2 className="w-5 h-5 text-az-accent" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-az-text">All clear</p>
+            <p className="text-xs text-az-text-secondary">No urgent items need your attention right now.</p>
+          </div>
+        </div>
+      </GlassPanel>
+    );
+  }
+
+  const urgentCount = items.filter(i => i.severity === 'urgent').length;
+  const warningCount = items.length - urgentCount;
+
+  const SEVERITY_COLORS = {
+    urgent: 'var(--az-danger)',
+    warning: 'var(--az-warning)',
+    info: 'var(--az-info)',
+  };
+
+  const TYPE_ICONS = {
+    HOUSEKEEPING_OVERDUE: Building2,
+    KITCHEN_AGING: Utensils,
+    VEHICLE_MAINTENANCE: Bus,
+    SHIFT_SWAP_PENDING: Users,
+    TIME_OFF_PENDING: CalendarCheck,
+    NEGATIVE_REVIEW: Star,
+    RESERVATION_PENDING: CalendarCheck,
+    LOW_STOCK: Package,
+  };
+
+  return (
+    <GlassPanel className="p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-az-md flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--az-danger) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--az-danger) 30%, transparent)' }}>
+            <AlertTriangle className="w-5 h-5" style={{ color: 'var(--az-danger)' }} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-az-text">Needs Attention</h3>
+            <p className="text-xs text-az-text-secondary">
+              {urgentCount > 0 && <span className="text-az-danger font-medium">{urgentCount} urgent</span>}
+              {urgentCount > 0 && warningCount > 0 && ' · '}
+              {warningCount > 0 && <span>{warningCount} warning{warningCount > 1 ? 's' : ''}</span>}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2 max-h-[280px] overflow-y-auto">
+        {items.map((item, i) => {
+          const Icon = TYPE_ICONS[item.type] || AlertTriangle;
+          const color = SEVERITY_COLORS[item.severity] || SEVERITY_COLORS.warning;
+          return (
+            <Link
+              key={i}
+              to={item.link || '#'}
+              className="flex items-center gap-3 p-2.5 rounded-az-md border border-az-border bg-az-surface hover:bg-az-surface-solid transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-az-md flex items-center justify-center flex-shrink-0" style={{ background: `color-mix(in srgb, ${color} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 30%, transparent)` }}>
+                <Icon className="w-4 h-4" style={{ color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-az-text truncate">{item.title}</p>
+                <p className="text-[11px] text-az-text-secondary truncate">{item.subtitle}</p>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-az-text-muted flex-shrink-0 group-hover:text-az-accent transition-colors" />
+            </Link>
+          );
+        })}
+      </div>
+    </GlassPanel>
+  );
+}
 
 export default function Dashboard() {
   const { isAdmin, adminBusinesses, bizProfile, selectedBusinessId, selectBusiness } = useAuth();
@@ -400,6 +500,25 @@ export default function Dashboard() {
           </>
         )}
       </div>
+
+      {/* ── Quick Actions ─────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Link to="/reservations?new=true" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-az-md text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors">
+          <CalendarPlus className="w-3.5 h-3.5" /> New Reservation
+        </Link>
+        <Link to="/products?new=true" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-az-md text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors">
+          <Plus className="w-3.5 h-3.5" /> Add Product
+        </Link>
+        <Link to="/employees?invite=true" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-az-md text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors">
+          <UserPlus className="w-3.5 h-3.5" /> Invite Employee
+        </Link>
+        <Link to="/marketing?new_promo=true" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-az-md text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors">
+          <Tag className="w-3.5 h-3.5" /> New Promo
+        </Link>
+      </div>
+
+      {/* ── At-Risk Widget ─────────────────────────────────────────────────── */}
+      <AtRiskWidget />
 
       {/* ── KYB banner ────────────────────────────────────────────────────── */}
       {needsKyb && (
