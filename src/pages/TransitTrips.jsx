@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { transit as transitApi, transitOpsApi } from '@/lib/marketplaceApi';
 import { Widget, WidgetStat, WidgetRow } from '@/components/ui/Widget';
+import { StatusCard } from '@/components/ui/StatusCard';
 import { DataTable } from '@/components/ui/DataTable';
 import { Button, Badge, Input, Select, Modal, Empty, Skeleton } from '@/components/ui';
 import { fmtUSDC, fmt, formatDateTime, cn } from '@/lib/utils';
@@ -454,20 +455,12 @@ export default function TransitTrips() {
         </Card>
       )}
 
-      {/* Stats widgets */}
+      {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Widget title="Total Trips" icon={Bus} iconColor="var(--az-info)" loading={isLoading}>
-          <WidgetStat value={fmt(totalTrips, 0)} label="All trips" />
-        </Widget>
-        <Widget title="Active" icon={Clock} iconColor="var(--az-warning)" loading={isLoading}>
-          <WidgetStat value={fmt(activeTrips, 0)} label="Scheduled + Delayed" color="var(--az-warning)" />
-        </Widget>
-        <Widget title="Bookings" icon={Users} iconColor="var(--az-accent)" loading={isLoading}>
-          <WidgetStat value={fmt(totalBookings, 0)} label="Assigned seats" color="var(--az-accent)" />
-        </Widget>
-        <Widget title="Estimated Revenue" icon={DollarSign} iconColor="var(--az-success)" loading={isLoading}>
-          <WidgetStat value={fmtUSDC(totalRevenue)} label="Based on booked seats" color="var(--az-success)" />
-        </Widget>
+        <StatusCard icon={Bus} label="Total Trips" value={isLoading ? '…' : fmt(totalTrips, 0)} status="info" />
+        <StatusCard icon={Clock} label="Active (Scheduled + Delayed)" value={isLoading ? '…' : fmt(activeTrips, 0)} status={activeTrips > 0 ? 'warning' : 'neutral'} />
+        <StatusCard icon={Users} label="Assigned Seats" value={isLoading ? '…' : fmt(totalBookings, 0)} status="active" />
+        <StatusCard icon={DollarSign} label="Est. Revenue" value={isLoading ? '…' : fmtUSDC(totalRevenue)} status="success" />
       </div>
 
       {/* Main Table */}

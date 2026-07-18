@@ -13,6 +13,8 @@ import {
   Switch,
   useToast
 } from '@/components/ui';
+import { StatusCard } from '@/components/ui/StatusCard';
+
 import {
   BedDouble,
   Bath,
@@ -513,25 +515,12 @@ export default function HotelRooms() {
       {/* TAB 1: INVENTORY VIEWS */}
       {!loading && activeTab === 'inventory' && (
         <div className="space-y-6">
-          {/* STATS BAR */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-            {Object.entries(STATUS_META).map(([key, meta]) => {
-              const count = statusCounts[key] || 0;
-              return (
-                <div
-                  key={key}
-                  className="flex flex-col justify-between p-3 rounded-xl border border-[var(--az-border)] bg-[var(--az-card)]"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <meta.icon className="w-4 h-4 flex-shrink-0" style={{ color: meta.color }} />
-                    <span className="text-[10px] text-[var(--az-text-muted)] font-bold uppercase tracking-wider">
-                      {meta.label}
-                    </span>
-                  </div>
-                  <p className="text-xl font-bold">{count}</p>
-                </div>
-              );
-            })}
+          {/* SUMMARY CARDS */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatusCard icon={CheckCircle2} label="Available" value={statusCounts.AVAILABLE || 0} status="active" />
+            <StatusCard icon={BedDouble} label="Occupied" value={statusCounts.OCCUPIED || 0} status="info" />
+            <StatusCard icon={AlertCircle} label="Needs Cleaning" value={statusCounts.DIRTY || 0} status={(statusCounts.DIRTY || 0) > 0 ? 'warning' : 'neutral'} />
+            <StatusCard icon={Wrench} label="Maintenance" value={statusCounts.MAINTENANCE || 0} status={(statusCounts.MAINTENANCE || 0) > 0 ? 'danger' : 'neutral'} />
           </div>
 
           {/* FILTER CONTROLS */}
