@@ -102,6 +102,7 @@ const ALL_NAVIGATION_ITEMS = [
   { label: 'Reviews', icon: Star, to: '/reviews', section: 'marketing', perm: 'reviews.view' },
   { label: 'Showcase', icon: ImageIcon, to: '/showcase', section: 'marketing', perm: 'marketing.view' },
   { label: 'Web Ordering', icon: Globe, to: '/marketing/web-ordering', section: 'marketing', perm: 'marketing.view' },
+  { label: 'Storefront', icon: Store, to: '/storefront', section: 'marketing', perm: 'settings.manage' },
 
   // Settings
   { label: 'Settings', icon: Settings, to: '/settings', section: 'settings', perm: null },
