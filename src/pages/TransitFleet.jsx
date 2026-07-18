@@ -223,12 +223,12 @@ export default function TransitFleet() {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-6 animate-fade-in text-[var(--sn-text)]">
+    <div className="space-y-6 max-w-7xl mx-auto p-6 animate-fade-in text-[var(--az-text)]">
       {/* Top Bar */}
-      <div className="flex items-center justify-between border-b border-[var(--sn-border)] pb-5">
+      <div className="flex items-center justify-between border-b border-[var(--az-border)] pb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Fleet & Maintenance Console</h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">Manage vehicles, visual seat grids, and scheduled maintenance records.</p>
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">Manage vehicles, visual seat grids, and scheduled maintenance records.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="secondary" onClick={() => setMaintOpen(true)}>
@@ -242,21 +242,21 @@ export default function TransitFleet() {
 
       {/* High-Alert Section for Overdue Maintenance */}
       {overdueVehicles.length > 0 && (
-        <Card className="border-[var(--sn-red)]/30 bg-[var(--sn-red)]/5">
+        <Card className="border-[var(--az-danger)]/30 bg-[var(--az-danger)]/5">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-[var(--sn-red)] mt-0.5 flex-shrink-0" />
+            <AlertTriangle className="w-5 h-5 text-[var(--az-danger)] mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <h3 className="text-sm font-bold text-[var(--sn-text)]">Critical Maintenance Alerts</h3>
-              <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">The following vehicles have overdue maintenance and should be taken out of service immediately.</p>
+              <h3 className="text-sm font-bold text-[var(--az-text)]">Critical Maintenance Alerts</h3>
+              <p className="text-xs text-[var(--az-text-muted)] mt-0.5">The following vehicles have overdue maintenance and should be taken out of service immediately.</p>
               <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
                 {overdueVehicles.map(m => (
-                  <div key={m.id} className="flex items-center justify-between p-2 rounded-xl bg-[var(--sn-card)] border border-[var(--sn-red)]/20 text-xs">
+                  <div key={m.id} className="flex items-center justify-between p-2 rounded-xl bg-[var(--az-surface)] border border-[var(--az-danger)]/20 text-xs">
                     <div className="flex items-center gap-2">
-                      <Bus className="w-4 h-4 text-[var(--sn-red)]" />
-                      <span className="font-semibold text-[var(--sn-text)]">{m.vehicle?.licensePlate || 'Unknown Vehicle'}</span>
-                      <span className="text-[var(--sn-text-muted)]">— {m.description}</span>
+                      <Bus className="w-4 h-4 text-[var(--az-danger)]" />
+                      <span className="font-semibold text-[var(--az-text)]">{m.vehicle?.licensePlate || 'Unknown Vehicle'}</span>
+                      <span className="text-[var(--az-text-muted)]">— {m.description}</span>
                     </div>
-                    <Button size="sm" variant="outline" className="h-7 text-xs border-[var(--sn-red)] text-[var(--sn-red)] hover:bg-[var(--sn-red)]/10" onClick={() => handleUpdateMaintStatus(m.id, 'COMPLETED')}>
+                    <Button size="sm" variant="outline" className="h-7 text-xs border-[var(--az-danger)] text-[var(--az-danger)] hover:bg-[var(--az-danger)]/10" onClick={() => handleUpdateMaintStatus(m.id, 'COMPLETED')}>
                       Resolve
                     </Button>
                   </div>
@@ -272,7 +272,7 @@ export default function TransitFleet() {
         {/* Left 2 Cols: Vehicle Board */}
         <div className="lg:col-span-2 space-y-6">
           {/* Controls */}
-          <div className="flex items-center justify-between flex-wrap gap-4 bg-[var(--sn-card)] p-4 rounded-2xl border border-[var(--sn-border)]">
+          <div className="flex items-center justify-between flex-wrap gap-4 bg-[var(--az-surface)] p-4 rounded-2xl border border-[var(--az-border)]">
             <div className="flex items-center gap-3">
               <Select
                 value={filterType}
@@ -297,7 +297,7 @@ export default function TransitFleet() {
                 ]}
               />
             </div>
-            <div className="text-xs text-[var(--sn-text-muted)] font-medium">
+            <div className="text-xs text-[var(--az-text-muted)] font-medium">
               Showing {filteredVehicles.length} of {vehicles.length} vehicles
             </div>
           </div>
@@ -311,16 +311,16 @@ export default function TransitFleet() {
                 const isUnderMaint = maintenance.some(m => m.vehicleId === v.id && m.status === 'SCHEDULED');
                 const isOverdue = overdueVehicles.some(m => m.vehicleId === v.id);
                 
-                let badgeColor = 'var(--sn-green)';
+                let badgeColor = 'var(--az-success)';
                 let statusLabel = 'Active';
                 if (isOverdue) {
-                  badgeColor = 'var(--sn-red)';
+                  badgeColor = 'var(--az-danger)';
                   statusLabel = 'Out of Service';
                 } else if (isUnderMaint) {
-                  badgeColor = 'var(--sn-amber)';
+                  badgeColor = 'var(--az-warning)';
                   statusLabel = 'In Maintenance';
                 } else if (!v.isActive) {
-                  badgeColor = 'var(--sn-text-muted)';
+                  badgeColor = 'var(--az-text-muted)';
                   statusLabel = 'Inactive';
                 }
 
@@ -328,12 +328,12 @@ export default function TransitFleet() {
                   <Card key={v.id} className="relative overflow-hidden group">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--sn-blue)]/10 border border-[var(--sn-blue)]/20 flex items-center justify-center">
-                          <Bus className="w-5 h-5 text-[var(--sn-blue)]" />
+                        <div className="w-10 h-10 rounded-xl bg-[var(--az-info)]/10 border border-[var(--az-info)]/20 flex items-center justify-center">
+                          <Bus className="w-5 h-5 text-[var(--az-info)]" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-[var(--sn-text)]">{v.make} {v.model}</p>
-                          <p className="text-xs text-[var(--sn-text-muted)]">{v.licensePlate || 'No License Plate'}</p>
+                          <p className="text-sm font-bold text-[var(--az-text)]">{v.make} {v.model}</p>
+                          <p className="text-xs text-[var(--az-text-muted)]">{v.licensePlate || 'No License Plate'}</p>
                         </div>
                       </div>
                       <Badge color={badgeColor}>{statusLabel}</Badge>
@@ -345,28 +345,28 @@ export default function TransitFleet() {
                       </div>
                     )}
 
-                    <div className="space-y-2 text-xs border-t border-[var(--sn-border)] pt-3">
+                    <div className="space-y-2 text-xs border-t border-[var(--az-border)] pt-3">
                       <div className="flex justify-between">
-                        <span className="text-[var(--sn-text-muted)]">Year & Color</span>
+                        <span className="text-[var(--az-text-muted)]">Year & Color</span>
                         <span className="font-semibold">{v.year || '—'} · {v.color || '—'}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[var(--sn-text-muted)]">Capacity</span>
+                        <span className="text-[var(--az-text-muted)]">Capacity</span>
                         <span className="font-semibold">{v.capacity || 0} seats</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[var(--sn-text-muted)]">Driver Assignment</span>
-                        <span className="font-semibold text-[var(--sn-blue)]">{v.driverName || 'Unassigned'}</span>
+                        <span className="text-[var(--az-text-muted)]">Driver Assignment</span>
+                        <span className="font-semibold text-[var(--az-info)]">{v.driverName || 'Unassigned'}</span>
                       </div>
                       {v.driverPhone && (
                         <div className="flex justify-between">
-                          <span className="text-[var(--sn-text-muted)]">Driver Phone</span>
+                          <span className="text-[var(--az-text-muted)]">Driver Phone</span>
                           <span className="font-mono">{v.driverPhone}</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-[var(--sn-border)] flex gap-2">
+                    <div className="mt-4 pt-3 border-t border-[var(--az-border)] flex gap-2">
                       <Button size="sm" variant="secondary" className="flex-1 text-xs py-1 h-8" onClick={() => openSeatMapBuilder(v)}>
                         <Grid className="w-3.5 h-3.5 mr-1" /> Seat Map
                       </Button>
@@ -380,34 +380,34 @@ export default function TransitFleet() {
 
         {/* Right Col: Upcoming Maintenance & Controls */}
         <div className="space-y-6">
-          <Card className="border-[var(--sn-border)] bg-[var(--sn-card)]">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--sn-border)]">
+          <Card className="border-[var(--az-border)] bg-[var(--az-surface)]">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--az-border)]">
               <div className="flex items-center gap-2">
-                <Wrench className="w-4 h-4 text-[var(--sn-purple)]" />
+                <Wrench className="w-4 h-4 text-[var(--az-accent)]" />
                 <h3 className="text-sm font-bold">Maintenance Schedule</h3>
               </div>
-              <Badge color="var(--sn-purple)">{maintenance.length} Active</Badge>
+              <Badge color="var(--az-accent)">{maintenance.length} Active</Badge>
             </div>
 
             {maintenance.length === 0 ? (
-              <p className="text-xs text-[var(--sn-text-muted)] text-center py-6">No scheduled routine maintenance.</p>
+              <p className="text-xs text-[var(--az-text-muted)] text-center py-6">No scheduled routine maintenance.</p>
             ) : (
               <div className="space-y-3">
                 {maintenance.map(m => (
-                  <div key={m.id} className="p-3 rounded-xl bg-black/20 border border-[var(--sn-border)] space-y-2">
+                  <div key={m.id} className="p-3 rounded-xl bg-black/20 border border-[var(--az-border)] space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-[var(--sn-blue)]">{m.vehicle?.licensePlate || 'Plate Unknown'}</span>
-                      <Badge color="var(--sn-amber)">{m.type}</Badge>
+                      <span className="font-bold text-[var(--az-info)]">{m.vehicle?.licensePlate || 'Plate Unknown'}</span>
+                      <Badge color="var(--az-warning)">{m.type}</Badge>
                     </div>
-                    <p className="text-xs text-[var(--sn-text)] font-medium">{m.description}</p>
-                    <div className="flex items-center justify-between text-[10px] text-[var(--sn-text-muted)] pt-1">
+                    <p className="text-xs text-[var(--az-text)] font-medium">{m.description}</p>
+                    <div className="flex items-center justify-between text-[10px] text-[var(--az-text-muted)] pt-1">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {new Date(m.scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
-                      {m.costUsdc && <span className="font-mono text-[var(--sn-green)]">${m.costUsdc} USDC</span>}
+                      {m.costUsdc && <span className="font-mono text-[var(--az-success)]">${m.costUsdc} USDC</span>}
                     </div>
-                    <div className="flex items-center gap-2 pt-1 border-t border-[var(--sn-border)]/50 mt-1">
+                    <div className="flex items-center gap-2 pt-1 border-t border-[var(--az-border)]/50 mt-1">
                       <Button size="sm" variant="outline" className="w-full h-6 text-[10px] py-0" onClick={() => handleUpdateMaintStatus(m.id, 'COMPLETED')}>
                         <CheckCircle2 className="w-3 h-3 mr-1" /> Complete
                       </Button>
@@ -441,15 +441,15 @@ export default function TransitFleet() {
             <Select label="Status" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
               options={[{ value: 'ACTIVE', label: 'Active / In Service' }, { value: 'INACTIVE', label: 'Inactive' }]} />
           </div>
-          <div className="border-t border-[var(--sn-border)] pt-3">
-            <h3 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider mb-3">Driver Assignment</h3>
+          <div className="border-t border-[var(--az-border)] pt-3">
+            <h3 className="text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider mb-3">Driver Assignment</h3>
             <div className="grid grid-cols-2 gap-4">
               <Input label="Driver Name" placeholder="Kwame Mensah" value={form.driverName} onChange={e => setForm({ ...form, driverName: e.target.value })} />
               <Input label="Driver Phone" placeholder="+233 24 123 4567" value={form.driverPhone} onChange={e => setForm({ ...form, driverPhone: e.target.value })} />
             </div>
           </div>
           <Input label="Image URL" placeholder="https://example.com/bus.jpg" value={form.imageUrl} onChange={e => setForm({ ...form, imageUrl: e.target.value })} />
-          <div className="flex justify-end gap-3 pt-3 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-3 pt-3 border-t border-[var(--az-border)]">
             <Button type="button" variant="secondary" onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button type="submit">Create Vehicle</Button>
           </div>
@@ -501,7 +501,7 @@ export default function TransitFleet() {
               onChange={e => setMaintForm({ ...maintForm, description: e.target.value })}
             />
           </div>
-          <div className="flex justify-end gap-3 pt-3 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-3 pt-3 border-t border-[var(--az-border)]">
             <Button type="button" variant="secondary" onClick={() => setMaintOpen(false)}>Cancel</Button>
             <Button type="submit">Schedule</Button>
           </div>
@@ -511,32 +511,32 @@ export default function TransitFleet() {
       {/* Seat Map Builder Modal */}
       <Modal open={seatMapOpen} onClose={() => setSeatMapOpen(false)} title={`Seat Map Editor — ${selectedVehicleForSeatMap?.make} ${selectedVehicleForSeatMap?.model}`} className="max-w-2xl">
         <div className="space-y-4">
-          <div className="p-3 bg-[var(--sn-blue)]/5 border border-[var(--sn-blue)]/20 rounded-xl text-xs flex items-start gap-2.5">
-            <Shield className="w-4 h-4 text-[var(--sn-blue)] mt-0.5 flex-shrink-0" />
+          <div className="p-3 bg-[var(--az-info)]/5 border border-[var(--az-info)]/20 rounded-xl text-xs flex items-start gap-2.5">
+            <Shield className="w-4 h-4 text-[var(--az-info)] mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-bold">Visual Seat Grid Configuration</p>
-              <p className="text-[var(--sn-text-muted)] mt-0.5">Click any cell to cycle its seat classification. This template layout sets the default structures for all trips generated using this vehicle.</p>
+              <p className="text-[var(--az-text-muted)] mt-0.5">Click any cell to cycle its seat classification. This template layout sets the default structures for all trips generated using this vehicle.</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 flex-wrap border-b border-[var(--sn-border)] pb-3 text-xs">
+          <div className="flex items-center gap-4 flex-wrap border-b border-[var(--az-border)] pb-3 text-xs">
             <div className="flex items-center gap-1.5">
-              <div className="w-3.5 h-3.5 rounded bg-[var(--sn-purple)]" />
+              <div className="w-3.5 h-3.5 rounded bg-[var(--az-accent)]" />
               <span>WINDOW Seat</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3.5 h-3.5 rounded bg-[var(--sn-blue)]" />
+              <div className="w-3.5 h-3.5 rounded bg-[var(--az-info)]" />
               <span>AISLE Seat</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3.5 h-3.5 rounded border border-dashed border-[var(--sn-border)] bg-black/40" />
+              <div className="w-3.5 h-3.5 rounded border border-dashed border-[var(--az-border)] bg-black/40" />
               <span>NONE (Empty space / walkway)</span>
             </div>
           </div>
 
           {/* Grid visual container */}
-          <div className="rounded-2xl border border-[var(--sn-border)] p-5 max-w-sm mx-auto bg-black/40">
-            <div className="flex justify-between items-center mb-4 pb-2 border-b border-[var(--sn-border)] text-xs font-bold text-[var(--sn-text-muted)]">
+          <div className="rounded-2xl border border-[var(--az-border)] p-5 max-w-sm mx-auto bg-black/40">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-[var(--az-border)] text-xs font-bold text-[var(--az-text-muted)]">
               <span>FRONT (WINDSHIELD)</span>
               <span>DRIVER</span>
             </div>
@@ -544,18 +544,18 @@ export default function TransitFleet() {
             {/* Grid rows */}
             <div className="grid gap-2.5" style={{ gridTemplateColumns: `repeat(${seatCols}, minmax(0, 1fr))` }}>
               {seatGrid.map((seat, index) => {
-                let cellColorClass = 'border-[var(--sn-border)] hover:border-[var(--sn-purple)] text-white';
+                let cellColorClass = 'border-[var(--az-border)] hover:border-[var(--az-accent)] text-white';
                 let cellBg = 'bg-black/20';
                 
                 if (seat.type === 'WINDOW') {
-                  cellBg = 'bg-[var(--sn-purple)]/10';
-                  cellColorClass = 'border-[var(--sn-purple)] text-[var(--sn-purple)]';
+                  cellBg = 'bg-[var(--az-accent)]/10';
+                  cellColorClass = 'border-[var(--az-accent)] text-[var(--az-accent)]';
                 } else if (seat.type === 'AISLE') {
-                  cellBg = 'bg-[var(--sn-blue)]/10';
-                  cellColorClass = 'border-[var(--sn-blue)] text-[var(--sn-blue)]';
+                  cellBg = 'bg-[var(--az-info)]/10';
+                  cellColorClass = 'border-[var(--az-info)] text-[var(--az-info)]';
                 } else {
-                  cellBg = 'bg-transparent border-dashed border-[var(--sn-border)]/50';
-                  cellColorClass = 'text-[var(--sn-text-muted)]/20';
+                  cellBg = 'bg-transparent border-dashed border-[var(--az-border)]/50';
+                  cellColorClass = 'text-[var(--az-text-muted)]/20';
                 }
 
                 return (
@@ -572,12 +572,12 @@ export default function TransitFleet() {
               })}
             </div>
             
-            <div className="text-center mt-4 text-[10px] text-[var(--sn-text-muted)] font-bold">
+            <div className="text-center mt-4 text-[10px] text-[var(--az-text-muted)] font-bold">
               REAR ROW
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-3 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-3 pt-3 border-t border-[var(--az-border)]">
             <Button variant="secondary" onClick={() => setSeatMapOpen(false)}>Cancel</Button>
             <Button onClick={handleSaveSeatMap}>Save Grid Template</Button>
           </div>

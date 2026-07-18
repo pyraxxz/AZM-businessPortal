@@ -182,9 +182,9 @@ export default function Showcase() {
   if (!canView) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[500px] text-center p-6">
-        <AlertTriangle className="w-12 h-12 text-[var(--sn-red)] mb-4 animate-bounce" />
-        <h2 className="text-xl font-bold text-[var(--sn-text)] mb-2">Access Denied</h2>
-        <p className="text-sm text-[var(--sn-text-muted)] max-w-md">
+        <AlertTriangle className="w-12 h-12 text-[var(--az-danger)] mb-4 animate-bounce" />
+        <h2 className="text-xl font-bold text-[var(--az-text)] mb-2">Access Denied</h2>
+        <p className="text-sm text-[var(--az-text-muted)] max-w-md">
           You do not have permission to view the Showcase Editor. Please consult your administrator.
         </p>
       </div>
@@ -205,15 +205,15 @@ export default function Showcase() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in text-[var(--sn-text)]">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto animate-fade-in text-[var(--az-text)]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black flex items-center gap-3">
-            <Smartphone className="w-6 h-6 text-[var(--sn-purple)]" />
+            <Smartphone className="w-6 h-6 text-[var(--az-accent)]" />
             Digital Storefront Editor
           </h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">
             Build high-conversion landing pages for the Azaman customer app. Upload slides, pin signature products, and highlight certificates.
           </p>
         </div>
@@ -222,7 +222,7 @@ export default function Showcase() {
           variant="secondary"
           size="sm"
           onClick={() => setShowPhonePreview(!showPhonePreview)}
-          className={`gap-1.5 ${showPhonePreview ? 'bg-[var(--sn-purple-subtle)] text-[var(--sn-purple)]' : ''}`}
+          className={`gap-1.5 ${showPhonePreview ? 'bg-[var(--az-accent-subtle)] text-[var(--az-accent)]' : ''}`}
         >
           <Smartphone className="w-4 h-4" />
           {showPhonePreview ? 'Hide Phone Mockup' : 'Show Live Phone Preview'}
@@ -237,20 +237,20 @@ export default function Showcase() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-extrabold flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-[var(--sn-purple)]" /> Full-Bleed Profile Slideshow
+                  <ImageIcon className="w-5 h-5 text-[var(--az-accent)]" /> Full-Bleed Profile Slideshow
                 </h3>
-                <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">High-definition cover slides shown as full bleed on your profile.</p>
+                <p className="text-xs text-[var(--az-text-muted)] mt-0.5">High-definition cover slides shown as full bleed on your profile.</p>
               </div>
-              <Badge color="var(--sn-purple)">{slides.length} Photos</Badge>
+              <Badge color="var(--az-accent)">{slides.length} Photos</Badge>
             </div>
 
             {/* Drag & drop upload area */}
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-[var(--sn-border)] rounded-2xl py-8 px-4 hover:border-[var(--sn-purple)] cursor-pointer transition-all bg-[var(--sn-surface)]">
-              <Upload className="w-8 h-8 text-[var(--sn-text-muted)] mb-2" />
-              <span className="text-sm font-bold text-[var(--sn-purple)]">
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-[var(--az-border)] rounded-2xl py-8 px-4 hover:border-[var(--az-accent)] cursor-pointer transition-all bg-[var(--az-surface)]">
+              <Upload className="w-8 h-8 text-[var(--az-text-muted)] mb-2" />
+              <span className="text-sm font-bold text-[var(--az-accent)]">
                 {uploading ? 'Processing & uploading slide...' : 'Upload Showcase Slide Image'}
               </span>
-              <p className="text-[10px] text-[var(--sn-text-muted)] mt-1">Accepts high-resolution JPG, PNG, WebP up to 5MB.</p>
+              <p className="text-[10px] text-[var(--az-text-muted)] mt-1">Accepts high-resolution JPG, PNG, WebP up to 5MB.</p>
               <input type="file" accept="image/*" className="hidden" onChange={handleUploadSlide} disabled={!canPublish} />
             </label>
 
@@ -266,31 +266,31 @@ export default function Showcase() {
             ) : (
               <div className="space-y-2">
                 {slides.map((slide, idx) => (
-                  <div key={slide.id || idx} className="flex items-center gap-3 p-2.5 rounded-xl border border-[var(--sn-border)] bg-[var(--sn-card)] hover:bg-[var(--sn-hover)] transition-all">
+                  <div key={slide.id || idx} className="flex items-center gap-3 p-2.5 rounded-xl border border-[var(--az-border)] bg-[var(--az-surface)] hover:bg-[var(--az-bg-alt)] transition-all">
                     <img src={slide.mediaUrl} className="w-16 h-12 object-cover rounded-lg" alt="" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold">Slide {idx + 1}</p>
-                      <p className="text-[10px] text-[var(--sn-text-muted)] truncate">{slide.mediaUrl}</p>
+                      <p className="text-[10px] text-[var(--az-text-muted)] truncate">{slide.mediaUrl}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleMoveSlide(idx, -1)}
                         disabled={idx === 0}
-                        className="p-1.5 rounded-lg text-[var(--sn-text-muted)] hover:text-white disabled:opacity-30"
+                        className="p-1.5 rounded-lg text-[var(--az-text-muted)] hover:text-white disabled:opacity-30"
                       >
                         <ArrowUp className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleMoveSlide(idx, 1)}
                         disabled={idx === slides.length - 1}
-                        className="p-1.5 rounded-lg text-[var(--sn-text-muted)] hover:text-white disabled:opacity-30"
+                        className="p-1.5 rounded-lg text-[var(--az-text-muted)] hover:text-white disabled:opacity-30"
                       >
                         <ArrowDown className="w-4 h-4" />
                       </button>
                       {canPublish && (
                         <button
                           onClick={() => handleRemoveSlide(slide.id)}
-                          className="p-1.5 rounded-lg text-[var(--sn-red)] hover:bg-[var(--sn-red)]/10"
+                          className="p-1.5 rounded-lg text-[var(--az-danger)] hover:bg-[var(--az-danger)]/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -306,9 +306,9 @@ export default function Showcase() {
           <Card className="space-y-4">
             <div>
               <h3 className="text-base font-extrabold flex items-center gap-2">
-                <Pin className="w-5 h-5 text-[var(--sn-blue)]" /> Signature Curated Items
+                <Pin className="w-5 h-5 text-[var(--az-info)]" /> Signature Curated Items
               </h3>
-              <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">Pin exclusive rooms, hot menu options, or freight cargo routes to the storefront top-shelf.</p>
+              <p className="text-xs text-[var(--az-text-muted)] mt-0.5">Pin exclusive rooms, hot menu options, or freight cargo routes to the storefront top-shelf.</p>
             </div>
 
             {/* Quick Add Curated Form */}
@@ -329,7 +329,7 @@ export default function Showcase() {
               <select
                 value={pinItemForm.category}
                 onChange={(e) => setPinItemForm(prev => ({ ...prev, category: e.target.value }))}
-                className="px-3 py-2 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] text-sm text-white"
+                className="px-3 py-2 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] text-sm text-white"
               >
                 <option value="Product">Product SKU</option>
                 <option value="Room">Luxury Room</option>
@@ -343,15 +343,15 @@ export default function Showcase() {
             {/* Curated list */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
               {curatedItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--sn-border)] bg-[var(--sn-surface)]">
+                <div key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--az-border)] bg-[var(--az-surface)]">
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-black">{item.name}</span>
-                      <Badge color="var(--sn-blue)" className="text-[9px] px-1 py-0">{item.category}</Badge>
+                      <Badge color="var(--az-info)" className="text-[9px] px-1 py-0">{item.category}</Badge>
                     </div>
-                    <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">${item.price} USDC</p>
+                    <p className="text-xs text-[var(--az-text-muted)] mt-0.5">${item.price} USDC</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-[var(--sn-red)] p-1" onClick={() => handleRemovePinItem(item.id)}>
+                  <Button variant="ghost" size="sm" className="text-[var(--az-danger)] p-1" onClick={() => handleRemovePinItem(item.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -363,9 +363,9 @@ export default function Showcase() {
           <Card className="space-y-4">
             <div>
               <h3 className="text-base font-extrabold flex items-center gap-2">
-                <Award className="w-5 h-5 text-[var(--sn-amber)]" /> Certifications & Trust Highlights
+                <Award className="w-5 h-5 text-[var(--az-warning)]" /> Certifications & Trust Highlights
               </h3>
-              <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">Exhibit Michelin badges, sustainable credentials, or verified transit safety awards.</p>
+              <p className="text-xs text-[var(--az-text-muted)] mt-0.5">Exhibit Michelin badges, sustainable credentials, or verified transit safety awards.</p>
             </div>
 
             {/* Add Highlight */}
@@ -379,7 +379,7 @@ export default function Showcase() {
               <select
                 value={highlightForm.badge}
                 onChange={(e) => setHighlightForm(prev => ({ ...prev, badge: e.target.value }))}
-                className="px-3 py-2 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] text-sm text-white"
+                className="px-3 py-2 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] text-sm text-white"
               >
                 <option value="Award">Trust Award</option>
                 <option value="Certificate">Certificate</option>
@@ -393,11 +393,11 @@ export default function Showcase() {
             {/* Highlights List */}
             <div className="flex flex-wrap gap-2 mt-4">
               {highlights.map((h) => (
-                <div key={h.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--sn-border)] bg-[var(--sn-card)]">
-                  <Award className="w-3.5 h-3.5 text-[var(--sn-amber)]" />
+                <div key={h.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--az-border)] bg-[var(--az-surface)]">
+                  <Award className="w-3.5 h-3.5 text-[var(--az-warning)]" />
                   <span className="text-xs font-bold">{h.title}</span>
-                  <Badge color="var(--sn-amber)" className="text-[9px] px-1 py-0">{h.badge}</Badge>
-                  <button onClick={() => handleRemoveHighlight(h.id)} className="text-[var(--sn-red)] hover:opacity-80 text-xs font-bold pl-1 border-l border-[var(--sn-border)]">
+                  <Badge color="var(--az-warning)" className="text-[9px] px-1 py-0">{h.badge}</Badge>
+                  <button onClick={() => handleRemoveHighlight(h.id)} className="text-[var(--az-danger)] hover:opacity-80 text-xs font-bold pl-1 border-l border-[var(--az-border)]">
                     ✕
                   </button>
                 </div>

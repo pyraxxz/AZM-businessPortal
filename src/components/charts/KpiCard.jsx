@@ -5,7 +5,7 @@ import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 
 export function KpiCard({ label, value, delta, deltaType = 'positive', sparkData, icon: Icon, color = 'var(--az-accent)', loading }) {
   if (loading) {
-    return <div className="rounded-az-lg border border-az-border h-32 animate-pulse bg-az-bg-alt" />;
+    return <div className="rounded-2xl border border-az-border h-32 animate-pulse bg-az-bg-alt" />;
   }
 
   const DeltaIcon = deltaType === 'positive' ? TrendingUp : TrendingDown;
@@ -20,7 +20,7 @@ export function KpiCard({ label, value, delta, deltaType = 'positive', sparkData
   const stringPrefix = typeof value === 'string' ? value.split(/[0-9]/)[0] : '';
 
   return (
-    <div className="bg-az-surface backdrop-blur-glass border border-az-border rounded-az-lg shadow-az-card p-6 flex flex-col justify-between transition-all duration-200">
+    <div className="bg-white border border-az-border rounded-2xl shadow-az-card p-6 flex flex-col justify-between transition-all duration-200">
       <div>
         <div className="flex items-start justify-between mb-3">
           <div>
@@ -38,7 +38,7 @@ export function KpiCard({ label, value, delta, deltaType = 'positive', sparkData
             </p>
           </div>
           {Icon && (
-            <div className="w-10 h-10 rounded-az-md flex items-center justify-center flex-shrink-0 bg-az-accent-subtle border border-az-accent-border">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-az-accent-subtle border border-az-accent-border">
               <Icon className="w-5 h-5 text-az-accent" />
             </div>
           )}

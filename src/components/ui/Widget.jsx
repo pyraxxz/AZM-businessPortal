@@ -16,7 +16,7 @@ export function Widget({
   title, 
   subtitle, 
   icon: Icon, 
-  iconColor = 'var(--sn-purple)',
+  iconColor = 'var(--az-accent)',
   actions, 
   children, 
   loading, 
@@ -28,14 +28,14 @@ export function Widget({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-[var(--sn-border)] overflow-hidden flex flex-col',
-        'transition-all duration-200 hover:border-[var(--sn-border)]',
+        'rounded-2xl border border-[var(--az-border)] overflow-hidden flex flex-col',
+        'transition-all duration-200 hover:border-[var(--az-border)]',
         className
       )}
       style={{ background: 'var(--az-card)', minHeight: height }}
     >
       {/* Widget header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--sn-border)]">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--az-border)]">
         <div className="flex items-center gap-2.5 min-w-0">
           {Icon && (
             <div
@@ -46,8 +46,8 @@ export function Widget({
             </div>
           )}
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-[var(--sn-text)] leading-tight truncate">{title}</h3>
-            {subtitle && <p className="text-[11px] text-[var(--sn-text-muted)] mt-0.5 truncate">{subtitle}</p>}
+            <h3 className="text-sm font-bold text-[var(--az-text)] leading-tight truncate">{title}</h3>
+            {subtitle && <p className="text-[11px] text-[var(--az-text-muted)] mt-0.5 truncate">{subtitle}</p>}
           </div>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
@@ -55,7 +55,7 @@ export function Widget({
           {onExpand && (
             <button
               onClick={onExpand}
-              className="p-1.5 rounded-lg hover:bg-[var(--sn-border)] text-[var(--sn-text-muted)] hover:text-[var(--sn-text-muted)] transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[var(--az-border)] text-[var(--az-text-muted)] hover:text-[var(--az-text-muted)] transition-colors"
               title="Expand"
             >
               <Maximize2 className="w-3.5 h-3.5" />
@@ -70,8 +70,8 @@ export function Widget({
           <Skeleton className="h-full min-h-[80px]" />
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-full min-h-[80px] text-center">
-            <p className="text-xs text-[var(--sn-red)] font-medium">{error}</p>
-            <p className="text-[11px] text-[var(--sn-text-muted)] mt-1">Try refreshing the page</p>
+            <p className="text-xs text-[var(--az-danger)] font-medium">{error}</p>
+            <p className="text-[11px] text-[var(--az-text-muted)] mt-1">Try refreshing the page</p>
           </div>
         ) : (
           children
@@ -82,19 +82,19 @@ export function Widget({
 }
 
 /** Widget stat — a single large number with optional trend indicator */
-export function WidgetStat({ value, label, trend, trendValue, color = 'var(--sn-text)' }) {
+export function WidgetStat({ value, label, trend, trendValue, color = 'var(--az-text)' }) {
   return (
     <div className="flex flex-col">
       <span className="text-2xl font-bold az-mono" style={{ color }}>{value}</span>
-      {label && <span className="text-[11px] text-[var(--sn-text-muted)] mt-0.5">{label}</span>}
+      {label && <span className="text-[11px] text-[var(--az-text-muted)] mt-0.5">{label}</span>}
       {trend && (
         <div className="flex items-center gap-1 mt-1.5">
           {trend === 'up' ? (
-            <TrendingUp className="w-3 h-3 text-[var(--sn-purple)]" />
+            <TrendingUp className="w-3 h-3 text-[var(--az-accent)]" />
           ) : (
-            <TrendingDown className="w-3 h-3 text-[var(--sn-red)]" />
+            <TrendingDown className="w-3 h-3 text-[var(--az-danger)]" />
           )}
-          <span className={cn('text-[11px] font-semibold', trend === 'up' ? 'text-[var(--sn-purple)]' : 'text-[var(--sn-red)]')}>
+          <span className={cn('text-[11px] font-semibold', trend === 'up' ? 'text-[var(--az-accent)]' : 'text-[var(--az-danger)]')}>
             {trendValue}
           </span>
         </div>
@@ -108,15 +108,15 @@ export function WidgetRow({ label, value, badge, onClick, color }) {
   return (
     <div
       className={cn(
-        'flex items-center justify-between py-2.5 border-b border-[var(--sn-border)] last:border-0',
+        'flex items-center justify-between py-2.5 border-b border-[var(--az-border)] last:border-0',
         onClick && 'cursor-pointer hover:bg-[var(--az-black)] transition-colors -mx-5 px-5'
       )}
       onClick={onClick}
     >
-      <span className="text-xs text-[var(--sn-text-muted)] font-medium">{label}</span>
+      <span className="text-xs text-[var(--az-text-muted)] font-medium">{label}</span>
       <div className="flex items-center gap-2">
         {badge}
-        <span className="text-xs font-bold text-[var(--sn-text)] az-mono" style={color ? { color } : undefined}>{value}</span>
+        <span className="text-xs font-bold text-[var(--az-text)] az-mono" style={color ? { color } : undefined}>{value}</span>
       </div>
     </div>
   );

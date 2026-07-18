@@ -273,17 +273,17 @@ export default function Payroll() {
   const renderStatusBadge = (status) => {
     switch (status) {
       case 'PENDING':
-        return <Badge color="var(--sn-amber)">Pending</Badge>;
+        return <Badge color="var(--az-warning)">Pending</Badge>;
       case 'PROCESSING':
-        return <Badge color="var(--sn-blue)">Processing</Badge>;
+        return <Badge color="var(--az-info)">Processing</Badge>;
       case 'READY':
-        return <Badge color="var(--sn-purple)">Ready</Badge>;
+        return <Badge color="var(--az-accent)">Ready</Badge>;
       case 'PAID':
-        return <Badge color="var(--sn-green)">Paid</Badge>;
+        return <Badge color="var(--az-success)">Paid</Badge>;
       case 'FAILED':
-        return <Badge color="var(--sn-red)">Failed</Badge>;
+        return <Badge color="var(--az-danger)">Failed</Badge>;
       default:
-        return <Badge color="var(--sn-text-muted)">{status}</Badge>;
+        return <Badge color="var(--az-text-muted)">{status}</Badge>;
     }
   };
 
@@ -291,9 +291,9 @@ export default function Payroll() {
   if (!canView) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[500px]">
-        <AlertCircle className="w-12 h-12 text-[var(--sn-red)] mb-4 animate-pulse" />
+        <AlertCircle className="w-12 h-12 text-[var(--az-danger)] mb-4 animate-pulse" />
         <h2 className="text-xl font-bold mb-2">Access Denied</h2>
-        <p className="text-[var(--sn-text-muted)] text-center max-w-md">
+        <p className="text-[var(--az-text-muted)] text-center max-w-md">
           You do not have the required permissions (`payroll.view`) to access the payroll management panel.
         </p>
       </div>
@@ -305,22 +305,22 @@ export default function Payroll() {
       {/* Page header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--sn-text)] flex items-center gap-2">
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--az-text)] flex items-center gap-2">
             Payroll &amp; Earned Wage Access
           </h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+          <p className="text-sm text-[var(--az-text-muted)] mt-1">
             Manage your workforce compensation, process monthly disbursements, and administer flexible on-demand wages.
           </p>
         </div>
 
         {/* Tab selection */}
-        <div className="flex bg-[var(--sn-card)] border border-[var(--sn-border)] rounded-xl p-1 shrink-0 self-start md:self-auto">
+        <div className="flex bg-[var(--az-surface)] border border-[var(--az-border)] rounded-xl p-1 shrink-0 self-start md:self-auto">
           <button
             onClick={() => setActiveTab('payroll')}
             className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
               activeTab === 'payroll'
-                ? 'bg-[var(--sn-purple)] text-[var(--az-black)] az-glow-purple'
-                : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'
+                ? 'bg-[var(--az-accent)] text-[var(--az-black)] az-glow-purple'
+                : 'text-[var(--az-text-muted)] hover:text-[var(--az-text)]'
             }`}
           >
             Payroll Dashboard
@@ -329,8 +329,8 @@ export default function Payroll() {
             onClick={() => setActiveTab('ewa')}
             className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
               activeTab === 'ewa'
-                ? 'bg-[var(--sn-purple)] text-[var(--az-black)] az-glow-purple'
-                : 'text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'
+                ? 'bg-[var(--az-accent)] text-[var(--az-black)] az-glow-purple'
+                : 'text-[var(--az-text-muted)] hover:text-[var(--az-text)]'
             }`}
           >
             EWA Management
@@ -342,7 +342,7 @@ export default function Payroll() {
       {activeTab === 'payroll' ? (
         <div className="space-y-6 animate-fade-in">
           {/* Controls row */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[var(--sn-card)] p-4 rounded-2xl border border-[var(--sn-border)]">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[var(--az-surface)] p-4 rounded-2xl border border-[var(--az-border)]">
             <div className="w-full sm:w-64">
               <Select
                 label="Payroll Period"
@@ -377,38 +377,38 @@ export default function Payroll() {
               label="Total Net Wages"
               value={`$${(payrollSummary?.totalNet || 0).toFixed(2)}`}
               icon={Wallet}
-              color="var(--sn-green)"
+              color="var(--az-success)"
               loading={loadingPayroll}
             />
             <StatCard
               label="Total Deductions"
               value={`$${(payrollSummary?.totalDeductions || 0).toFixed(2)}`}
               icon={TrendingUp}
-              color="var(--sn-red)"
+              color="var(--az-danger)"
               loading={loadingPayroll}
             />
             <StatCard
               label="EWA Deductions"
               value={`$${(payrollSummary?.ewaDeductions || 0).toFixed(2)}`}
               icon={ArrowUpCircle}
-              color="var(--sn-amber)"
+              color="var(--az-warning)"
               loading={loadingPayroll}
             />
             <StatCard
               label="Employee Count"
               value={payrollSummary?.count || 0}
               icon={Clock}
-              color="var(--sn-blue)"
+              color="var(--az-info)"
               loading={loadingPayroll}
             />
           </div>
 
           {/* Payroll List Card */}
           <Card className="overflow-hidden">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 gap-4 border-b border-[var(--sn-border)] mb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 gap-4 border-b border-[var(--az-border)] mb-4">
               <div>
                 <h3 className="text-lg font-bold">Payroll Registers</h3>
-                <p className="text-xs text-[var(--sn-text-muted)] mt-1">
+                <p className="text-xs text-[var(--az-text-muted)] mt-1">
                   Individual details, rates, tax deductions, and disbursements for {currentPeriod}
                 </p>
               </div>
@@ -418,7 +418,7 @@ export default function Payroll() {
                   variant="primary"
                   onClick={handleDisburseAll}
                   loading={disbursingAll}
-                  className="w-full sm:w-auto bg-[var(--sn-green)] text-black"
+                  className="w-full sm:w-auto bg-[var(--az-success)] text-black"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   Disburse All Ready Payments
@@ -443,7 +443,7 @@ export default function Payroll() {
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse text-left text-sm">
                   <thead>
-                    <tr className="border-b border-[var(--sn-border)] text-[var(--sn-text-muted)] uppercase text-xs tracking-wider font-semibold">
+                    <tr className="border-b border-[var(--az-border)] text-[var(--az-text-muted)] uppercase text-xs tracking-wider font-semibold">
                       <th className="py-3 px-4">Employee</th>
                       <th className="py-3 px-4">Pay Type</th>
                       <th className="py-3 px-4 text-right">Gross Amount</th>
@@ -462,30 +462,30 @@ export default function Payroll() {
                       return (
                         <tr
                           key={record.id}
-                          className="border-b border-[var(--sn-border)] last:border-0 hover:bg-[var(--sn-card)] transition-colors"
+                          className="border-b border-[var(--az-border)] last:border-0 hover:bg-[var(--az-surface)] transition-colors"
                         >
                           <td className="py-4 px-4 flex items-center gap-3">
                             <Avatar src={empAvatar} name={empName} size="sm" />
                             <div>
-                              <p className="font-semibold text-[var(--sn-text)]">{empName}</p>
-                              <p className="text-xs text-[var(--sn-text-muted)]">{empRole}</p>
+                              <p className="font-semibold text-[var(--az-text)]">{empName}</p>
+                              <p className="text-xs text-[var(--az-text-muted)]">{empRole}</p>
                             </div>
                           </td>
                           <td className="py-4 px-4">
-                            <Badge color="var(--sn-purple)">{record.payrollType || 'SALARY'}</Badge>
+                            <Badge color="var(--az-accent)">{record.payrollType || 'SALARY'}</Badge>
                           </td>
                           <td className="py-4 px-4 text-right font-medium az-mono">
                             ${(record.grossAmount || 0).toFixed(2)}
                           </td>
-                          <td className="py-4 px-4 text-right text-[var(--sn-red)] font-medium az-mono">
+                          <td className="py-4 px-4 text-right text-[var(--az-danger)] font-medium az-mono">
                             -${((record.deductionAmount || 0) + (record.ewaDeduction || 0)).toFixed(2)}
                             {record.ewaDeduction > 0 && (
-                              <span className="block text-[10px] text-[var(--sn-amber)]">
+                              <span className="block text-[10px] text-[var(--az-warning)]">
                                 (inc. ${(record.ewaDeduction || 0).toFixed(2)} EWA)
                               </span>
                             )}
                           </td>
-                          <td className="py-4 px-4 text-right font-semibold text-[var(--sn-green)] az-mono">
+                          <td className="py-4 px-4 text-right font-semibold text-[var(--az-success)] az-mono">
                             ${(record.netAmount || 0).toFixed(2)}
                           </td>
                           <td className="py-4 px-4 text-center">
@@ -508,7 +508,7 @@ export default function Payroll() {
                                 size="sm"
                                 onClick={() => handleDisburseSingle(record.id)}
                                 loading={disbursingId === record.id}
-                                className="bg-[var(--sn-green)] text-black"
+                                className="bg-[var(--az-success)] text-black"
                               >
                                 Disburse
                               </Button>
@@ -531,30 +531,30 @@ export default function Payroll() {
               label="Total Accrued Across Employees"
               value={`$${(ewaSummary?.totalAccrued || 0).toFixed(2)}`}
               icon={TrendingUp}
-              color="var(--sn-green)"
+              color="var(--az-success)"
               loading={loadingEwa}
             />
             <StatCard
               label="Total Withdrawn Early (EWA)"
               value={`$${(ewaSummary?.totalWithdrawn || 0).toFixed(2)}`}
               icon={ArrowUpCircle}
-              color="var(--sn-purple)"
+              color="var(--az-accent)"
               loading={loadingEwa}
             />
             <StatCard
               label="Pending Request Actions"
               value={ewaSummary?.pendingRequests || 0}
               icon={Clock}
-              color="var(--sn-amber)"
+              color="var(--az-warning)"
               loading={loadingEwa}
             />
           </div>
 
           {/* EWA Employee List Card */}
           <Card>
-            <div className="pb-6 border-b border-[var(--sn-border)] mb-4">
+            <div className="pb-6 border-b border-[var(--az-border)] mb-4">
               <h3 className="text-lg font-bold">Earned Wage Access (EWA) Registry</h3>
-              <p className="text-xs text-[var(--sn-text-muted)] mt-1">
+              <p className="text-xs text-[var(--az-text-muted)] mt-1">
                 Real-time tracking of employee accrued wages, early withdrawals, and eligibility limits.
               </p>
             </div>
@@ -575,7 +575,7 @@ export default function Payroll() {
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse text-left text-sm">
                   <thead>
-                    <tr className="border-b border-[var(--sn-border)] text-[var(--sn-text-muted)] uppercase text-xs tracking-wider font-semibold">
+                    <tr className="border-b border-[var(--az-border)] text-[var(--az-text-muted)] uppercase text-xs tracking-wider font-semibold">
                       <th className="py-3 px-4">Employee</th>
                       <th className="py-3 px-4 text-right">Accrued Wages</th>
                       <th className="py-3 px-4 text-right">Withdrawn Early</th>
@@ -595,26 +595,26 @@ export default function Payroll() {
                       return (
                         <tr
                           key={emp.id}
-                          className="border-b border-[var(--sn-border)] last:border-0 hover:bg-[var(--sn-card)] transition-colors"
+                          className="border-b border-[var(--az-border)] last:border-0 hover:bg-[var(--az-surface)] transition-colors"
                         >
                           <td className="py-4 px-4 flex items-center gap-3">
                             <Avatar src={empAvatar} name={empName} size="sm" />
                             <div>
-                              <p className="font-semibold text-[var(--sn-text)]">{empName}</p>
-                              <p className="text-xs text-[var(--sn-text-muted)]">{empRole}</p>
+                              <p className="font-semibold text-[var(--az-text)]">{empName}</p>
+                              <p className="text-xs text-[var(--az-text-muted)]">{empRole}</p>
                             </div>
                           </td>
-                          <td className="py-4 px-4 text-right font-medium text-[var(--sn-green)] az-mono">
+                          <td className="py-4 px-4 text-right font-medium text-[var(--az-success)] az-mono">
                             ${accrued.toFixed(2)}
                           </td>
-                          <td className="py-4 px-4 text-right text-[var(--sn-amber)] font-medium az-mono">
+                          <td className="py-4 px-4 text-right text-[var(--az-warning)] font-medium az-mono">
                             ${withdrawn.toFixed(2)}
                           </td>
                           <td className="py-4 px-4 text-center">
                             {eligibility ? (
-                              <Badge color="var(--sn-green)">Eligible</Badge>
+                              <Badge color="var(--az-success)">Eligible</Badge>
                             ) : (
-                              <Badge color="var(--sn-red)">Ineligible</Badge>
+                              <Badge color="var(--az-danger)">Ineligible</Badge>
                             )}
                           </td>
                           <td className="py-4 px-4 text-right">
@@ -649,17 +649,17 @@ export default function Payroll() {
         {selectedRecord && (
           <div className="space-y-6">
             {/* Header info */}
-            <div className="flex items-center gap-3 pb-4 border-b border-[var(--sn-border)]">
+            <div className="flex items-center gap-3 pb-4 border-b border-[var(--az-border)]">
               <Avatar
                 src={selectedRecord.employee?.user?.avatarUrl}
                 name={selectedRecord.employee?.user?.fullName || 'Employee'}
                 size="md"
               />
               <div>
-                <h4 className="font-bold text-[var(--sn-text)]">
+                <h4 className="font-bold text-[var(--az-text)]">
                   {selectedRecord.employee?.user?.fullName}
                 </h4>
-                <p className="text-xs text-[var(--sn-text-muted)]">
+                <p className="text-xs text-[var(--az-text-muted)]">
                   {selectedRecord.employee?.title || selectedRecord.employee?.role || 'Staff'} • {selectedRecord.period}
                 </p>
               </div>
@@ -668,57 +668,57 @@ export default function Payroll() {
             {/* Metrics Breakdown Grid */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[var(--az-black)] p-3 rounded-xl border border-[var(--sn-border)]">
-                  <p className="text-xs text-[var(--sn-text-muted)] font-semibold uppercase tracking-wider mb-1">Base Wages</p>
-                  <p className="text-lg font-bold text-[var(--sn-text)] az-mono">
+                <div className="bg-[var(--az-black)] p-3 rounded-xl border border-[var(--az-border)]">
+                  <p className="text-xs text-[var(--az-text-muted)] font-semibold uppercase tracking-wider mb-1">Base Wages</p>
+                  <p className="text-lg font-bold text-[var(--az-text)] az-mono">
                     ${(selectedRecord.baseAmount || 0).toFixed(2)}
                   </p>
                 </div>
-                <div className="bg-[var(--az-black)] p-3 rounded-xl border border-[var(--sn-border)]">
-                  <p className="text-xs text-[var(--sn-text-muted)] font-semibold uppercase tracking-wider mb-1">Type</p>
-                  <p className="text-sm font-bold text-[var(--sn-purple)] mt-1">
+                <div className="bg-[var(--az-black)] p-3 rounded-xl border border-[var(--az-border)]">
+                  <p className="text-xs text-[var(--az-text-muted)] font-semibold uppercase tracking-wider mb-1">Type</p>
+                  <p className="text-sm font-bold text-[var(--az-accent)] mt-1">
                     {selectedRecord.payrollType || 'SALARY'}
                   </p>
                 </div>
               </div>
 
               {/* Hours section (useful if hourly) */}
-              <div className="grid grid-cols-2 gap-4 border-t border-[var(--sn-border)] pt-4">
+              <div className="grid grid-cols-2 gap-4 border-t border-[var(--az-border)] pt-4">
                 <div>
-                  <p className="text-xs text-[var(--sn-text-muted)] mb-1">Regular Hours</p>
-                  <p className="text-sm font-semibold text-[var(--sn-text)] az-mono">
+                  <p className="text-xs text-[var(--az-text-muted)] mb-1">Regular Hours</p>
+                  <p className="text-sm font-semibold text-[var(--az-text)] az-mono">
                     {(selectedRecord.totalHours || 0).toFixed(1)} hrs
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-[var(--sn-text-muted)] mb-1">Overtime Hours</p>
-                  <p className="text-sm font-semibold text-[var(--sn-text)] az-mono">
+                  <p className="text-xs text-[var(--az-text-muted)] mb-1">Overtime Hours</p>
+                  <p className="text-sm font-semibold text-[var(--az-text)] az-mono">
                     {(selectedRecord.overtimeHours || 0).toFixed(1)} hrs
                   </p>
                 </div>
               </div>
 
               {/* Earnings Table */}
-              <div className="border-t border-[var(--sn-border)] pt-4">
-                <h5 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider mb-3">Earnings</h5>
+              <div className="border-t border-[var(--az-border)] pt-4">
+                <h5 className="text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider mb-3">Earnings</h5>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[var(--sn-text-muted)]">Regular Pay</span>
+                    <span className="text-[var(--az-text-muted)]">Regular Pay</span>
                     <span className="font-semibold az-mono">${(selectedRecord.baseAmount || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[var(--sn-text-muted)]">Overtime Wages</span>
+                    <span className="text-[var(--az-text-muted)]">Overtime Wages</span>
                     <span className="font-semibold az-mono">${(selectedRecord.overtimeAmount || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[var(--sn-text-muted)]">Bonus Payments</span>
-                    <span className="font-semibold text-[var(--sn-green)] az-mono">+${(selectedRecord.bonusAmount || 0).toFixed(2)}</span>
+                    <span className="text-[var(--az-text-muted)]">Bonus Payments</span>
+                    <span className="font-semibold text-[var(--az-success)] az-mono">+${(selectedRecord.bonusAmount || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[var(--sn-text-muted)]">Tips &amp; Gratuities</span>
-                    <span className="font-semibold text-[var(--sn-green)] az-mono">+${(selectedRecord.tipsAmount || 0).toFixed(2)}</span>
+                    <span className="text-[var(--az-text-muted)]">Tips &amp; Gratuities</span>
+                    <span className="font-semibold text-[var(--az-success)] az-mono">+${(selectedRecord.tipsAmount || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between border-t border-[var(--sn-border)] pt-2 font-bold text-base">
+                  <div className="flex justify-between border-t border-[var(--az-border)] pt-2 font-bold text-base">
                     <span>Gross Earnings</span>
                     <span className="az-mono">${(selectedRecord.grossAmount || 0).toFixed(2)}</span>
                   </div>
@@ -726,24 +726,24 @@ export default function Payroll() {
               </div>
 
               {/* Deductions & Taxes Table */}
-              <div className="border-t border-[var(--sn-border)] pt-4">
-                <h5 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider mb-3">Deductions &amp; Taxes</h5>
+              <div className="border-t border-[var(--az-border)] pt-4">
+                <h5 className="text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider mb-3">Deductions &amp; Taxes</h5>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[var(--sn-text-muted)]">Tax Withholdings</span>
-                    <span className="font-semibold text-[var(--sn-red)] az-mono">-${(selectedRecord.taxAmount || 0).toFixed(2)}</span>
+                    <span className="text-[var(--az-text-muted)]">Tax Withholdings</span>
+                    <span className="font-semibold text-[var(--az-danger)] az-mono">-${(selectedRecord.taxAmount || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[var(--sn-text-muted)]">Voluntary Deductions</span>
-                    <span className="font-semibold text-[var(--sn-red)] az-mono">-${(selectedRecord.deductionAmount || 0).toFixed(2)}</span>
+                    <span className="text-[var(--az-text-muted)]">Voluntary Deductions</span>
+                    <span className="font-semibold text-[var(--az-danger)] az-mono">-${(selectedRecord.deductionAmount || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-[var(--sn-amber)] font-medium">
+                  <div className="flex justify-between text-[var(--az-warning)] font-medium">
                     <span>Earned Wage Access (EWA)</span>
                     <span className="az-mono">-${(selectedRecord.ewaDeduction || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between border-t border-[var(--sn-border)] pt-2 font-bold text-base">
+                  <div className="flex justify-between border-t border-[var(--az-border)] pt-2 font-bold text-base">
                     <span>Total Deductions</span>
-                    <span className="text-[var(--sn-red)] az-mono">
+                    <span className="text-[var(--az-danger)] az-mono">
                       -${((selectedRecord.deductionAmount || 0) + (selectedRecord.taxAmount || 0) + (selectedRecord.ewaDeduction || 0)).toFixed(2)}
                     </span>
                   </div>
@@ -751,30 +751,30 @@ export default function Payroll() {
               </div>
 
               {/* Final Net Pay */}
-              <div className="border-t border-[var(--sn-border)] pt-4 flex justify-between items-center bg-[var(--sn-card)] p-4 rounded-xl border border-[var(--sn-border)]">
+              <div className="border-t border-[var(--az-border)] pt-4 flex justify-between items-center bg-[var(--az-surface)] p-4 rounded-xl border border-[var(--az-border)]">
                 <div>
-                  <p className="text-xs text-[var(--sn-text-muted)] font-semibold uppercase tracking-wider">Net Disbursed Pay</p>
-                  <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">Final amount paid to employee</p>
+                  <p className="text-xs text-[var(--az-text-muted)] font-semibold uppercase tracking-wider">Net Disbursed Pay</p>
+                  <p className="text-xs text-[var(--az-text-muted)] mt-0.5">Final amount paid to employee</p>
                 </div>
-                <p className="text-2xl font-black text-[var(--sn-green)] az-mono">
+                <p className="text-2xl font-black text-[var(--az-success)] az-mono">
                   ${(selectedRecord.netAmount || 0).toFixed(2)}
                 </p>
               </div>
 
               {/* Status details */}
               {selectedRecord.paidAt && (
-                <div className="text-xs text-[var(--sn-text-muted)] text-right">
+                <div className="text-xs text-[var(--az-text-muted)] text-right">
                   Paid on {new Date(selectedRecord.paidAt).toLocaleDateString()}
                 </div>
               )}
               {selectedRecord.status === 'FAILED' && selectedRecord.failureReason && (
-                <div className="p-3 bg-[var(--sn-red)]1a rounded-lg border border-[var(--sn-red)]30 text-xs text-[var(--sn-red)]">
+                <div className="p-3 bg-[var(--az-danger)]1a rounded-lg border border-[var(--az-danger)]30 text-xs text-[var(--az-danger)]">
                   <strong>Disbursement Failed:</strong> {selectedRecord.failureReason}
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--sn-border)]">
+            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--az-border)]">
               <Button
                 variant="secondary"
                 onClick={() => {
@@ -803,17 +803,17 @@ export default function Payroll() {
         {selectedEmployee && (
           <div className="space-y-6">
             {/* Header profile */}
-            <div className="flex items-center gap-3 pb-4 border-b border-[var(--sn-border)]">
+            <div className="flex items-center gap-3 pb-4 border-b border-[var(--az-border)]">
               <Avatar
                 src={selectedEmployee.user?.avatarUrl}
                 name={selectedEmployee.user?.fullName || 'Employee'}
                 size="md"
               />
               <div>
-                <h4 className="font-bold text-[var(--sn-text)]">
+                <h4 className="font-bold text-[var(--az-text)]">
                   {selectedEmployee.user?.fullName}
                 </h4>
-                <p className="text-xs text-[var(--sn-text-muted)]">
+                <p className="text-xs text-[var(--az-text-muted)]">
                   {selectedEmployee.title || selectedEmployee.role || 'Staff'}
                 </p>
               </div>
@@ -827,26 +827,26 @@ export default function Payroll() {
             ) : (
               <div className="space-y-6">
                 {/* Eligibility status */}
-                <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)]">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)]">
                   <div>
-                    <span className="text-xs text-[var(--sn-text-muted)] uppercase tracking-wider font-semibold">Eligibility Limit</span>
-                    <p className="text-2xl font-bold text-[var(--sn-text)] mt-1 az-mono">
+                    <span className="text-xs text-[var(--az-text-muted)] uppercase tracking-wider font-semibold">Eligibility Limit</span>
+                    <p className="text-2xl font-bold text-[var(--az-text)] mt-1 az-mono">
                       ${(employeeEwaEligibility?.accruedWages || 0).toFixed(2)}
                     </p>
-                    <p className="text-xs text-[var(--sn-text-muted)] mt-1">Total earned up to current shift</p>
+                    <p className="text-xs text-[var(--az-text-muted)] mt-1">Total earned up to current shift</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs text-[var(--sn-text-muted)] uppercase tracking-wider font-semibold">Available early</span>
-                    <p className="text-2xl font-bold text-[var(--sn-green)] mt-1 az-mono">
+                    <span className="text-xs text-[var(--az-text-muted)] uppercase tracking-wider font-semibold">Available early</span>
+                    <p className="text-2xl font-bold text-[var(--az-success)] mt-1 az-mono">
                       ${(employeeEwaEligibility?.maxWithdrawal || 0).toFixed(2)}
                     </p>
-                    <p className="text-xs text-[var(--sn-text-muted)] mt-1">Limit minus current withdrawals</p>
+                    <p className="text-xs text-[var(--az-text-muted)] mt-1">Limit minus current withdrawals</p>
                   </div>
                 </div>
 
                 {/* Progress bar visualizing maximum early withdrawal allocation */}
                 <div>
-                  <div className="flex justify-between text-xs font-semibold text-[var(--sn-text-muted)] mb-1.5 uppercase tracking-wider">
+                  <div className="flex justify-between text-xs font-semibold text-[var(--az-text-muted)] mb-1.5 uppercase tracking-wider">
                     <span>Early Access Allocation Usage</span>
                     <span className="az-mono">
                       ${((employeeEwaEligibility?.accruedWages || 0) - (employeeEwaEligibility?.maxWithdrawal || 0)).toFixed(2)} / ${(employeeEwaEligibility?.accruedWages || 0).toFixed(2)}
@@ -855,17 +855,17 @@ export default function Payroll() {
                   <Progress
                     value={(employeeEwaEligibility?.accruedWages || 0) - (employeeEwaEligibility?.maxWithdrawal || 0)}
                     max={employeeEwaEligibility?.accruedWages || 100}
-                    color="var(--sn-purple)"
+                    color="var(--az-accent)"
                   />
                 </div>
 
                 {/* Eligibility criteria badge info */}
-                <div className="flex items-center justify-between border-t border-b border-[var(--sn-border)] py-3">
+                <div className="flex items-center justify-between border-t border-b border-[var(--az-border)] py-3">
                   <span className="text-sm font-semibold">Current EWA Status</span>
                   {employeeEwaEligibility?.eligible ? (
-                    <Badge color="var(--sn-green)">Eligible for Withdrawal</Badge>
+                    <Badge color="var(--az-success)">Eligible for Withdrawal</Badge>
                   ) : (
-                    <Badge color="var(--sn-red)">Locked / Ineligible</Badge>
+                    <Badge color="var(--az-danger)">Locked / Ineligible</Badge>
                   )}
                 </div>
 
@@ -885,7 +885,7 @@ export default function Payroll() {
                         required
                         className="pr-16 az-mono"
                       />
-                      <div className="absolute right-4 bottom-3 text-sm font-bold text-[var(--sn-text-muted)]">
+                      <div className="absolute right-4 bottom-3 text-sm font-bold text-[var(--az-text-muted)]">
                         USDC
                       </div>
                     </div>
@@ -895,7 +895,7 @@ export default function Payroll() {
                         type="submit"
                         variant="primary"
                         loading={processingWithdrawal}
-                        className="w-full bg-[var(--sn-green)] text-black"
+                        className="w-full bg-[var(--az-success)] text-black"
                       >
                         <Zap className="w-4 h-4" />
                         Disburse Early Wage Advance
@@ -905,24 +905,24 @@ export default function Payroll() {
                 )}
 
                 {/* Withdrawal History List */}
-                <div className="border-t border-[var(--sn-border)] pt-4">
-                  <h5 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider mb-3">Withdrawal History</h5>
+                <div className="border-t border-[var(--az-border)] pt-4">
+                  <h5 className="text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider mb-3">Withdrawal History</h5>
                   {employeeEwaHistory.length === 0 ? (
-                    <p className="text-xs text-[var(--sn-text-muted)] text-center py-4">No early wage withdrawals processed this cycle.</p>
+                    <p className="text-xs text-[var(--az-text-muted)] text-center py-4">No early wage withdrawals processed this cycle.</p>
                   ) : (
                     <div className="space-y-2.5 max-h-40 overflow-y-auto">
                       {employeeEwaHistory.map((w, idx) => (
                         <div
                           key={w.id || idx}
-                          className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--sn-card)] border border-[var(--sn-border)] text-xs"
+                          className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--az-surface)] border border-[var(--az-border)] text-xs"
                         >
                           <div>
-                            <p className="font-semibold text-[var(--sn-text)] az-mono">${(w.amount || 0).toFixed(2)} USDC</p>
-                            <p className="text-[10px] text-[var(--sn-text-muted)]">
+                            <p className="font-semibold text-[var(--az-text)] az-mono">${(w.amount || 0).toFixed(2)} USDC</p>
+                            <p className="text-[10px] text-[var(--az-text-muted)]">
                               {w.timestamp ? new Date(w.timestamp).toLocaleString() : 'Recent withdrawal'}
                             </p>
                           </div>
-                          <Badge color="var(--sn-green)">Processed</Badge>
+                          <Badge color="var(--az-success)">Processed</Badge>
                         </div>
                       ))}
                     </div>
@@ -931,7 +931,7 @@ export default function Payroll() {
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--sn-border)]">
+            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--az-border)]">
               <Button
                 variant="secondary"
                 onClick={() => {

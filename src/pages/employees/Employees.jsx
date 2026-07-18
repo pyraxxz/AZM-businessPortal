@@ -10,34 +10,63 @@ import {
   Modal,
   Empty,
   Skeleton,
-  Avatar
+  Avatar,
+  DropdownMenu,
+  Tooltip,
+  Switch,
+  StatCard,
+  Textarea
 } from '@/components/ui';
-import { GlassPanel } from '@/components/ui/GlassPanel';
 import { useToast } from '@/components/ui/Toast';
 import {
   Users,
   UserPlus,
   Search,
+  MoreVertical,
+  Edit2,
+  Trash2,
   Mail,
   Phone,
+  Star,
   Clock,
   Calendar,
   DollarSign,
   Ban,
   CheckCircle2,
-  Filter,
-  Grid,
-  List,
-  Download,
-  Building,
-  Shield
+  Filter
 } from 'lucide-react';
 
+const ROLES = [
+  { value: 'OWNER', label: 'Owner' },
+  { value: 'MANAGER', label: 'Manager' },
+  { value: 'SUPERVISOR', label: 'Supervisor' },
+  { value: 'STAFF', label: 'Staff' },
+  { value: 'TRAINEE', label: 'Trainee' },
+];
+
+const STATUSES = [
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'SUSPENDED', label: 'Suspended' },
+  { value: 'TERMINATED', label: 'Terminated' },
+];
+
+const PAYROLL_TYPES = [
+  { value: 'SALARY', label: 'Salary' },
+  { value: 'HOURLY', label: 'Hourly' },
+];
+
 const STATUS_COLORS = {
-  ACTIVE: '#6C4FD1',
-  SUSPENDED: '#F59E0B',
-  TERMINATED: '#EF4444',
+  ACTIVE: 'var(--az-accent)',
+  SUSPENDED: 'var(--az-warning)',
+  TERMINATED: 'var(--az-danger)',
 };
+
+const AVAILABLE_PERMISSIONS = [
+  { value: 'employees.view', label: 'View Employees' },
+  { value: 'employees.create', label: 'Add Employees' },
+  { value: 'employees.manage', label: 'Manage Employees' },
+  { value: 'employees.permissions', label: 'Update Permissions' },
+];
 
 export default function Employees() {
   const { toast } = useToast();
@@ -46,20 +75,21 @@ export default function Employees() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Search, view & filter state
+  // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
-  const [departmentFilter, setDepartmentFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [viewMode, setViewMode] = useState('grid'); // grid or list
 
-  // Profile side-drawer / modal details
+  // Modals
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isPermsOpen, setIsPermsOpen] = useState(false);
+  const [isSelectedOpen, setIsSelectedOpen] = useState(false);
+
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Invite member state
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({
+  // Form States
+  const [addForm, setAddForm] = useState({
     azmId: '',
     role: 'STAFF',
     title: '',
@@ -70,6 +100,19 @@ export default function Employees() {
     paymentPreference: 'USDC',
   });
 
+  const [editForm, setEditForm] = useState({
+    role: 'STAFF',
+    title: '',
+    department: '',
+    payrollType: 'HOURLY',
+    salaryAmount: '',
+    hourlyRate: '',
+    paymentPreference: 'USDC',
+  });
+
+  const [permissionsForm, setPermissionsForm] = useState([]);
+
+  // Fetch employees
   const fetchEmployees = async () => {
     try {
       setLoading(true);
@@ -86,27 +129,48 @@ export default function Employees() {
     fetchEmployees();
   }, []);
 
-  const handleInviteSubmit = async () => {
+  // Filtered employees for local display (search + dropdown filters)
+  const filteredEmployees = employees.filter((emp) => {
+    const name = emp.user?.fullName || '';
+    const email = emp.user?.email || '';
+    const matchesSearch =
+      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      email.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesRole = roleFilter === 'ALL' || emp.role === roleFilter;
+    const matchesStatus = statusFilter === 'ALL' || emp.status === statusFilter;
+
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
+  // Calculate Stat Cards
+  const totalEmployees = employees.length;
+  const activeCount = employees.filter((e) => e.status === 'ACTIVE').length;
+  const suspendedCount = employees.filter((e) => e.status === 'SUSPENDED').length;
+  const avgRating =
+    employees.length > 0
+      ? employees.reduce((sum, e) => sum + (e.rating || 0), 0) / employees.length
+      : 0;
+
+  // Add Employee Submission
+  const handleAddEmployee = async () => {
     try {
-      if (!inviteForm.azmId) {
-        toast.error('Azaman ID is required');
-        return;
-      }
       const payload = {
-        azmId: inviteForm.azmId,
-        role: inviteForm.role,
-        title: inviteForm.title,
-        department: inviteForm.department,
-        payrollType: inviteForm.payrollType,
-        salaryAmount: inviteForm.payrollType === 'SALARY' ? parseFloat(inviteForm.salaryAmount || 0) : undefined,
-        hourlyRate: inviteForm.payrollType === 'HOURLY' ? parseFloat(inviteForm.hourlyRate || 0) : undefined,
-        paymentPreference: inviteForm.paymentPreference,
+        azmId: addForm.azmId,
+        role: addForm.role,
+        title: addForm.title,
+        department: addForm.department,
+        payrollType: addForm.payrollType,
+        salaryAmount: addForm.payrollType === 'SALARY' ? parseFloat(addForm.salaryAmount || 0) : undefined,
+        hourlyRate: addForm.payrollType === 'HOURLY' ? parseFloat(addForm.hourlyRate || 0) : undefined,
+        paymentPreference: addForm.paymentPreference,
       };
 
       await employeeApi.create(payload);
-      toast.success('Member invited successfully');
-      setIsInviteOpen(false);
-      setInviteForm({
+      toast.success('Employee added successfully');
+      setIsAddOpen(false);
+      // Reset form
+      setAddForm({
         azmId: '',
         role: 'STAFF',
         title: '',
@@ -118,490 +182,613 @@ export default function Employees() {
       });
       fetchEmployees();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to invite team member');
+      toast.error(err.response?.data?.message || 'Failed to add employee');
     }
   };
 
-  const handleExportRoster = () => {
-    toast.success('Roster exported successfully as CSV (UI simulation)');
+  // Edit Employee Submission
+  const handleEditEmployee = async () => {
+    try {
+      const payload = {
+        role: editForm.role,
+        title: editForm.title,
+        department: editForm.department,
+        payrollType: editForm.payrollType,
+        salaryAmount: editForm.payrollType === 'SALARY' ? parseFloat(editForm.salaryAmount || 0) : undefined,
+        hourlyRate: editForm.payrollType === 'HOURLY' ? parseFloat(editForm.hourlyRate || 0) : undefined,
+        paymentPreference: editForm.paymentPreference,
+      };
+
+      await employeeApi.update(selectedEmployee.id, payload);
+      toast.success('Employee updated successfully');
+      setIsEditOpen(false);
+      if (isSelectedOpen) {
+        // Update selected view modal too
+        setSelectedEmployee((prev) => ({ ...prev, ...payload }));
+      }
+      fetchEmployees();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update employee');
+    }
   };
 
-  // Filter staff locally
-  const filteredEmployees = employees.filter((emp) => {
-    const name = emp.user?.fullName || '';
-    const email = emp.user?.email || '';
-    const matchesSearch =
-      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesRole = roleFilter === 'ALL' || emp.role === roleFilter;
-    const matchesDept = departmentFilter === 'ALL' || emp.department === departmentFilter;
-    const matchesStatus = statusFilter === 'ALL' || emp.status === statusFilter;
-
-    return matchesSearch && matchesRole && matchesDept && matchesStatus;
-  });
-
-  // Departments list extracted dynamically
-  const departments = Array.from(new Set(employees.map(e => e.department).filter(Boolean)));
-
-  // KPI Calculations
-  const totalCount = employees.length;
-  const activeCount = employees.filter(e => e.status === 'ACTIVE').length;
-  const onLeaveCount = employees.filter(e => e.status === 'SUSPENDED').length;
-  const deptsCount = departments.length;
-
-  // Helper to color initials beautifully
-  const getInitialsColor = (name) => {
-    if (!name) return '#6C4FD1';
-    const colors = ['#6C4FD1', '#10B981', '#3B82F6', '#EC4899', '#F59E0B', '#8B5CF6'];
-    const charCodeSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return colors[charCodeSum % colors.length];
+  // Permissions Submission
+  const handleUpdatePermissions = async () => {
+    try {
+      await employeeApi.updatePermissions(selectedEmployee.id, permissionsForm);
+      toast.success('Permissions updated successfully');
+      setIsPermsOpen(false);
+      fetchEmployees();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update permissions');
+    }
   };
 
-  const getInitials = (name) => {
-    if (!name) return '?';
-    return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  // Terminate Employee Action
+  const handleTerminateEmployee = async (id) => {
+    try {
+      await employeeApi.remove(id);
+      toast.success('Employee terminated successfully');
+      if (isSelectedOpen && selectedEmployee?.id === id) {
+        setIsSelectedOpen(false);
+      }
+      fetchEmployees();
+    } catch (err) {
+      toast.error('Failed to terminate employee');
+    }
+  };
+
+  // Suspend/Reactivate status toggle
+  const handleToggleStatus = async (emp) => {
+    try {
+      const nextStatus = emp.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+      await employeeApi.update(emp.id, { status: nextStatus });
+      toast.success(`Employee ${nextStatus === 'ACTIVE' ? 'reactivated' : 'suspended'}`);
+      fetchEmployees();
+    } catch (err) {
+      toast.error('Failed to update employee status');
+    }
+  };
+
+  // Set up forms for selected user
+  const openEditModal = (emp) => {
+    setSelectedEmployee(emp);
+    setEditForm({
+      role: emp.role || 'STAFF',
+      title: emp.title || '',
+      department: emp.department || '',
+      payrollType: emp.payrollType || 'HOURLY',
+      salaryAmount: emp.salaryAmount || '',
+      hourlyRate: emp.hourlyRate || '',
+      paymentPreference: emp.paymentPreference || 'USDC',
+    });
+    setIsEditOpen(true);
+  };
+
+  const openPermissionsModal = (emp) => {
+    setSelectedEmployee(emp);
+    setPermissionsForm(emp.permissions || []);
+    setIsPermsOpen(true);
+  };
+
+  const togglePermission = (perm) => {
+    setPermissionsForm((prev) =>
+      prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm]
+    );
   };
 
   const canCreate = hasPermission('employees.create');
+  const canManage = hasPermission('employees.manage');
+  const canPermissions = hasPermission('employees.permissions');
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-      
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-[var(--az-text)]">Team Directory</h1>
-            <Badge color="#6C4FD1" bg="rgba(108, 79, 209, 0.1)">
-              {totalCount} Staff Member{totalCount !== 1 ? 's' : ''}
-            </Badge>
-          </div>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-1">
-            Manage your staff directory, permissions, departments, compensation models, and schedule metrics.
+          <h1 className="text-xl font-bold text-[var(--az-text)]">Employees</h1>
+          <p className="text-sm text-[var(--az-text-muted)] mt-0.5">
+            Manage roles, compensation, schedules, and permissions
           </p>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={handleExportRoster} className="gap-2 text-[var(--az-text)]">
-            <Download className="w-4 h-4" /> Export Roster
+        {canCreate && (
+          <Button onClick={() => setIsAddOpen(true)}>
+            <UserPlus className="w-4 h-4" /> Add Employee
           </Button>
-          {canCreate && (
-            <Button onClick={() => setIsInviteOpen(true)} className="bg-[#6C4FD1] text-white hover:bg-[#5b42b1] gap-2">
-              <UserPlus className="w-4 h-4" /> Invite Member
-            </Button>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Stats Bar */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-[#6C4FD1]/10 text-[#6C4FD1]">
-            <Users className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs text-[var(--sn-text-muted)]">Total Staff</span>
-            <p className="text-xl font-extrabold text-[var(--az-text)]">{totalCount}</p>
-          </div>
-        </GlassPanel>
-
-        <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs text-[var(--sn-text-muted)]">Active Now</span>
-            <p className="text-xl font-extrabold text-[var(--az-text)]">{activeCount}</p>
-          </div>
-        </GlassPanel>
-
-        <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500">
-            <Clock className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs text-[var(--sn-text-muted)]">On Leave / Suspended</span>
-            <p className="text-xl font-extrabold text-[var(--az-text)]">{onLeaveCount}</p>
-          </div>
-        </GlassPanel>
-
-        <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500">
-            <Building className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs text-[var(--sn-text-muted)]">Departments</span>
-            <p className="text-xl font-extrabold text-[var(--az-text)]">{deptsCount}</p>
-          </div>
-        </GlassPanel>
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Employees"
+          value={totalEmployees}
+          icon={Users}
+          loading={loading}
+        />
+        <StatCard
+          label="Active Now"
+          value={activeCount}
+          icon={CheckCircle2}
+          color="var(--az-accent)"
+          loading={loading}
+        />
+        <StatCard
+          label="Suspended"
+          value={suspendedCount}
+          icon={Ban}
+          color="var(--az-warning)"
+          loading={loading}
+        />
+        <StatCard
+          label="Avg Rating"
+          value={avgRating > 0 ? `${avgRating.toFixed(1)} ★` : '—'}
+          icon={Star}
+          color="var(--az-warning)"
+          loading={loading}
+        />
       </div>
 
-      {/* Search & Filter Controls */}
-      <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
+      {/* Filter Bar */}
+      <Card className="flex flex-col md:flex-row gap-4 items-center">
         <div className="relative w-full md:flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--sn-text-muted)]" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--az-text-muted)]" />
           <Input
-            placeholder="Search by operator name or email address..."
-            className="pl-10 w-full"
+            placeholder="Search by name or email..."
+            className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center gap-1.5 bg-[var(--az-border)]/20 px-3 py-1.5 rounded-xl border border-[var(--az-border)] text-xs font-semibold">
-            <Filter className="w-3.5 h-3.5 text-[var(--sn-text-muted)]" />
-            <span className="text-[var(--sn-text-muted)]">Filters</span>
-          </div>
-
+        <div className="flex gap-3 w-full md:w-auto">
           <Select
             value={roleFilter}
-            onChange={(val) => setRoleFilter(val)}
-            options={[
-              { value: 'ALL', label: 'All Roles' },
-              { value: 'OWNER', label: 'Owner' },
-              { value: 'MANAGER', label: 'Manager' },
-              { value: 'SUPERVISOR', label: 'Supervisor' },
-              { value: 'STAFF', label: 'Staff' }
-            ]}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            options={[{ value: 'ALL', label: 'All Roles' }, ...ROLES]}
+            className="w-full md:w-44"
           />
-
-          <Select
-            value={departmentFilter}
-            onChange={(val) => setDepartmentFilter(val)}
-            options={[
-              { value: 'ALL', label: 'All Depts' },
-              ...departments.map(d => ({ value: d, label: d }))
-            ]}
-          />
-
           <Select
             value={statusFilter}
-            onChange={(val) => setStatusFilter(val)}
-            options={[
-              { value: 'ALL', label: 'All Status' },
-              { value: 'ACTIVE', label: 'Active' },
-              { value: 'SUSPENDED', label: 'Suspended' },
-              { value: 'TERMINATED', label: 'Terminated' }
-            ]}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            options={[{ value: 'ALL', label: 'All Statuses' }, ...STATUSES]}
+            className="w-full md:w-44"
           />
-
-          {/* Toggle View Modes */}
-          <div className="flex bg-[var(--az-border)]/20 p-1 rounded-xl border border-[var(--az-border)] ml-auto md:ml-0">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white shadow text-[#6C4FD1]' : 'text-[var(--sn-text-muted)]'}`}
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow text-[#6C4FD1]' : 'text-[var(--sn-text-muted)]'}`}
-            >
-              <List className="w-4 h-4" />
-            </button>
-          </div>
         </div>
-      </GlassPanel>
+      </Card>
 
-      {/* Directory Main List/Grid View */}
+      {/* Employee Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-44 w-full rounded-2xl" />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-48" />
+          ))}
         </div>
       ) : filteredEmployees.length === 0 ? (
-        <Card className="flex items-center justify-center py-16 border-dashed border-[var(--az-border)]">
-          <Empty icon={Users} title="No staff members match" description="Refine your query filters or insert a new team invite." />
-        </Card>
-      ) : viewMode === 'grid' ? (
+        <Empty
+          icon={Users}
+          title="No employees found"
+          description="Try adjusting your filters or search query."
+        />
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEmployees.map((emp) => {
-            const fullName = emp.user?.fullName || 'Invite Pending';
-            const initColor = getInitialsColor(fullName);
+            const user = emp.user || {};
+            const isSuspended = emp.status === 'SUSPENDED';
+            const isTerminated = emp.status === 'TERMINATED';
+
             return (
-              <GlassPanel
+              <Card
                 key={emp.id}
-                onClick={() => { setSelectedEmployee(emp); setIsDrawerOpen(true); }}
-                className="p-5 border border-[var(--az-border)] rounded-2xl flex flex-col hover:shadow-lg hover:border-[#6C4FD1]/30 transition-all duration-300 cursor-pointer group"
+                hover
+                onClick={() => {
+                  setSelectedEmployee(emp);
+                  setIsSelectedOpen(true);
+                }}
+                className="relative group flex flex-col justify-between"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-                      style={{ backgroundColor: initColor }}
-                    >
-                      {getInitials(fullName)}
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        src={user.avatarUrl}
+                        name={user.fullName || user.username}
+                        size="lg"
+                      />
+                      <div>
+                        <h3 className="font-bold text-[var(--az-text)] truncate max-w-[150px]">
+                          {user.fullName || user.username || 'Unnamed'}
+                        </h3>
+                        <p className="text-xs text-[var(--az-text-muted)] truncate max-w-[150px]">
+                          {emp.title || 'No Title'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-[var(--az-text)] group-hover:text-[#6C4FD1] transition-colors line-clamp-1">
-                        {fullName}
-                      </h3>
-                      <p className="text-xs text-[var(--sn-text-muted)] mt-0.5 line-clamp-1">
-                        {emp.title || emp.role}
-                      </p>
+
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu
+                        trigger={
+                          <button className="p-1.5 rounded-lg hover:bg-[var(--az-bg-alt)] text-[var(--az-text-muted)]">
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                        }
+                        items={[
+                          ...(canManage
+                            ? [
+                                {
+                                  label: 'Edit Info',
+                                  icon: Edit2,
+                                  onClick: () => openEditModal(emp),
+                                },
+                                {
+                                  label: isSuspended ? 'Reactivate' : 'Suspend',
+                                  icon: isSuspended ? CheckCircle2 : Ban,
+                                  onClick: () => handleToggleStatus(emp),
+                                },
+                              ]
+                            : []),
+                          ...(canPermissions
+                            ? [
+                                {
+                                  label: 'Update Permissions',
+                                  icon: Filter,
+                                  onClick: () => openPermissionsModal(emp),
+                                },
+                              ]
+                            : []),
+                          ...(canManage && !isTerminated
+                            ? [
+                                { divider: true },
+                                {
+                                  label: 'Terminate',
+                                  icon: Trash2,
+                                  danger: true,
+                                  onClick: () => handleTerminateEmployee(emp.id),
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
                     </div>
                   </div>
-                  <Badge
-                    color={STATUS_COLORS[emp.status] || '#6C4FD1'}
-                    bg={`${STATUS_COLORS[emp.status] || '#6C4FD1'}12`}
-                  >
-                    {emp.status}
-                  </Badge>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <Badge color={STATUS_COLORS[emp.status] || 'var(--az-text-muted)'}>
+                      {emp.status}
+                    </Badge>
+                    <Badge color="var(--az-accent)">{emp.role}</Badge>
+                    {emp.department && (
+                      <Badge color="var(--az-text-muted)">{emp.department}</Badge>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2 border-t border-[var(--az-border)] pt-3 text-xs text-[var(--sn-text-muted)] flex-1">
-                  <div className="flex items-center justify-between">
-                    <span>Department:</span>
-                    <span className="font-semibold text-[var(--az-text)]">{emp.department || 'Operations'}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Compensation:</span>
-                    <span className="font-semibold text-[var(--az-text)]">
-                      {emp.payrollType === 'SALARY' ? `$${emp.salaryAmount}/yr` : `$${emp.hourlyRate || 0}/hr`}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Payment:</span>
-                    <span className="font-semibold text-[var(--az-text)] font-mono">{emp.paymentPreference || 'USDC'}</span>
+                <div className="border-t border-[var(--az-border)] pt-4 mt-auto space-y-2">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center gap-1.5 text-[var(--az-text-muted)]">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{emp.totalHours || 0} hrs worked</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[var(--az-text-muted)] justify-end">
+                      <Star className="w-3.5 h-3.5 text-[var(--az-warning)]" />
+                      <span className="font-semibold text-[var(--az-text)]">
+                        {emp.rating ? emp.rating.toFixed(1) : '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[var(--az-text-muted)]">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>{emp.totalShifts || 0} shifts</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[var(--az-text-muted)] justify-end">
+                      <DollarSign className="w-3.5 h-3.5" />
+                      <span className="font-semibold text-[var(--az-text)]">
+                        {emp.payrollType === 'SALARY'
+                          ? `${emp.salaryAmount || 0}/mo`
+                          : `${emp.hourlyRate || 0}/hr`}
+                      </span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-[var(--az-border)] flex items-center justify-between text-[11px] text-[var(--sn-text-muted)]">
-                  <span>Hired: {emp.createdAt ? new Date(emp.createdAt).toLocaleDateString() : 'Pending'}</span>
-                  <span className="text-[#6C4FD1] group-hover:underline font-semibold">View Details →</span>
-                </div>
-              </GlassPanel>
+              </Card>
             );
           })}
         </div>
-      ) : (
-        /* List Mode View */
-        <GlassPanel className="border border-[var(--az-border)] rounded-2xl overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[var(--az-border)]/20 text-xs font-semibold text-[var(--sn-text-muted)] border-b border-[var(--az-border)]">
-                <th className="p-4">Staff Member</th>
-                <th className="p-4">Department</th>
-                <th className="p-4">Role</th>
-                <th className="p-4">Compensation</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Hire Date</th>
-                <th className="p-4 text-right">Details</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--az-border)] text-xs text-[var(--az-text)]">
-              {filteredEmployees.map((emp) => {
-                const fullName = emp.user?.fullName || 'Invite Pending';
-                const initColor = getInitialsColor(fullName);
-                return (
-                  <tr
-                    key={emp.id}
-                    onClick={() => { setSelectedEmployee(emp); setIsDrawerOpen(true); }}
-                    className="hover:bg-[var(--az-border)]/10 cursor-pointer transition-colors"
-                  >
-                    <td className="p-4 flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
-                        style={{ backgroundColor: initColor }}
-                      >
-                        {getInitials(fullName)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-bold truncate">{fullName}</p>
-                        <p className="text-[10px] text-[var(--sn-text-muted)] truncate">{emp.user?.email || '—'}</p>
-                      </div>
-                    </td>
-                    <td className="p-4 font-semibold">{emp.department || 'Operations'}</td>
-                    <td className="p-4 text-[var(--sn-text-muted)]">{emp.title || emp.role}</td>
-                    <td className="p-4 font-mono font-semibold">
-                      {emp.payrollType === 'SALARY' ? `$${emp.salaryAmount}/yr` : `$${emp.hourlyRate || 0}/hr`}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase"
-                        style={{ color: STATUS_COLORS[emp.status], backgroundColor: `${STATUS_COLORS[emp.status]}12` }}
-                      >
-                        {emp.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-[var(--sn-text-muted)]">
-                      {emp.createdAt ? new Date(emp.createdAt).toLocaleDateString() : '—'}
-                    </td>
-                    <td className="p-4 text-right text-[#6C4FD1] font-semibold hover:underline">View →</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </GlassPanel>
       )}
 
-      {/* Side Profile Detail Drawer (Right Aligned Modal Simulation) */}
-      {selectedEmployee && (
-        <Modal
-          open={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          title="Staff Profile Details"
-        >
-          <div className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
-            
-            {/* Drawer Hero */}
-            <div className="flex items-center gap-4 border-b border-[var(--az-border)] pb-4">
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl"
-                style={{ backgroundColor: getInitialsColor(selectedEmployee.user?.fullName || 'Pending') }}
-              >
-                {getInitials(selectedEmployee.user?.fullName || 'Pending')}
-              </div>
+      {/* Details Modal */}
+      <Modal
+        open={isSelectedOpen}
+        onClose={() => setIsSelectedOpen(false)}
+        title="Employee Details"
+      >
+        {selectedEmployee && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <Avatar
+                src={selectedEmployee.user?.avatarUrl}
+                name={selectedEmployee.user?.fullName}
+                size="lg"
+              />
               <div>
-                <h3 className="text-lg font-extrabold text-[var(--az-text)]">
-                  {selectedEmployee.user?.fullName || 'Invite Pending'}
-                </h3>
-                <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">
-                  {selectedEmployee.title || selectedEmployee.role} — {selectedEmployee.department || 'Operations'}
+                <h2 className="text-lg font-bold text-[var(--az-text)]">
+                  {selectedEmployee.user?.fullName || selectedEmployee.user?.username}
+                </h2>
+                <p className="text-sm text-[var(--az-text-muted)]">
+                  {selectedEmployee.title} • {selectedEmployee.department}
+                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Badge color={STATUS_COLORS[selectedEmployee.status]}>
+                    {selectedEmployee.status}
+                  </Badge>
+                  <Badge color="var(--az-accent)">{selectedEmployee.role}</Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 border-t border-b border-[var(--az-border)] py-4">
+              <div className="space-y-1">
+                <span className="text-xs text-[var(--az-text-muted)] block uppercase font-semibold">
+                  Compensation
+                </span>
+                <span className="text-sm text-[var(--az-text)] font-semibold">
+                  {selectedEmployee.payrollType === 'SALARY'
+                    ? `${selectedEmployee.salaryAmount || 0} USDC / month`
+                    : `${selectedEmployee.hourlyRate || 0} USDC / hour`}
+                </span>
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs text-[var(--az-text-muted)] block uppercase font-semibold">
+                  Hire Date
+                </span>
+                <span className="text-sm text-[var(--az-text)]">
+                  {selectedEmployee.hireDate
+                    ? new Date(selectedEmployee.hireDate).toLocaleDateString()
+                    : '—'}
+                </span>
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs text-[var(--az-text-muted)] block uppercase font-semibold">
+                  Email
+                </span>
+                <span className="text-sm text-[var(--az-text)] flex items-center gap-1 truncate">
+                  <Mail className="w-3.5 h-3.5 text-[var(--az-text-muted)]" />
+                  {selectedEmployee.user?.email || '—'}
+                </span>
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs text-[var(--az-text-muted)] block uppercase font-semibold">
+                  Rating
+                </span>
+                <span className="text-sm text-[var(--az-warning)] flex items-center gap-1 font-semibold">
+                  <Star className="w-3.5 h-3.5 fill-[var(--az-warning)]" />
+                  {selectedEmployee.rating ? selectedEmployee.rating.toFixed(1) : 'No reviews'}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-3 rounded-xl bg-[var(--az-surface)] border border-[var(--az-border)]">
+                <p className="text-xs text-[var(--az-text-muted)] font-semibold">SHIFTS</p>
+                <p className="text-lg font-bold text-[var(--az-text)] mt-1">
+                  {selectedEmployee.totalShifts || 0}
+                </p>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-[var(--az-surface)] border border-[var(--az-border)]">
+                <p className="text-xs text-[var(--az-text-muted)] font-semibold">HOURS</p>
+                <p className="text-lg font-bold text-[var(--az-text)] mt-1">
+                  {selectedEmployee.totalHours || 0}
+                </p>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-[var(--az-surface)] border border-[var(--az-border)]">
+                <p className="text-xs text-[var(--az-text-muted)] font-semibold">DELAYS</p>
+                <p className="text-lg font-bold text-[var(--az-danger)] mt-1">
+                  {selectedEmployee.lateCount || 0} Late / {selectedEmployee.noShowCount || 0} No-Show
                 </p>
               </div>
             </div>
 
-            {/* Profile Contact */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider">Contact & Account</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2 text-xs text-[var(--sn-text-muted)] bg-[var(--az-border)]/15 p-3 rounded-xl border border-[var(--az-border)]">
-                  <Mail className="w-4 h-4 text-[#6C4FD1]" />
-                  <span className="truncate">{selectedEmployee.user?.email || 'N/A'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-[var(--sn-text-muted)] bg-[var(--az-border)]/15 p-3 rounded-xl border border-[var(--az-border)]">
-                  <Phone className="w-4 h-4 text-[#6C4FD1]" />
-                  <span>{selectedEmployee.user?.phoneNumber || 'No phone recorded'}</span>
+            {selectedEmployee.permissions && selectedEmployee.permissions.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs text-[var(--az-text-muted)] uppercase font-semibold">
+                  Permissions
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedEmployee.permissions.map((perm) => (
+                    <Badge key={perm} color="var(--az-accent)">
+                      {perm}
+                    </Badge>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Permissions Summary Section */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider">System Permissions Summary</h4>
-              <GlassPanel className="p-4 border border-[var(--az-border)] rounded-xl space-y-2">
-                <div className="flex items-center justify-between border-b border-[var(--az-border)] pb-2 text-xs">
-                  <span className="font-bold text-[var(--az-text)] flex items-center gap-1.5">
-                    <Shield className="w-3.5 h-3.5 text-[#6C4FD1]" /> Policy Assignment: {selectedEmployee.role}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {(selectedEmployee.permissions && selectedEmployee.permissions.length > 0) ? (
-                    selectedEmployee.permissions.map((p, i) => (
-                      <Badge key={i} color="#6C4FD1" bg="rgba(108, 79, 209, 0.1)">{p}</Badge>
-                    ))
-                  ) : (
-                    <p className="text-[11px] text-[var(--sn-text-muted)]">Default role-level permissions are applied to this account.</p>
-                  )}
-                </div>
-              </GlassPanel>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="secondary" onClick={() => setIsSelectedOpen(false)}>
+                Close
+              </Button>
+              {canManage && (
+                <Button onClick={() => openEditModal(selectedEmployee)}>
+                  <Edit2 className="w-4 h-4" /> Edit Profile
+                </Button>
+              )}
             </div>
-
-            {/* Quick Actions Links */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider">Operational Links</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                <a
-                  href="/employees"
-                  className="flex items-center justify-between p-3.5 bg-white border border-[var(--az-border)] hover:border-[#6C4FD1] rounded-xl transition-all font-semibold text-[#6C4FD1]"
-                >
-                  <span className="flex items-center gap-2"><Calendar className="w-4 h-4" /> Schedule Roster</span>
-                  <span>View & Edit →</span>
-                </a>
-                <a
-                  href="/employees"
-                  className="flex items-center justify-between p-3.5 bg-white border border-[var(--az-border)] hover:border-[#6C4FD1] rounded-xl transition-all font-semibold text-[#6C4FD1]"
-                >
-                  <span className="flex items-center gap-2"><DollarSign className="w-4 h-4" /> Payroll Position</span>
-                  <span>Review →</span>
-                </a>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-[var(--az-border)] flex justify-end">
-              <Button onClick={() => setIsDrawerOpen(false)} variant="secondary">Close Profile</Button>
-            </div>
-
           </div>
-        </Modal>
-      )}
+        )}
+      </Modal>
 
-      {/* Invite Member Modal */}
-      <Modal open={isInviteOpen} onClose={() => setIsInviteOpen(false)} title="Invite Team Member">
+      {/* Add Modal */}
+      <Modal
+        open={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        title="Add New Employee"
+      >
         <div className="space-y-4">
           <Input
-            label="Azaman ID (User ID)"
-            placeholder="AZM-1234567"
-            value={inviteForm.azmId}
-            onChange={e => setInviteForm({ ...inviteForm, azmId: e.target.value })}
+            label="AZM Username (e.g. username)"
+            placeholder="Search by username..."
+            value={addForm.azmId}
+            onChange={(e) => setAddForm({ ...addForm, azmId: e.target.value })}
           />
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Title (e.g. Lead Designer)"
-              placeholder="Title"
-              value={inviteForm.title}
-              onChange={e => setInviteForm({ ...inviteForm, title: e.target.value })}
+            <Select
+              label="Role"
+              value={addForm.role}
+              onChange={(e) => setAddForm({ ...addForm, role: e.target.value })}
+              options={ROLES}
             />
+            <Input
+              label="Job Title"
+              placeholder="e.g. Front Desk Manager"
+              value={addForm.title}
+              onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <Input
               label="Department"
-              placeholder="E.g. Engineering"
-              value={inviteForm.department}
-              onChange={e => setInviteForm({ ...inviteForm, department: e.target.value })}
+              placeholder="e.g. Operations"
+              value={addForm.department}
+              onChange={(e) => setAddForm({ ...addForm, department: e.target.value })}
+            />
+            <Select
+              label="Payroll Type"
+              value={addForm.payrollType}
+              onChange={(e) => setAddForm({ ...addForm, payrollType: e.target.value })}
+              options={PAYROLL_TYPES}
             />
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">System Role</label>
-              <select
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[var(--az-border)] text-[var(--az-text)] text-sm outline-none focus:border-[#6C4FD1]"
-                value={inviteForm.role}
-                onChange={e => setInviteForm({ ...inviteForm, role: e.target.value })}
-              >
-                <option value="STAFF">Staff Operator</option>
-                <option value="SUPERVISOR">Supervisor</option>
-                <option value="MANAGER">Manager</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Payroll Model</label>
-              <select
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[var(--az-border)] text-[var(--az-text)] text-sm outline-none focus:border-[#6C4FD1]"
-                value={inviteForm.payrollType}
-                onChange={e => setInviteForm({ ...inviteForm, payrollType: e.target.value })}
-              >
-                <option value="HOURLY">Hourly Rate Model</option>
-                <option value="SALARY">Salary Model</option>
-              </select>
-            </div>
-          </div>
-
-          {inviteForm.payrollType === 'SALARY' ? (
+          {addForm.payrollType === 'SALARY' ? (
             <Input
-              label="Yearly Salary (USDC / USD equivalent)"
-              placeholder="e.g. 75000"
-              value={inviteForm.salaryAmount}
-              onChange={e => setInviteForm({ ...inviteForm, salaryAmount: e.target.value })}
+              label="Monthly Salary (USDC)"
+              type="number"
+              placeholder="e.g. 3000"
+              value={addForm.salaryAmount}
+              onChange={(e) => setAddForm({ ...addForm, salaryAmount: e.target.value })}
             />
           ) : (
             <Input
-              label="Hourly Rate (USDC / USD equivalent)"
-              placeholder="e.g. 25"
-              value={inviteForm.hourlyRate}
-              onChange={e => setInviteForm({ ...inviteForm, hourlyRate: e.target.value })}
+              label="Hourly Rate (USDC)"
+              type="number"
+              placeholder="e.g. 15"
+              value={addForm.hourlyRate}
+              onChange={(e) => setAddForm({ ...addForm, hourlyRate: e.target.value })}
             />
           )}
 
-          <div className="pt-4 border-t border-[var(--az-border)] flex items-center justify-end gap-2">
-            <Button variant="secondary" onClick={() => setIsInviteOpen(false)}>Cancel</Button>
-            <Button onClick={handleInviteSubmit} className="bg-[#6C4FD1] text-white hover:bg-[#5b42b1]">Send Invitation</Button>
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--az-border)]">
+            <Button variant="secondary" onClick={() => setIsAddOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddEmployee}>Create Employee</Button>
           </div>
         </div>
       </Modal>
 
+      {/* Edit Modal */}
+      <Modal
+        open={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        title="Edit Employee Profile"
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label="Role"
+              value={editForm.role}
+              onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+              options={ROLES}
+            />
+            <Input
+              label="Job Title"
+              placeholder="e.g. Front Desk Manager"
+              value={editForm.title}
+              onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Department"
+              placeholder="e.g. Operations"
+              value={editForm.department}
+              onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+            />
+            <Select
+              label="Payroll Type"
+              value={editForm.payrollType}
+              onChange={(e) => setEditForm({ ...editForm, payrollType: e.target.value })}
+              options={PAYROLL_TYPES}
+            />
+          </div>
+          {editForm.payrollType === 'SALARY' ? (
+            <Input
+              label="Monthly Salary (USDC)"
+              type="number"
+              placeholder="e.g. 3000"
+              value={editForm.salaryAmount}
+              onChange={(e) => setEditForm({ ...editForm, salaryAmount: e.target.value })}
+            />
+          ) : (
+            <Input
+              label="Hourly Rate (USDC)"
+              type="number"
+              placeholder="e.g. 15"
+              value={editForm.hourlyRate}
+              onChange={(e) => setEditForm({ ...editForm, hourlyRate: e.target.value })}
+            />
+          )}
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--az-border)]">
+            <Button variant="secondary" onClick={() => setIsEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditEmployee}>Save Changes</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Permissions Modal */}
+      <Modal
+        open={isPermsOpen}
+        onClose={() => setIsPermsOpen(false)}
+        title="Update Employee Permissions"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-[var(--az-text-muted)] mb-4">
+            Grant or restrict explicit permissions for {selectedEmployee?.user?.fullName || selectedEmployee?.user?.username}.
+          </p>
+
+          <div className="space-y-3">
+            {AVAILABLE_PERMISSIONS.map((perm) => {
+              const isChecked = permissionsForm.includes(perm.value);
+              return (
+                <div
+                  key={perm.value}
+                  className="flex items-center justify-between p-3 rounded-xl bg-[var(--az-surface)] border border-[var(--az-border)]"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--az-text)]">
+                      {perm.label}
+                    </p>
+                    <p className="text-xs text-[var(--az-text-muted)]">
+                      {perm.value}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isChecked}
+                    onChange={() => togglePermission(perm.value)}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--az-border)]">
+            <Button variant="secondary" onClick={() => setIsPermsOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdatePermissions}>Save Permissions</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

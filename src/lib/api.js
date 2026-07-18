@@ -73,6 +73,7 @@ export const escrow = {
 // client-side from the orders list (see Dashboard).
 export const analytics = {
   summary: () => request('/api/business/orders/stats'),
+  predictive: () => request('/api/business-os/analytics/predictive'),
 };
 
 // ── Locations ─────────────────────────────────────────────────────────────────

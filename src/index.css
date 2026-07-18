@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    /* ── Phase 2 Design System: Light liquid glass aesthetic (DEFAULT) ── */
+    /* ── Phase 3 Design System: Light liquid glass aesthetic (DEFAULT) ── */
     --az-bg:            #F7F5F2;
     --az-bg-alt:        #FBFAF8;
     --az-surface:       rgba(255, 255, 255, 0.72);
@@ -29,40 +29,12 @@
     --az-danger-subtle:  rgba(225, 83, 97, 0.10);
     --az-info:           #3D74DB;
 
-    /* ── Sentry v3 tokens — mapped to light mode equivalents for safety ── */
-    --sn-black:          var(--az-bg);
-    --sn-surface:        var(--az-bg-alt);
-    --sn-elevated:       var(--az-surface-solid);
-    --sn-hover:          rgba(17, 17, 17, 0.04);
-    --sn-card:           var(--az-surface);
-    --sn-card-hover:     rgba(255, 255, 255, 0.9);
-    --sn-border:         var(--az-border);
-    --sn-border-hover:   var(--az-border-strong);
-    --sn-border-bright:  var(--az-border-strong);
-    --sn-text:           var(--az-text);
-    --sn-text-secondary: var(--az-text-secondary);
-    --sn-text-muted:     var(--az-text-muted);
-    --sn-purple:         var(--az-accent);
-    --sn-purple-h:       var(--az-accent-hover);
-    --sn-purple-subtle:  var(--az-accent-subtle);
-    --sn-purple-border:  var(--az-accent-border);
-    --sn-blue:           var(--az-info);
-    --sn-blue-subtle:    rgba(61, 116, 219, 0.1);
-    --sn-green:          var(--az-success);
-    --sn-green-subtle:   var(--az-success-subtle);
-    --sn-red:            var(--az-danger);
-    --sn-red-subtle:     var(--az-danger-subtle);
-    --sn-amber:          var(--az-warning);
-    --sn-amber-subtle:   var(--az-warning-subtle);
-
-    /* Legacy aliases mapped to light theme custom properties */
-    --az-black:          var(--az-text);
+    /* Legacy aliases */
+    --az-black:          var(--az-surface-solid);
     --az-card:           var(--az-surface-solid);
     --az-card-elevated:  var(--az-surface-solid);
     --az-border-bright:  var(--az-border-strong);
     --az-text-primary:   var(--az-text);
-    --az-text-secondary: var(--az-text-secondary);
-    --az-text-muted:     var(--az-text-muted);
     --az-emerald:        var(--az-success);
     --az-emerald-dim:    var(--az-success-subtle);
     --az-emerald-glow:   rgba(31, 163, 122, 0.15);
@@ -101,74 +73,47 @@
 
   /* ── Dark Mode activation ── */
   html.dark, body.dark, .dark {
-    --az-bg:            #0F0E13;
-    --az-bg-alt:        #15141C;
-    --az-surface:       rgba(30, 28, 38, 0.65);
-    --az-surface-solid: #1E1C26;
-    --az-border:        rgba(255, 255, 255, 0.08);
-    --az-border-strong: rgba(255, 255, 255, 0.14);
-    --az-text:           #F0F0F5;
-    --az-text-secondary: #C6BDCF;
-    --az-text-muted:     #776589;
+    --az-bg:             #0A0A0B;
+    --az-bg-alt:         #131314;
+    --az-surface:        rgba(24, 24, 26, 0.70);
+    --az-surface-solid:  #1C1C1F;
+    --az-border:         rgba(255, 255, 255, 0.08);
+    --az-border-strong:  rgba(255, 255, 255, 0.14);
+    --az-text:           #F5F5F6;
+    --az-text-secondary: #A8A8AD;
+    --az-text-muted:     #6E6E74;
 
-    --az-accent:         #6C4FD1;
-    --az-accent-hover:   #7C61DD;
-    --az-accent-subtle:  rgba(108, 79, 209, 0.12);
-    --az-accent-border:  rgba(108, 79, 209, 0.32);
+    --az-accent:         #7C5CFA;
+    --az-accent-hover:   #8E71FB;
+    --az-accent-subtle:  rgba(124, 92, 250, 0.14);
+    --az-accent-border:  rgba(124, 92, 250, 0.32);
 
-    --az-success:        #1FA37A;
-    --az-success-subtle: rgba(31, 163, 122, 0.12);
-    --az-warning:        #E2A33D;
-    --az-warning-subtle: rgba(226, 163, 61, 0.15);
-    --az-danger:         #E15361;
-    --az-danger-subtle:  rgba(225, 83, 97, 0.12);
-    --az-info:           #3D74DB;
+    --az-success:        #2ED3A8;
+    --az-success-subtle: rgba(46, 211, 168, 0.14);
+    --az-warning:        #F0B429;
+    --az-warning-subtle: rgba(240, 180, 41, 0.15);
+    --az-danger:         #F0616D;
+    --az-danger-subtle:  rgba(240, 97, 109, 0.14);
+    --az-info:           #5B93EC;
 
-    /* Sentry v3 compatibility in Dark Mode */
-    --sn-black:          #16141c;
-    --sn-surface:        #1a1822;
-    --sn-elevated:       #211f2a;
-    --sn-hover:          #272531;
-    --sn-card:           #1e1c26;
-    --sn-card-hover:     #25232f;
-    --sn-border:         #2a2732;
-    --sn-border-hover:   #36333f;
-    --sn-border-bright:  #3d3a47;
-    --sn-text:           #f0f0f5;
-    --sn-text-secondary: #c6bdcf;
-    --sn-text-muted:     #776589;
-    --sn-purple:         #6C5FC7;
-    --sn-purple-h:       #7B70D4;
-    --sn-purple-subtle:  rgba(108, 95, 199, 0.1);
-    --sn-purple-border:  rgba(108, 95, 199, 0.25);
-    --sn-blue:           #3D74DB;
-    --sn-blue-subtle:    rgba(61, 116, 219, 0.1);
-    --sn-green:          #33BF9E;
-    --sn-green-subtle:   rgba(51, 191, 158, 0.1);
-    --sn-red:            #F55459;
-    --sn-red-subtle:     rgba(245, 84, 89, 0.1);
-    --sn-amber:          #FFC227;
-    --sn-amber-subtle:   rgba(255, 194, 39, 0.1);
-
-    --az-black:          var(--sn-black);
-    --az-card:           var(--sn-card);
-    --az-card-elevated:  var(--sn-elevated);
-    --az-border-bright:  var(--sn-border-bright);
-    --az-text-primary:   var(--sn-text);
-    --az-text-secondary: var(--sn-text-secondary);
-    --az-text-muted:     var(--sn-text-muted);
-    --az-emerald:        var(--sn-green);
-    --az-emerald-dim:    var(--sn-green-subtle);
-    --az-emerald-glow:   rgba(51, 191, 158, 0.2);
-    --az-blue:           var(--sn-blue);
-    --az-blue-dim:       var(--sn-blue-subtle);
-    --az-purple:         var(--sn-purple);
-    --az-amber:          var(--sn-amber);
-    --az-amber-dim:      var(--sn-amber-subtle);
-    --az-red:            var(--sn-red);
-    --az-red-dim:        var(--sn-red-subtle);
-    --az-cyan:           var(--sn-blue);
-    --az-cyan-dim:       var(--sn-blue-subtle);
+    /* Legacy aliases in dark mode */
+    --az-black:          #0A0A0B;
+    --az-card:           #1C1C1F;
+    --az-card-elevated:  #232326;
+    --az-border-bright:  rgba(255, 255, 255, 0.18);
+    --az-text-primary:   var(--az-text);
+    --az-emerald:        #2ED3A8;
+    --az-emerald-dim:    rgba(46, 211, 168, 0.1);
+    --az-emerald-glow:   rgba(46, 211, 168, 0.2);
+    --az-blue:           var(--az-info);
+    --az-blue-dim:       rgba(91, 147, 236, 0.1);
+    --az-purple:         var(--az-accent);
+    --az-amber:          var(--az-warning);
+    --az-amber-dim:      var(--az-warning-subtle);
+    --az-red:            var(--az-danger);
+    --az-red-dim:        var(--az-danger-subtle);
+    --az-cyan:           var(--az-info);
+    --az-cyan-dim:       rgba(91, 147, 236, 0.1);
 
     --background:          var(--az-bg);
     --foreground:          var(--az-text);
@@ -259,33 +204,33 @@
     transform: none;
   }
   .btn-sentry-primary {
-    @apply btn-sentry bg-[var(--az-accent)] text-white;
+    @apply btn-sentry bg-az-accent text-white;
   }
   .btn-sentry-primary:hover {
-    @apply bg-[var(--az-accent-hover)];
+    @apply bg-az-accent-hover;
   }
 
   /* Light-theme aware enterprise helpers */
   .btn-az {
-    @apply inline-flex items-center justify-center gap-2 rounded-az-md font-semibold select-none transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold select-none transition-all duration-200;
     box-shadow: var(--shadow-az-card);
   }
   .btn-az-primary {
     @apply btn-az bg-az-accent text-white hover:bg-az-accent-hover focus:ring-2 focus:ring-az-accent/20;
   }
 
-  /* ── Sentry-style nav item ── */
+  /* ── Nav item ── */
   .nav-sentry {
     @apply flex items-center gap-2.5 px-3 py-2 rounded-md text-sm relative transition-colors duration-150;
   }
   .nav-sentry.active {
-    @apply font-semibold text-[var(--az-accent)];
+    @apply font-semibold text-az-accent;
   }
   .nav-sentry:hover:not(.active) {
-    @apply bg-az-accent-subtle text-[var(--az-text-secondary)];
+    @apply bg-az-accent-subtle text-az-text-secondary;
   }
 
-  /* ── Sentry tooltip ── */
+  /* ── Tooltip ── */
   .tooltip-sentry {
     background: var(--az-surface-solid);
     border: 1px solid var(--az-border-strong);

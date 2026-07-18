@@ -10,6 +10,7 @@ import { getTypeConfig } from '@/lib/businessTypes';
 import NotificationBell from './NotificationBell';
 import { BusinessSelector } from './BusinessSelector';
 import { PhonePreview } from '../PhonePreview';
+import { CommandPalette } from '../CommandPalette';
 import {
   LayoutDashboard,
   Bell,
@@ -47,8 +48,9 @@ import {
   CarFront,
   ShipWheel,
   FileSpreadsheet,
-  Store as StoreIcon,
-} from 'lucide-react';
+  MessageSquare,
+  ShoppingCart,
+  BarChart2, Code2, Globe, Layers, Moon, Sun, Store } from "lucide-react";
 
 const SECTION_HEADERS = {
   overview: 'Overview',
@@ -64,6 +66,7 @@ const ALL_NAVIGATION_ITEMS = [
   // Overview
   { label: 'Dashboard', icon: LayoutDashboard, to: '/', section: 'overview', perm: null },
   { label: 'Notifications', icon: Bell, to: '/notifications', section: 'overview', perm: null },
+  { label: 'Messages', icon: MessageSquare, to: '/messages', section: 'overview', perm: null },
 
   // Bookings & Orders
   { label: 'Reservations', icon: CalendarCheck, to: '/reservations', section: 'bookings', perm: 'reservations.view' },
@@ -78,6 +81,7 @@ const ALL_NAVIGATION_ITEMS = [
   { label: 'Tables', icon: TableIcon, to: '/restaurant-tables', section: 'ops', perm: 'restaurant.view' },
   { label: 'Inventory', icon: Package, to: '/inventory', section: 'ops', perm: 'inventory.view' },
   { label: 'Dine-In', icon: Utensils, to: '/dine-in', section: 'ops', perm: 'restaurant.view' },
+  { label: 'POS', icon: ShoppingCart, to: '/pos', section: 'ops', perm: 'restaurant.view' },
   { label: 'Transit Fleet', icon: CarFront, to: '/transit-fleet', section: 'ops', perm: 'transit.view' },
   { label: 'Trips', icon: Bus, to: '/transit', section: 'ops', perm: 'transit.view' },
   { label: 'Drivers', icon: ShipWheel, to: '/transit-drivers', section: 'ops', perm: 'transit.view' },
@@ -94,13 +98,18 @@ const ALL_NAVIGATION_ITEMS = [
 
   // Marketing
   { label: 'Marketing', icon: Megaphone, to: '/marketing', section: 'marketing', perm: 'marketing.view' },
+  { label: 'Analytics', icon: BarChart2, to: '/analytics', section: 'marketing', perm: 'marketing.view' },
   { label: 'Reviews', icon: Star, to: '/reviews', section: 'marketing', perm: 'reviews.view' },
   { label: 'Showcase', icon: ImageIcon, to: '/showcase', section: 'marketing', perm: 'marketing.view' },
-  { label: 'Storefront', icon: StoreIcon, to: '/storefront', section: 'marketing', perm: 'marketing.view' },
+  { label: 'Web Ordering', icon: Globe, to: '/marketing/web-ordering', section: 'marketing', perm: 'marketing.view' },
+  { label: 'Storefront', icon: Store, to: '/storefront', section: 'marketing', perm: 'settings.manage' },
 
   // Settings
   { label: 'Settings', icon: Settings, to: '/settings', section: 'settings', perm: null },
-  { label: 'Locations', icon: MapPin, to: '/locations', section: 'settings', perm: 'locations.view' }
+  { label: 'Locations', icon: MapPin, to: '/locations', section: 'settings', perm: 'locations.view' },
+  { label: 'Messaging', icon: MessageSquare, to: '/settings/messaging', section: 'settings', perm: null },
+  { label: 'Business Groups', icon: Layers, to: '/groups', section: 'settings', perm: null },
+  { label: 'Developer', icon: Code2, to: '/settings/developer', section: 'settings', perm: null }
 ];
 
 export default function Layout() {
@@ -114,12 +123,37 @@ export default function Layout() {
   
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('az-dark-mode');
+    if (saved !== null) return JSON.parse(saved);
+    return false; // light is the real default
+  });
+
+  // Apply / remove .dark class on <html>
+  useEffect(() => {
+    const html = document.documentElement;
+    if (darkMode) { html.classList.add('dark'); } else { html.classList.remove('dark'); }
+    localStorage.setItem('az-dark-mode', JSON.stringify(darkMode));
+  }, [darkMode]);
   const [showPhonePreview, setShowPhonePreview] = useState(false);
+  const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const profileRef = useRef(null);
 
   useBizNotifications();
+
+  // Handle Ctrl+K / Cmd+K globally
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdPaletteOpen(v => !v);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Save sidebar toggle state
   useEffect(() => {
@@ -140,8 +174,25 @@ export default function Layout() {
   // Check if current user is owner (always bypasses permission filtering)
   const isOwner = user?.role === 'owner' || user?.role === 'admin';
 
-  // Filter items by permission
+  // Filter items by permission & businessType rules
+  const bizType = bizProfile?.businessType?.toUpperCase();
+  const isHotel = ['HOTEL'].includes(bizType);
+  const isRestaurant = ['RESTAURANT', 'DINE_IN', 'CAFE'].includes(bizType);
+  const isTransit = ['TRANSIT', 'LOGISTICS'].includes(bizType);
+
   const filteredNavItems = ALL_NAVIGATION_ITEMS.filter(item => {
+    // Hide hotel-only items for non-hotel businesses
+    if (item.perm === 'hotel.view' && !isHotel && !isRestaurant) return false;
+    // Hide restaurant-only items for non-restaurant businesses
+    if (item.perm === 'restaurant.view' && !isRestaurant && !isHotel) return false;
+    // Hide transit-only items for non-transit businesses
+    if (item.perm === 'transit.view' && !isTransit) return false;
+
+    // POS is only visible for restaurant/hotel businesses
+    if (item.label === 'POS') {
+      if (!isRestaurant && !isHotel) return false;
+    }
+
     if (!item.perm) return true;
     if (isOwner) return true;
     return hasPermission(item.perm);
@@ -193,8 +244,9 @@ export default function Layout() {
                   key={item.to}
                   to={item.to}
                   onClick={onLinkClick}
+                  aria-label={item.label}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all relative rounded-az-md group',
+                    'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all relative rounded-full group',
                     active
                       ? 'text-az-accent font-semibold'
                       : 'text-az-text-secondary hover:bg-az-bg-alt hover:text-az-text'
@@ -204,7 +256,7 @@ export default function Layout() {
                   {active && (
                     <motion.div
                       layoutId="sidebar-active-bg"
-                      className="absolute inset-0 rounded-az-md bg-az-accent-subtle -z-10"
+                      className="absolute inset-0 rounded-full bg-az-accent-subtle -z-10"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -213,7 +265,7 @@ export default function Layout() {
                   {!sidebarExpanded && active && (
                     <motion.div
                       layoutId="sidebar-rail-active-bg"
-                      className="absolute inset-y-1.5 left-2 right-2 rounded-lg bg-az-accent-subtle -z-10"
+                      className="absolute inset-y-1.5 left-2 right-2 rounded-full bg-az-accent-subtle -z-10"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -242,11 +294,14 @@ export default function Layout() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-az-bg text-az-text font-sans">
       
+      {/* Command Palette Mount */}
+      <CommandPalette isOpen={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} />
+
       {/* ── Desktop Sidebar ── */}
       <motion.aside
         animate={{ width: sidebarExpanded ? 240 : 64 }}
         transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-        className="hidden md:flex flex-col flex-shrink-0 border-r border-az-border bg-az-surface backdrop-blur-glass relative z-20 h-full overflow-hidden"
+        className="hidden md:flex flex-col flex-shrink-0 border-r border-az-border bg-white relative z-20 h-full overflow-hidden"
       >
         {/* Logo area */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-az-border flex-shrink-0">
@@ -322,7 +377,7 @@ export default function Layout() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-[280px] bg-az-surface backdrop-blur-glass border-r border-az-border z-40 md:hidden flex flex-col h-full shadow-lg"
+              className="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-az-border z-40 md:hidden flex flex-col h-full shadow-lg"
             >
               <div className="h-16 flex items-center justify-between px-4 border-b border-az-border flex-shrink-0">
                 <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
@@ -390,6 +445,13 @@ export default function Layout() {
           {/* Top Bar Actions (Right) */}
           <div className="flex items-center gap-3">
             
+            {/* Cmd+K Hint Badge */}
+            <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded bg-az-bg-alt border border-az-border text-az-text-muted text-[10px] font-medium tracking-wide">
+              <span>Cmd</span>
+              <span>+</span>
+              <span>K</span>
+            </div>
+
             {/* Sync / Connection Status */}
             <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full bg-az-bg-alt border border-az-border text-xs text-az-text-secondary font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -416,6 +478,17 @@ export default function Layout() {
             ) : (
               <BusinessSelector />
             )}
+
+            {/* Dark mode toggle */}
+            <button
+              onClick={() => setDarkMode(v => !v)}
+              className="w-9 h-9 rounded-full border flex items-center justify-center transition-colors hover:bg-az-bg-alt"
+              style={{ borderColor: 'var(--az-border)', color: 'var(--az-text-muted)' }}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={darkMode ? 'Light mode' : 'Dark mode'}
+            >
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
 
             {/* Notification Bell */}
             <NotificationBell />

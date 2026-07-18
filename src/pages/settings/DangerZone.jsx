@@ -43,9 +43,9 @@ export default function DangerZone() {
   if (!canManage) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Lock className="w-10 h-10 text-[var(--sn-text-muted)] opacity-40 mb-3" />
-        <h3 className="font-semibold text-[var(--sn-text)]">Owner Only</h3>
-        <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+        <Lock className="w-10 h-10 text-[var(--az-text-muted)] opacity-40 mb-3" />
+        <h3 className="font-semibold text-[var(--az-text)]">Owner Only</h3>
+        <p className="text-sm text-[var(--az-text-muted)] mt-1">
           Danger Zone actions require owner-level access.
         </p>
       </div>
@@ -57,8 +57,8 @@ export default function DangerZone() {
       <div className="flex items-center gap-3">
         <AlertTriangle className="w-6 h-6 text-destructive" />
         <div>
-          <h2 className="text-lg font-bold text-[var(--sn-text)]">Danger Zone</h2>
-          <p className="text-sm text-[var(--sn-text-muted)]">
+          <h2 className="text-lg font-bold text-[var(--az-text)]">Danger Zone</h2>
+          <p className="text-sm text-[var(--az-text-muted)]">
             High-impact actions. These require confirmation before proceeding.
           </p>
         </div>
@@ -68,17 +68,17 @@ export default function DangerZone() {
       <Card className="p-5 border-destructive/30">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="font-semibold text-[var(--sn-text)] flex items-center gap-2">
+            <h3 className="font-semibold text-[var(--az-text)] flex items-center gap-2">
               {isPaused ? <Play className="w-4 h-4 text-emerald-500" /> : <Pause className="w-4 h-4 text-destructive" />}
               {isPaused ? 'Resume Business' : 'Pause Business'}
             </h3>
-            <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+            <p className="text-sm text-[var(--az-text-muted)] mt-1">
               {isPaused
                 ? 'Your business is currently paused. Resume to accept new orders and bookings again.'
                 : 'Temporarily stop accepting new orders and bookings without deleting any data. Your existing orders, employees, and settings are preserved.'}
             </p>
             {isPaused && (
-              <Badge color="var(--sn-red)" className="mt-2 text-xs">
+              <Badge color="var(--az-danger)" className="mt-2 text-xs">
                 Currently Paused
               </Badge>
             )}
@@ -109,16 +109,41 @@ export default function DangerZone() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="font-semibold text-[var(--sn-text)] flex items-center gap-2">
+            <h3 className="font-semibold text-[var(--az-text)] flex items-center gap-2">
               <Download className="w-4 h-4" />
               Export Business Data
             </h3>
-            <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+            <p className="text-sm text-[var(--az-text-muted)] mt-1">
               Download a zip of your orders, invoices, reviews, and employee records. Useful for accounting or migration.
             </p>
           </div>
-          <Button variant="outline" disabled>
-            Coming Soon
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem('biz_token');
+                const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://azaman-backend-9d3u.onrender.com' : 'http://localhost:3000');
+                const res = await fetch(`${BASE_URL}/api/business-os/export`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) throw new Error('Export failed');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'business_data_export.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast.success('Export downloaded successfully');
+              } catch (e) {
+                toast.error('Export failed: ' + e.message);
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-1.5" />
+            Export Data
           </Button>
         </div>
       </Card>
@@ -131,7 +156,7 @@ export default function DangerZone() {
               <Trash2 className="w-4 h-4" />
               Request Account Closure
             </h3>
-            <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+            <p className="text-sm text-[var(--az-text-muted)] mt-1">
               This will open a support ticket with the AZM team to permanently close your business account.
               Your data will be retained for 90 days before permanent deletion, per compliance requirements.
             </p>

@@ -5,11 +5,11 @@ import { useToast } from '@/components/ui/Toast';
 import { Users, Bus, AlertCircle, Clock, CheckCircle2, XCircle, Calendar, Truck } from 'lucide-react';
 
 const DRIVER_STATUS = {
-  ASSIGNED: { label: 'Assigned', color: 'var(--sn-text-muted)' },
-  CHECKED_IN: { label: 'Checked In', color: 'var(--sn-blue)' },
-  ON_DUTY: { label: 'On Duty', color: 'var(--sn-purple)' },
-  COMPLETED: { label: 'Completed', color: 'var(--sn-green)' },
-  NO_SHOW: { label: 'No Show', color: 'var(--sn-red)' },
+  ASSIGNED: { label: 'Assigned', color: 'var(--az-text-muted)' },
+  CHECKED_IN: { label: 'Checked In', color: 'var(--az-info)' },
+  ON_DUTY: { label: 'On Duty', color: 'var(--az-accent)' },
+  COMPLETED: { label: 'Completed', color: 'var(--az-success)' },
+  NO_SHOW: { label: 'No Show', color: 'var(--az-danger)' },
 };
 
 const NEXT_DRIVER_STATUS = {
@@ -95,8 +95,8 @@ export default function TransitDrivers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[var(--sn-text)]">Driver Dispatch</h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-0.5">Manage driver assignments and emergency reassignment</p>
+          <h1 className="text-xl font-bold text-[var(--az-text)]">Driver Dispatch</h1>
+          <p className="text-sm text-[var(--az-text-muted)] mt-0.5">Manage driver assignments and emergency reassignment</p>
         </div>
         <Button variant="destructive" onClick={() => setIropsOpen(true)}>
           <AlertCircle className="w-4 h-4" /> Emergency Reassign
@@ -105,7 +105,7 @@ export default function TransitDrivers() {
 
       {/* Dispatch Board */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-[var(--sn-text)] flex items-center gap-2">
+        <h3 className="text-sm font-bold text-[var(--az-text)] flex items-center gap-2">
           <Clock className="w-4 h-4" /> Today's Dispatch Board
         </h3>
         {driverKeys.length === 0 && (
@@ -117,15 +117,15 @@ export default function TransitDrivers() {
             <Card key={key} className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[var(--sn-blue)]/10 border border-[var(--sn-blue)]/30 flex items-center justify-center">
-                    <Bus className="w-5 h-5 text-[var(--sn-blue)]" />
+                  <div className="w-10 h-10 rounded-full bg-[var(--az-info)]/10 border border-[var(--az-info)]/30 flex items-center justify-center">
+                    <Bus className="w-5 h-5 text-[var(--az-info)]" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[var(--sn-text)]">{driver.name}</p>
-                    {driver.phone && <p className="text-xs text-[var(--sn-text-muted)]">{driver.phone}</p>}
+                    <p className="text-sm font-bold text-[var(--az-text)]">{driver.name}</p>
+                    {driver.phone && <p className="text-xs text-[var(--az-text-muted)]">{driver.phone}</p>}
                   </div>
                 </div>
-                <span className="text-xs text-[var(--sn-text-muted)]">{driver.assignments.length} trip(s)</span>
+                <span className="text-xs text-[var(--az-text-muted)]">{driver.assignments.length} trip(s)</span>
               </div>
               {/* Timeline */}
               <div className="flex items-center gap-2 overflow-x-auto pb-2">
@@ -133,25 +133,25 @@ export default function TransitDrivers() {
                   const st = a.status || 'ASSIGNED';
                   const stInfo = DRIVER_STATUS[st] || DRIVER_STATUS.ASSIGNED;
                   return (
-                    <div key={a.id} className="min-w-[200px] border border-[var(--sn-border)] rounded-lg p-3 space-y-2" style={{ borderColor: stInfo.color + '40' }}>
+                    <div key={a.id} className="min-w-[200px] border border-[var(--az-border)] rounded-lg p-3 space-y-2" style={{ borderColor: stInfo.color + '40' }}>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[var(--sn-text)]">{a.trip?.routeName || 'Trip'}</span>
+                        <span className="text-xs font-bold text-[var(--az-text)]">{a.trip?.routeName || 'Trip'}</span>
                         <Badge color={stInfo.color}>{stInfo.label}</Badge>
                       </div>
-                      <div className="text-xs text-[var(--sn-text-muted)]">
+                      <div className="text-xs text-[var(--az-text-muted)]">
                         {a.trip?.origin} → {a.trip?.destination}
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-[var(--sn-text-muted)]">
+                      <div className="flex items-center gap-1 text-xs text-[var(--az-text-muted)]">
                         <Clock className="w-3 h-3" />
                         {a.trip?.departureAt ? new Date(a.trip.departureAt).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : 'TBD'}
                       </div>
                       {a.vehicle && (
-                        <div className="flex items-center gap-1 text-xs text-[var(--sn-text-muted)]">
+                        <div className="flex items-center gap-1 text-xs text-[var(--az-text-muted)]">
                           <Truck className="w-3 h-3" /> {a.vehicle.make} {a.vehicle.model} ({a.vehicle.licensePlate || 'No plate'})
                         </div>
                       )}
                       {st === 'NO_SHOW' ? (
-                        <div className="flex items-center gap-1 text-xs text-[var(--sn-red)]">
+                        <div className="flex items-center gap-1 text-xs text-[var(--az-danger)]">
                           <XCircle className="w-3 h-3" /> No-show flagged
                         </div>
                       ) : NEXT_DRIVER_STATUS[st] ? (
@@ -159,7 +159,7 @@ export default function TransitDrivers() {
                           Advance to {NEXT_DRIVER_STATUS[st].replace('_', ' ')}
                         </Button>
                       ) : (
-                        <div className="flex items-center gap-1 text-xs text-[var(--sn-green)]">
+                        <div className="flex items-center gap-1 text-xs text-[var(--az-success)]">
                           <CheckCircle2 className="w-3 h-3" /> Completed
                         </div>
                       )}
@@ -175,18 +175,18 @@ export default function TransitDrivers() {
       {/* Monthly Calendar */}
       {calendar?.length > 0 && (
         <Card>
-          <h3 className="text-sm font-bold text-[var(--sn-text)] mb-3 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-[var(--az-text)] mb-3 flex items-center gap-2">
             <Calendar className="w-4 h-4" /> Monthly Schedule ({viewMonth})
           </h3>
           <div className="grid grid-cols-7 gap-1">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-              <p key={d} className="text-[10px] text-center text-[var(--sn-text-muted)] font-bold uppercase pb-1">{d}</p>
+              <p key={d} className="text-[10px] text-center text-[var(--az-text-muted)] font-bold uppercase pb-1">{d}</p>
             ))}
             {calendar.map(day => (
-              <div key={day.date} className={'rounded-lg p-2 min-h-[60px] border ' + (day.hasAssignment ? 'border-[var(--sn-blue)]/30 bg-[var(--sn-blue)]/5' : 'border-[var(--sn-border)]')}>
-                <p className="text-xs font-bold text-[var(--sn-text)]">{day.day}</p>
+              <div key={day.date} className={'rounded-lg p-2 min-h-[60px] border ' + (day.hasAssignment ? 'border-[var(--az-info)]/30 bg-[var(--az-info)]/5' : 'border-[var(--az-border)]')}>
+                <p className="text-xs font-bold text-[var(--az-text)]">{day.day}</p>
                 {day.assignments?.map(a => (
-                  <div key={a.id} className="mt-1 text-[10px] rounded px-1 py-0.5 bg-[var(--sn-blue)]/10 text-[var(--sn-blue)] truncate">
+                  <div key={a.id} className="mt-1 text-[10px] rounded px-1 py-0.5 bg-[var(--az-info)]/10 text-[var(--az-info)] truncate">
                     {a.driverName} → {a.route}
                   </div>
                 ))}
@@ -199,7 +199,7 @@ export default function TransitDrivers() {
       {/* IROPS Reassignment Modal */}
       <Modal open={iropsOpen} onClose={() => setIropsOpen(false)} title="Emergency Vehicle Reassignment">
         <div className="space-y-4">
-          <div className="flex items-center gap-2 text-[var(--sn-red)]">
+          <div className="flex items-center gap-2 text-[var(--az-danger)]">
             <AlertCircle className="w-4 h-4" />
             <p className="text-sm font-medium">Vehicle breakdown? Reassign all passengers and cargo to a replacement vehicle.</p>
           </div>

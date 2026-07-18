@@ -271,8 +271,8 @@ export default function HotelFrontDesk() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold text-[var(--sn-text)]">Hotel Front Desk</h1>
-            <p className="text-sm text-[var(--sn-text-muted)] mt-0.5">Manage daily operations, bookings, and room allocations.</p>
+            <h1 className="text-xl font-bold text-[var(--az-text)]">Hotel Front Desk</h1>
+            <p className="text-sm text-[var(--az-text-muted)] mt-0.5">Manage daily operations, bookings, and room allocations.</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -300,9 +300,9 @@ export default function HotelFrontDesk() {
       content: (
         <div className="space-y-8 mt-6">
           {/* Quick Actions / Date Controls */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[var(--sn-card-bg)] p-4 rounded-xl border border-[var(--sn-border)]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[var(--az-surface)] p-4 rounded-xl border border-[var(--az-border)]">
             <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Viewing Date:</label>
+              <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Viewing Date:</label>
               <Input
                 type="date"
                 value={selectedDate}
@@ -324,38 +324,38 @@ export default function HotelFrontDesk() {
           {/* Grid of lists */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Arrivals Card */}
-            <Card className="flex flex-col h-full border border-[var(--sn-border)]">
-              <div className="p-4 border-b border-[var(--sn-border)] flex items-center justify-between bg-[rgba(var(--sn-purple-rgb),0.02)]">
+            <Card className="flex flex-col h-full border border-[var(--az-border)]">
+              <div className="p-4 border-b border-[var(--az-border)] flex items-center justify-between bg-[rgba(108,79,209,0.02)]">
                 <div className="flex items-center gap-2">
-                  <LogIn className="text-[var(--sn-purple)]" size={18} />
-                  <h3 className="font-semibold text-[var(--sn-text)]">Arrivals Today</h3>
+                  <LogIn className="text-[var(--az-accent)]" size={18} />
+                  <h3 className="font-semibold text-[var(--az-text)]">Arrivals Today</h3>
                 </div>
-                <Badge color="var(--sn-purple)">{arrivals.length}</Badge>
+                <Badge color="var(--az-accent)">{arrivals.length}</Badge>
               </div>
               <div className="p-4 flex-1 overflow-y-auto max-h-[500px] space-y-3">
                 {arrivals.length === 0 ? (
                   <Empty icon={Calendar} title="No arrivals remaining" description="All expected guests for today have been checked in or cancelled." />
                 ) : (
                   arrivals.map(guest => (
-                    <div key={guest.id} className="p-3 bg-[var(--sn-body-bg)] rounded-lg border border-[var(--sn-border)] hover:border-[var(--sn-purple)] transition-all">
+                    <div key={guest.id} className="p-3 bg-[var(--az-bg)] rounded-lg border border-[var(--az-border)] hover:border-[var(--az-accent)] transition-all">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <p className="font-semibold text-sm text-[var(--sn-text)]">{guest.customer?.username || guest.customerName || 'Guest'}</p>
-                          <p className="text-xs text-[var(--sn-text-muted)]">Room Type: {guest.roomType?.name || 'Standard'}</p>
+                          <p className="font-semibold text-sm text-[var(--az-text)]">{guest.customer?.username || guest.customerName || 'Guest'}</p>
+                          <p className="text-xs text-[var(--az-text-muted)]">Room Type: {guest.roomType?.name || 'Standard'}</p>
                         </div>
-                        <Badge color={guest.amountUsdc ? 'var(--sn-green)' : 'var(--sn-amber)'}>
+                        <Badge color={guest.amountUsdc ? 'var(--az-success)' : 'var(--az-warning)'}>
                           {guest.amountUsdc ? `${guest.amountUsdc} USDC` : 'No Deposit'}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--sn-border)]">
-                        <span className="text-xs text-[var(--sn-text-muted)]">
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--az-border)]">
+                        <span className="text-xs text-[var(--az-text-muted)]">
                           Check-in: {guest.startDatetime ? new Date(guest.startDatetime).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : 'Flexible'}
                         </span>
                         <Button
                           size="sm"
                           disabled={actionPending}
                           onClick={() => handleCheckIn(guest.id)}
-                          className="px-3 py-1 bg-[var(--sn-purple)] text-white hover:bg-[var(--sn-purple)] opacity-90 hover:opacity-100 flex items-center gap-1 text-xs"
+                          className="px-3 py-1 bg-[var(--az-accent)] text-white hover:bg-[var(--az-accent)] opacity-90 hover:opacity-100 flex items-center gap-1 text-xs"
                         >
                           <LogIn size={12} /> Check In
                         </Button>
@@ -367,37 +367,37 @@ export default function HotelFrontDesk() {
             </Card>
 
             {/* In-House Card */}
-            <Card className="flex flex-col h-full border border-[var(--sn-border)]">
-              <div className="p-4 border-b border-[var(--sn-border)] flex items-center justify-between bg-[rgba(var(--sn-blue-rgb),0.02)]">
+            <Card className="flex flex-col h-full border border-[var(--az-border)]">
+              <div className="p-4 border-b border-[var(--az-border)] flex items-center justify-between bg-[rgba(61,116,219,0.02)]">
                 <div className="flex items-center gap-2">
-                  <BedDouble className="text-[var(--sn-blue)]" size={18} />
-                  <h3 className="font-semibold text-[var(--sn-text)]">In-House Guests</h3>
+                  <BedDouble className="text-[var(--az-info)]" size={18} />
+                  <h3 className="font-semibold text-[var(--az-text)]">In-House Guests</h3>
                 </div>
-                <Badge color="var(--sn-blue)">{inHouse.length}</Badge>
+                <Badge color="var(--az-info)">{inHouse.length}</Badge>
               </div>
               <div className="p-4 flex-1 overflow-y-auto max-h-[500px] space-y-3">
                 {inHouse.length === 0 ? (
                   <Empty icon={BedDouble} title="No active guests" description="There are currently no guests registered in-house." />
                 ) : (
                   inHouse.map(guest => (
-                    <div key={guest.id} className="p-3 bg-[var(--sn-body-bg)] rounded-lg border border-[var(--sn-border)] hover:border-[var(--sn-blue)] transition-all">
+                    <div key={guest.id} className="p-3 bg-[var(--az-bg)] rounded-lg border border-[var(--az-border)] hover:border-[var(--az-info)] transition-all">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <p className="font-semibold text-sm text-[var(--sn-text)]">{guest.customer?.username || guest.customerName || 'Guest'}</p>
-                          <p className="text-xs text-[var(--sn-text-muted)]">Room {guest.room?.roomNumber || 'Unassigned'} ({guest.room?.roomType || 'Standard'})</p>
+                          <p className="font-semibold text-sm text-[var(--az-text)]">{guest.customer?.username || guest.customerName || 'Guest'}</p>
+                          <p className="text-xs text-[var(--az-text-muted)]">Room {guest.room?.roomNumber || 'Unassigned'} ({guest.room?.roomType || 'Standard'})</p>
                         </div>
-                        <Badge color="var(--sn-blue)">In House</Badge>
+                        <Badge color="var(--az-info)">In House</Badge>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 my-2 text-xs text-[var(--sn-text-muted)] bg-[var(--sn-card-bg)] p-2 rounded">
-                        <div>Nights Remaining: <strong className="text-[var(--sn-text)]">{guest.nightsRemaining ?? 1}</strong></div>
-                        <div>Total spend: <strong className="text-[var(--sn-text)]">{guest.amountUsdc || 0} USDC</strong></div>
+                      <div className="grid grid-cols-2 gap-2 my-2 text-xs text-[var(--az-text-muted)] bg-[var(--az-surface)] p-2 rounded">
+                        <div>Nights Remaining: <strong className="text-[var(--az-text)]">{guest.nightsRemaining ?? 1}</strong></div>
+                        <div>Total spend: <strong className="text-[var(--az-text)]">{guest.amountUsdc || 0} USDC</strong></div>
                       </div>
-                      <div className="flex justify-end gap-2 mt-3 pt-2 border-t border-[var(--sn-border)]">
+                      <div className="flex justify-end gap-2 mt-3 pt-2 border-t border-[var(--az-border)]">
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => openMoveRoomModal(guest)}
-                          className="px-2 py-1 text-xs text-[var(--sn-text-muted)] hover:text-[var(--sn-text)] border border-[var(--sn-border)] flex items-center gap-1"
+                          className="px-2 py-1 text-xs text-[var(--az-text-muted)] hover:text-[var(--az-text)] border border-[var(--az-border)] flex items-center gap-1"
                         >
                           <Move size={12} /> Move Room
                         </Button>
@@ -409,38 +409,38 @@ export default function HotelFrontDesk() {
             </Card>
 
             {/* Departures Card */}
-            <Card className="flex flex-col h-full border border-[var(--sn-border)]">
-              <div className="p-4 border-b border-[var(--sn-border)] flex items-center justify-between bg-[rgba(var(--sn-amber-rgb),0.02)]">
+            <Card className="flex flex-col h-full border border-[var(--az-border)]">
+              <div className="p-4 border-b border-[var(--az-border)] flex items-center justify-between bg-[rgba(222,168,50,0.02)]">
                 <div className="flex items-center gap-2">
-                  <LogOut className="text-[var(--sn-amber)]" size={18} />
-                  <h3 className="font-semibold text-[var(--sn-text)]">Departures Today</h3>
+                  <LogOut className="text-[var(--az-warning)]" size={18} />
+                  <h3 className="font-semibold text-[var(--az-text)]">Departures Today</h3>
                 </div>
-                <Badge color="var(--sn-amber)">{departures.length}</Badge>
+                <Badge color="var(--az-warning)">{departures.length}</Badge>
               </div>
               <div className="p-4 flex-1 overflow-y-auto max-h-[500px] space-y-3">
                 {departures.length === 0 ? (
                   <Empty icon={Calendar} title="No departures today" description="No departures are scheduled or outstanding for today." />
                 ) : (
                   departures.map(guest => (
-                    <div key={guest.id} className="p-3 bg-[var(--sn-body-bg)] rounded-lg border border-[var(--sn-border)] hover:border-[var(--sn-amber)] transition-all">
+                    <div key={guest.id} className="p-3 bg-[var(--az-bg)] rounded-lg border border-[var(--az-border)] hover:border-[var(--az-warning)] transition-all">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <p className="font-semibold text-sm text-[var(--sn-text)]">{guest.customer?.username || guest.customerName || 'Guest'}</p>
-                          <p className="text-xs text-[var(--sn-text-muted)]">Room {guest.room?.roomNumber || 'Unassigned'}</p>
+                          <p className="font-semibold text-sm text-[var(--az-text)]">{guest.customer?.username || guest.customerName || 'Guest'}</p>
+                          <p className="text-xs text-[var(--az-text-muted)]">Room {guest.room?.roomNumber || 'Unassigned'}</p>
                         </div>
-                        <Badge color={guest.amountUsdc ? 'var(--sn-red)' : 'var(--sn-green)'}>
+                        <Badge color={guest.amountUsdc ? 'var(--az-danger)' : 'var(--az-success)'}>
                           {guest.amountUsdc ? `${guest.amountUsdc} USDC Due` : 'No Balance'}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--sn-border)]">
-                        <span className="text-xs text-[var(--sn-text-muted)]">
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--az-border)]">
+                        <span className="text-xs text-[var(--az-text-muted)]">
                           Checkout: {guest.endDatetime ? new Date(guest.endDatetime).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : 'Flexible'}
                         </span>
                         <Button
                           size="sm"
                           disabled={actionPending}
                           onClick={() => openCheckoutConfirm(guest)}
-                          className="px-3 py-1 bg-[var(--sn-amber)] text-white hover:bg-[var(--sn-amber)] opacity-90 hover:opacity-100 flex items-center gap-1 text-xs"
+                          className="px-3 py-1 bg-[var(--az-warning)] text-white hover:bg-[var(--az-warning)] opacity-90 hover:opacity-100 flex items-center gap-1 text-xs"
                         >
                           <LogOut size={12} /> Check Out
                         </Button>
@@ -461,33 +461,33 @@ export default function HotelFrontDesk() {
       content: (
         <div className="space-y-6 mt-6">
           {/* Room Rack Legend */}
-          <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-[var(--sn-card-bg)] border border-[var(--sn-border)] rounded-xl">
+          <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-[var(--az-surface)] border border-[var(--az-border)] rounded-xl">
             <div className="flex flex-wrap gap-4 items-center">
-              <span className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider mr-2">Status Legend:</span>
+              <span className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider mr-2">Status Legend:</span>
               <div className="flex items-center gap-1.5 text-xs">
-                <span className="w-3.5 h-3.5 rounded bg-[var(--sn-green)] inline-block" />
+                <span className="w-3.5 h-3.5 rounded bg-[var(--az-success)] inline-block" />
                 <span>Available</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
-                <span className="w-3.5 h-3.5 rounded bg-[var(--sn-blue)] inline-block" />
+                <span className="w-3.5 h-3.5 rounded bg-[var(--az-info)] inline-block" />
                 <span>Occupied</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
-                <span className="w-3.5 h-3.5 rounded bg-[var(--sn-purple)] inline-block" />
+                <span className="w-3.5 h-3.5 rounded bg-[var(--az-accent)] inline-block" />
                 <span>Reserved</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
-                <span className="w-3.5 h-3.5 rounded bg-[var(--sn-amber)] inline-block" />
+                <span className="w-3.5 h-3.5 rounded bg-[var(--az-warning)] inline-block" />
                 <span>Dirty / Cleaning</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
-                <span className="w-3.5 h-3.5 rounded bg-[var(--sn-red)] inline-block" />
+                <span className="w-3.5 h-3.5 rounded bg-[var(--az-danger)] inline-block" />
                 <span>Maintenance</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Start Date:</label>
+              <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Start Date:</label>
               <Input
                 type="date"
                 value={selectedDate}
@@ -498,15 +498,15 @@ export default function HotelFrontDesk() {
           </div>
 
           {/* Grid Rack View */}
-          <Card className="overflow-x-auto border border-[var(--sn-border)] p-4">
+          <Card className="overflow-x-auto border border-[var(--az-border)] p-4">
             <table className="w-full border-collapse min-w-[800px]">
               <thead>
                 <tr>
-                  <th className="p-3 text-left text-xs font-semibold text-[var(--sn-text-muted)] border-b border-[var(--sn-border)] uppercase tracking-wider min-w-[200px]">
+                  <th className="p-3 text-left text-xs font-semibold text-[var(--az-text-muted)] border-b border-[var(--az-border)] uppercase tracking-wider min-w-[200px]">
                     Room Information
                   </th>
                   {rackDates.map((rd, i) => (
-                    <th key={rd.dateStr} className={`p-3 text-center text-xs font-semibold border-b border-[var(--sn-border)] uppercase tracking-wider ${i === 0 ? 'text-[var(--sn-purple)] font-bold bg-[rgba(var(--sn-purple-rgb),0.02)]' : 'text-[var(--sn-text-muted)]'}`}>
+                    <th key={rd.dateStr} className={`p-3 text-center text-xs font-semibold border-b border-[var(--az-border)] uppercase tracking-wider ${i === 0 ? 'text-[var(--az-accent)] font-bold bg-[rgba(108,79,209,0.02)]' : 'text-[var(--az-text-muted)]'}`}>
                       {rd.label} {i === 0 && '(Today)'}
                     </th>
                   ))}
@@ -515,7 +515,7 @@ export default function HotelFrontDesk() {
               <tbody>
                 {Object.keys(roomsByFloor).length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-sm text-[var(--sn-text-muted)]">
+                    <td colSpan={8} className="p-8 text-center text-sm text-[var(--az-text-muted)]">
                       No hotel rooms configured or found.
                     </td>
                   </tr>
@@ -525,8 +525,8 @@ export default function HotelFrontDesk() {
                       <td colSpan={8} className="p-0">
                         <table className="w-full table-fixed">
                           <thead>
-                            <tr className="bg-[var(--sn-body-bg)]">
-                              <td colSpan={8} className="p-2 text-xs font-bold text-[var(--sn-text)] border-b border-t border-[var(--sn-border)]">
+                            <tr className="bg-[var(--az-bg)]">
+                              <td colSpan={8} className="p-2 text-xs font-bold text-[var(--az-text)] border-b border-t border-[var(--az-border)]">
                                 {floor}
                               </td>
                             </tr>
@@ -534,13 +534,13 @@ export default function HotelFrontDesk() {
                           <tbody>
                             {rooms.map(room => {
                               return (
-                                <tr key={room.id} className="hover:bg-[rgba(var(--sn-border-rgb),0.1)]">
+                                <tr key={room.id} className="hover:bg-[rgba(214,210,203,0.1)]">
                                   {/* Room description column */}
-                                  <td className="p-3 text-sm border-b border-[var(--sn-border)] w-[200px]">
-                                    <div className="font-semibold text-[var(--sn-text)]">
+                                  <td className="p-3 text-sm border-b border-[var(--az-border)] w-[200px]">
+                                    <div className="font-semibold text-[var(--az-text)]">
                                       Room {room.roomNumber}
                                     </div>
-                                    <div className="text-xs text-[var(--sn-text-muted)] capitalize">
+                                    <div className="text-xs text-[var(--az-text-muted)] capitalize">
                                       {room.roomType || 'Standard'}
                                     </div>
                                   </td>
@@ -572,16 +572,16 @@ export default function HotelFrontDesk() {
                                     }
 
                                     // Color mapping
-                                    let cellColor = 'var(--sn-green)';
-                                    if (status === 'OCCUPIED') cellColor = 'var(--sn-blue)';
-                                    if (status === 'RESERVED') cellColor = 'var(--sn-purple)';
-                                    if (status === 'DIRTY') cellColor = 'var(--sn-amber)';
-                                    if (status === 'MAINTENANCE') cellColor = 'var(--sn-red)';
+                                    let cellColor = 'var(--az-success)';
+                                    if (status === 'OCCUPIED') cellColor = 'var(--az-info)';
+                                    if (status === 'RESERVED') cellColor = 'var(--az-accent)';
+                                    if (status === 'DIRTY') cellColor = 'var(--az-warning)';
+                                    if (status === 'MAINTENANCE') cellColor = 'var(--az-danger)';
 
                                     const displayTooltip = status === 'OCCUPIED' || status === 'RESERVED';
 
                                     return (
-                                      <td key={rd.dateStr} className="p-2 border-b border-r border-[var(--sn-border)] text-center relative">
+                                      <td key={rd.dateStr} className="p-2 border-b border-r border-[var(--az-border)] text-center relative">
                                         {displayTooltip ? (
                                           <Tooltip
                                             content={
@@ -642,13 +642,13 @@ export default function HotelFrontDesk() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--sn-text)] tracking-tight">Hotel Front Desk</h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-0.5">
+          <h1 className="text-2xl font-bold text-[var(--az-text)] tracking-tight">Hotel Front Desk</h1>
+          <p className="text-sm text-[var(--az-text-muted)] mt-0.5">
             Overview of arrivals, in-house guests, checkouts and reservations.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={loadData} className="border border-[var(--sn-border)] flex items-center gap-1.5 text-sm">
+          <Button variant="ghost" onClick={loadData} className="border border-[var(--az-border)] flex items-center gap-1.5 text-sm">
             <RefreshCw size={14} /> Refresh Desk
           </Button>
         </div>
@@ -660,25 +660,25 @@ export default function HotelFrontDesk() {
           label="Arrivals Today"
           value={arrivals.length}
           icon={LogIn}
-          color="var(--sn-purple)"
+          color="var(--az-accent)"
         />
         <StatCard
           label="In-House Guests"
           value={inHouse.length}
           icon={BedDouble}
-          color="var(--sn-blue)"
+          color="var(--az-info)"
         />
         <StatCard
           label="Departures Today"
           value={departures.length}
           icon={LogOut}
-          color="var(--sn-amber)"
+          color="var(--az-warning)"
         />
         <StatCard
           label="Available Rooms"
           value={availableRoomsCount}
           icon={Calendar}
-          color="var(--sn-green)"
+          color="var(--az-success)"
         />
       </div>
 
@@ -755,7 +755,7 @@ export default function HotelFrontDesk() {
             onChange={(e) => setWalkInForm(prev => ({ ...prev, notes: e.target.value }))}
           />
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--az-border)]">
             <Button variant="ghost" type="button" onClick={() => setWalkInOpen(false)}>
               Cancel
             </Button>
@@ -774,9 +774,9 @@ export default function HotelFrontDesk() {
         className="max-w-md"
       >
         <form onSubmit={handleMoveRoomSubmit} className="space-y-4 pt-3">
-          <div className="bg-[var(--sn-body-bg)] p-3 rounded border border-[var(--sn-border)] text-sm space-y-1">
-            <p className="text-[var(--sn-text-muted)]">Guest Name: <strong className="text-[var(--sn-text)]">{moveRoomForm.guestName}</strong></p>
-            <p className="text-[var(--sn-text-muted)]">Current Room: <strong className="text-[var(--sn-text)]">{moveRoomForm.currentRoomNumber}</strong></p>
+          <div className="bg-[var(--az-bg)] p-3 rounded border border-[var(--az-border)] text-sm space-y-1">
+            <p className="text-[var(--az-text-muted)]">Guest Name: <strong className="text-[var(--az-text)]">{moveRoomForm.guestName}</strong></p>
+            <p className="text-[var(--az-text-muted)]">Current Room: <strong className="text-[var(--az-text)]">{moveRoomForm.currentRoomNumber}</strong></p>
           </div>
 
           <Select
@@ -801,7 +801,7 @@ export default function HotelFrontDesk() {
             onChange={(e) => setMoveRoomForm(prev => ({ ...prev, reason: e.target.value }))}
           />
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--az-border)]">
             <Button variant="ghost" type="button" onClick={() => setMoveRoomOpen(false)}>
               Cancel
             </Button>
@@ -820,34 +820,34 @@ export default function HotelFrontDesk() {
         className="max-w-md"
       >
         <div className="space-y-4 pt-3">
-          <div className="bg-[rgba(var(--sn-amber-rgb),0.05)] border border-[var(--sn-amber)] p-4 rounded-lg flex items-start gap-3">
-            <Info className="text-[var(--sn-amber)] shrink-0 mt-0.5" size={18} />
+          <div className="bg-[rgba(222,168,50,0.05)] border border-[var(--az-warning)] p-4 rounded-lg flex items-start gap-3">
+            <Info className="text-[var(--az-warning)] shrink-0 mt-0.5" size={18} />
             <div className="text-sm">
-              <p className="font-semibold text-[var(--sn-text)]">Review Checkout Details</p>
-              <p className="text-[var(--sn-text-muted)] mt-1">
-                You are checking out <strong className="text-[var(--sn-text)]">{checkoutConfirmData.guestName}</strong> from Room <strong className="text-[var(--sn-text)]">{checkoutConfirmData.roomNumber}</strong>.
+              <p className="font-semibold text-[var(--az-text)]">Review Checkout Details</p>
+              <p className="text-[var(--az-text-muted)] mt-1">
+                You are checking out <strong className="text-[var(--az-text)]">{checkoutConfirmData.guestName}</strong> from Room <strong className="text-[var(--az-text)]">{checkoutConfirmData.roomNumber}</strong>.
               </p>
             </div>
           </div>
 
-          <div className="p-3 bg-[var(--sn-body-bg)] rounded border border-[var(--sn-border)] space-y-2 text-sm">
+          <div className="p-3 bg-[var(--az-bg)] rounded border border-[var(--az-border)] space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-[var(--sn-text-muted)]">Outstanding Balance:</span>
-              <strong className={checkoutConfirmData.balanceDue > 0 ? 'text-[var(--sn-red)] font-bold' : 'text-[var(--sn-green)] font-bold'}>
+              <span className="text-[var(--az-text-muted)]">Outstanding Balance:</span>
+              <strong className={checkoutConfirmData.balanceDue > 0 ? 'text-[var(--az-danger)] font-bold' : 'text-[var(--az-success)] font-bold'}>
                 {checkoutConfirmData.balanceDue ? `${checkoutConfirmData.balanceDue} USDC` : 'Settled'}
               </strong>
             </div>
-            <div className="flex justify-between border-t border-[var(--sn-border)] pt-2 mt-1">
-              <span className="text-[var(--sn-text-muted)]">Housekeeping Task:</span>
-              <span className="text-[var(--sn-text)] font-medium">Automatic Clean Created (DIRTY)</span>
+            <div className="flex justify-between border-t border-[var(--az-border)] pt-2 mt-1">
+              <span className="text-[var(--az-text-muted)]">Housekeeping Task:</span>
+              <span className="text-[var(--az-text)] font-medium">Automatic Clean Created (DIRTY)</span>
             </div>
           </div>
 
-          <p className="text-xs text-[var(--sn-text-muted)] italic">
+          <p className="text-xs text-[var(--az-text-muted)] italic">
             Note: Once finalized, Room {checkoutConfirmData.roomNumber} will immediately set to DIRTY status to notify cleaning crews.
           </p>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--az-border)]">
             <Button variant="ghost" type="button" onClick={() => setCheckoutConfirmOpen(false)}>
               Cancel
             </Button>
@@ -855,7 +855,7 @@ export default function HotelFrontDesk() {
               onClick={handleCheckOut}
               disabled={actionPending}
               loading={actionPending}
-              className="bg-[var(--sn-amber)] hover:bg-[var(--sn-amber)] text-white"
+              className="bg-[var(--az-warning)] hover:bg-[var(--az-warning)] text-white"
             >
               Confirm Checkout
             </Button>

@@ -1,31 +1,39 @@
+/**
+ * Dashboard — Sentry-inspired widget-based dashboard.
+ * Business-type-aware: shows different widgets for transit, restaurant, hotel, retail, etc.
+ *
+ * Sentry design tenets applied:
+ * - Widget-based layout (like Sentry's dashboard widgets)
+ * - Placeholders instead of loading spinners
+ * - Data-dense, clean visual hierarchy
+ * - Global date range context
+ * - Type-specific widget sections
+ */
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { orders as ordersApi, invoices as invoicesApi } from '@/lib/api';
+import { orders as ordersApi, invoices as invoicesApi, request } from '@/lib/api';
 import { reservations as resApi, transit as transitApi, checkIn as checkInApi, reviews as reviewsApi } from '@/lib/marketplaceApi';
 import { useAuth } from '@/lib/AuthContext';
 import { Widget, WidgetStat, WidgetRow } from '@/components/ui/Widget';
 import { KpiCard } from '@/components/charts/KpiCard';
 import { Badge, Skeleton, Card } from '@/components/ui';
 import { GlassPanel } from '@/components/ui/GlassPanel';
-import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import { fmtUSDC, fmt, relativeTime, ORDER_STATUS_META, KYB_STATUS_META, cn } from '@/lib/utils';
 import { getTypeConfig } from '@/lib/businessTypes';
 import { Link } from 'react-router-dom';
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  AreaChart, Area, PieChart, Pie, Cell
-} from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { motion } from 'framer-motion';
+import OnboardingChecklist from '@/components/ui/OnboardingChecklist';
 import {
   ShoppingBag, TrendingUp, Clock, CheckCircle2,
   AlertTriangle, ArrowRight, Package, FileCheck,
   Receipt, DollarSign, Bus, Users, CalendarCheck,
-  Star, UserCheck, Route, Sparkles,
+  QrCode, Star, UserCheck, UserX, Route, Sparkles,
   UtensilsCrossed, Building2, Briefcase, Store,
-  Utensils, Hotel, ArrowUpRight, TrendingDown,
-  Coffee, Calendar, MapPin, ClipboardList, PlusCircle
+  Utensils, Hotel, ArrowUpRight, Plus, CalendarPlus, UserPlus, Tag
 } from 'lucide-react';
 
+// ── Revenue computation ──────────────────────────────────────────────────────
 function computeDailyRevenue(orders, days = 30) {
   const map = {};
   const now = new Date();
@@ -36,7 +44,7 @@ function computeDailyRevenue(orders, days = 30) {
     map[key] = { date: key, label: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }), revenue: 0 };
   }
   orders
-    .filter(o => ['COMPLETED', 'DELIVERED', 'PAID'].includes(o.status))
+    .filter(o => o.status === 'COMPLETED')
     .forEach(o => {
       const key = new Date(o.createdAt).toISOString().split('T')[0];
       if (map[key]) map[key].revenue += Number(o.amountUsdc) || 0;
@@ -45,13 +53,13 @@ function computeDailyRevenue(orders, days = 30) {
 }
 
 function computeFunnel(orders) {
-  const funded = ['PAID', 'DELIVERED', 'COMPLETED', 'DISPUTED'];
+  const funded    = ['PAID', 'DELIVERED', 'COMPLETED', 'DISPUTED'];
   const delivered = ['DELIVERED', 'COMPLETED'];
   return [
-    { label: 'Total Orders', count: orders.length, color: 'var(--az-accent)' },
-    { label: 'Funded / Paid', count: orders.filter(o => funded.includes(o.status)).length, color: '#8B5CF6' },
-    { label: 'Delivered', count: orders.filter(o => delivered.includes(o.status)).length, color: '#3B82F6' },
-    { label: 'Completed', count: orders.filter(o => o.status === 'COMPLETED').length, color: '#10B981' },
+    { label: 'Total',     count: orders.length,                                          color: 'var(--az-info)' },
+    { label: 'Paid',      count: orders.filter(o => funded.includes(o.status)).length,    color: 'var(--az-accent)' },
+    { label: 'Delivered', count: orders.filter(o => delivered.includes(o.status)).length, color: 'var(--az-warning)' },
+    { label: 'Completed', count: orders.filter(o => o.status === 'COMPLETED').length,      color: 'var(--az-success)' },
   ];
 }
 
@@ -59,568 +67,792 @@ const TYPE_ICONS = { Bus, UtensilsCrossed, Building2, Briefcase, Store, Shopping
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.03
+    }
+  }
 };
+
 const itemVariants = {
   hidden: { opacity: 0, y: 15 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 20 } }
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
 };
 
-export default function Dashboard() {
-  const { isAdmin, adminBusinesses, bizProfile, selectedBusinessId, selectBusiness } = useAuth();
-  const [range, setRange] = useState('30d');
+// ── At-Risk Widget ───────────────────────────────────────────────────────────
+function AtRiskWidget() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['at-risk'],
+    queryFn: () => request('/api/business-os/dashboard/at-risk'),
+    refetchInterval: 60_000, // refresh every minute
+  });
 
-  if (isAdmin && !selectedBusinessId) {
-    const grouped = (adminBusinesses || []).reduce((acc, b) => {
-      (acc[b.category] = acc[b.category] || []).push(b);
-      return acc;
-    }, {});
+  const items = data?.items || [];
 
+  if (isLoading) {
     return (
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        <header>
-          <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--az-text)' }}>Marketplace Overview</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--az-text-muted)' }}>Select a business to view their dedicated portal.</p>
-        </header>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            ['Total Businesses', (adminBusinesses || []).length, 'var(--az-accent)'],
-            ['Restaurants', grouped['FOOD_BEVERAGE']?.length || 0, 'var(--az-warning)'],
-            ['Hotels', grouped['REAL_ESTATE']?.length || 0, 'var(--az-info)'],
-            ['Transit', grouped['LOGISTICS']?.length || 0, 'var(--az-success)'],
-          ].map(([label, val, color]) => (
-            <GlassPanel key={label} className="p-5 border" style={{ borderColor: 'var(--az-border)' }}>
-              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--az-text-muted)' }}>{label}</p>
-              <p className="text-3xl font-black mt-1" style={{ color }}>{val}</p>
-            </GlassPanel>
-          ))}
+      <GlassPanel className="p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border animate-pulse" />
+          <div className="h-4 w-32 rounded bg-az-bg-alt animate-pulse" />
         </div>
-        {Object.entries(grouped).map(([category, businesses]) => (
-          <div key={category} className="space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--az-accent)' }}>{category.replace('_', ' ')}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {businesses.map(b => (
-                <button key={b.id} onClick={() => { localStorage.setItem('admin_selected_biz', b.id); selectBusiness(b.id); }}
-                  className="text-left rounded-xl border p-5 transition-all hover:-translate-y-1"
-                  style={{ background: 'var(--az-surface)', borderColor: 'var(--az-border)' }}>
-                  <p className="text-sm font-bold truncate" style={{ color: 'var(--az-text)' }}>{b.businessName}</p>
-                  <p className="text-xs mt-1 font-mono truncate" style={{ color: 'var(--az-text-muted)' }}>ID: {b.azamanId || b.bizId}</p>
-                  <div className="flex gap-2 mt-4">
-                    <Badge variant={b.kybStatus === 'VERIFIED' ? 'success' : 'secondary'}>{b.kybStatus}</Badge>
-                    {b._count && <Badge variant="outline">{b._count.orders || 0} orders</Badge>}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      </GlassPanel>
     );
   }
 
+  if (items.length === 0) {
+    return (
+      <GlassPanel className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+            <CheckCircle2 className="w-5 h-5 text-az-accent" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-az-text">All clear</p>
+            <p className="text-xs text-az-text-secondary">No urgent items need your attention right now.</p>
+          </div>
+        </div>
+      </GlassPanel>
+    );
+  }
+
+  const urgentCount = items.filter(i => i.severity === 'urgent').length;
+  const warningCount = items.length - urgentCount;
+
+  const SEVERITY_COLORS = {
+    urgent: 'var(--az-danger)',
+    warning: 'var(--az-warning)',
+    info: 'var(--az-info)',
+  };
+
+  const TYPE_ICONS = {
+    HOUSEKEEPING_OVERDUE: Building2,
+    KITCHEN_AGING: Utensils,
+    VEHICLE_MAINTENANCE: Bus,
+    SHIFT_SWAP_PENDING: Users,
+    TIME_OFF_PENDING: CalendarCheck,
+    NEGATIVE_REVIEW: Star,
+    RESERVATION_PENDING: CalendarCheck,
+    LOW_STOCK: Package,
+  };
+
+  return (
+    <GlassPanel className="p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-az-md flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--az-danger) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--az-danger) 30%, transparent)' }}>
+            <AlertTriangle className="w-5 h-5" style={{ color: 'var(--az-danger)' }} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-az-text">Needs Attention</h3>
+            <p className="text-xs text-az-text-secondary">
+              {urgentCount > 0 && <span className="text-az-danger font-medium">{urgentCount} urgent</span>}
+              {urgentCount > 0 && warningCount > 0 && ' · '}
+              {warningCount > 0 && <span>{warningCount} warning{warningCount > 1 ? 's' : ''}</span>}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2 max-h-[280px] overflow-y-auto">
+        {items.map((item, i) => {
+          const Icon = TYPE_ICONS[item.type] || AlertTriangle;
+          const color = SEVERITY_COLORS[item.severity] || SEVERITY_COLORS.warning;
+          return (
+            <Link
+              key={i}
+              to={item.link || '#'}
+              className="flex items-center gap-3 p-2.5 rounded-az-md border border-az-border bg-az-surface hover:bg-az-surface-solid transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-az-md flex items-center justify-center flex-shrink-0" style={{ background: `color-mix(in srgb, ${color} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 30%, transparent)` }}>
+                <Icon className="w-4 h-4" style={{ color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-az-text truncate">{item.title}</p>
+                <p className="text-[11px] text-az-text-secondary truncate">{item.subtitle}</p>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-az-text-muted flex-shrink-0 group-hover:text-az-accent transition-colors" />
+            </Link>
+          );
+        })}
+      </div>
+    </GlassPanel>
+  );
+}
+
+export default function Dashboard() {
+  const { isAdmin, adminBusinesses, bizProfile, selectedBusinessId, selectBusiness } = useAuth();
+
+  if (isAdmin && !selectedBusinessId) {
+      const grouped = adminBusinesses.reduce((acc, b) => {
+          (acc[b.category] = acc[b.category] || []).push(b);
+          return acc;
+      }, {});
+
+      return (
+          <div className="p-6 space-y-6 max-w-7xl mx-auto">
+              <header>
+                  <h1 className="text-2xl font-bold text-az-text">Marketplace Overview</h1>
+                  <p className="text-sm text-az-text-muted mt-1">Select a business from the sidebar to manage their portal.</p>
+              </header>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <GlassPanel className="p-4">
+                      <p className="text-xs text-az-text-muted font-semibold uppercase">Total</p>
+                      <p className="text-2xl font-bold text-az-text mt-1">{adminBusinesses.length}</p>
+                  </GlassPanel>
+                  <GlassPanel className="p-4">
+                      <p className="text-xs text-az-text-muted font-semibold uppercase">Restaurants</p>
+                      <p className="text-2xl font-bold text-az-text mt-1">{grouped['FOOD_BEVERAGE']?.length || 0}</p>
+                  </GlassPanel>
+                  <GlassPanel className="p-4">
+                      <p className="text-xs text-az-text-muted font-semibold uppercase">Hotels</p>
+                      <p className="text-2xl font-bold text-az-text mt-1">{grouped['REAL_ESTATE']?.length || 0}</p>
+                  </GlassPanel>
+                  <GlassPanel className="p-4">
+                      <p className="text-xs text-az-text-muted font-semibold uppercase">Transit</p>
+                      <p className="text-2xl font-bold text-az-text mt-1">{grouped['LOGISTICS']?.length || 0}</p>
+                  </GlassPanel>
+              </div>
+
+              {Object.entries(grouped).map(([category, businesses]) => (
+                  <div key={category} className="space-y-3">
+                      <h2 className="text-sm font-bold text-az-text uppercase tracking-wider">{category}</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {businesses.map(b => (
+                              <button
+                                  key={b.id}
+                                  onClick={() => {
+                                      localStorage.setItem('admin_selected_biz', b.id);
+                                      selectBusiness(b.id);
+                                  }}
+                                  className="text-left rounded-az-lg border border-az-border bg-az-surface backdrop-blur-glass hover:bg-az-surface-solid hover:border-az-accent p-4 transition-all"
+                              >
+                                  <p className="text-sm font-bold text-az-text truncate">{b.businessName}</p>
+                                  <p className="text-xs text-az-text-muted mt-1 truncate">ID: {b.azamanId || b.bizId}</p>
+                                  <div className="flex gap-2 mt-3">
+                                      <Badge variant={b.kybStatus === 'VERIFIED' ? 'success' : 'secondary'}>{b.kybStatus}</Badge>
+                                      {b._count && (
+                                          <Badge variant="outline">{b._count.orders || 0} orders</Badge>
+                                      )}
+                                  </div>
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+              ))}
+          </div>
+      );
+  }
+
   const typeConfig = getTypeConfig(bizProfile);
-  const TypeIcon = TYPE_ICONS[typeConfig?.icon] || Store;
+  const TypeIcon = TYPE_ICONS[typeConfig.icon] || Store;
 
+  // ── Core queries (shared across all business types) ──────────────────────
   const { data: statsData, isLoading: statsLoading } = useQuery({
-    queryKey: ['biz-stats'], queryFn: () => ordersApi.stats(), refetchInterval: 60_000,
+    queryKey: ['biz-stats'],
+    queryFn:  () => ordersApi.stats(),
+    refetchInterval: 60_000,
   });
+
   const { data: recentData, isLoading: recentLoading } = useQuery({
-    queryKey: ['recent-orders'], queryFn: () => ordersApi.list({ limit: 10 }), refetchInterval: 30_000,
+    queryKey: ['recent-orders'],
+    queryFn:  () => ordersApi.list({ limit: 5 }),
+    refetchInterval: 30_000,
   });
+
   const { data: analyticsData, isLoading: analyticsLoading } = useQuery({
-    queryKey: ['dashboard-analytics-orders'], queryFn: () => ordersApi.list({ limit: 50 }), refetchInterval: 60_000,
+    queryKey: ['dashboard-analytics-orders'],
+    queryFn:  () => ordersApi.list({ limit: 50 }),
+    refetchInterval: 60_000,
   });
+
   const { data: invoiceData } = useQuery({
-    queryKey: ['dashboard-invoices'], queryFn: () => invoicesApi.list({ limit: 50 }), refetchInterval: 60_000,
+    queryKey: ['dashboard-invoices'],
+    queryFn:  () => invoicesApi.list({ limit: 50 }),
+    refetchInterval: 60_000,
   });
+
+  // ── Type-specific queries ────────────────────────────────────────────────
   const { data: resStatsData } = useQuery({
-    queryKey: ['reservation-stats'], queryFn: () => resApi.stats(),
-    enabled: !!(typeConfig?.navItems?.includes('reservations')),
+    queryKey: ['reservation-stats'],
+    queryFn:  () => resApi.stats(),
+    enabled: typeConfig.navItems.includes('reservations'),
   });
+
   const { data: transitData } = useQuery({
-    queryKey: ['transit-trips-dashboard'], queryFn: () => transitApi.list(),
-    enabled: typeConfig?.type === 'TRANSIT',
+    queryKey: ['transit-trips-dashboard'],
+    queryFn:  () => transitApi.list(),
+    enabled: typeConfig.type === 'TRANSIT',
   });
+
+  const { data: checkInStatsData } = useQuery({
+    queryKey: ['checkin-stats-dashboard'],
+    queryFn:  () => checkInApi.todayStats(),
+    enabled: typeConfig.navItems.includes('checkin'),
+    retry: false,
+  });
+
   const { data: reviewStatsData } = useQuery({
-    queryKey: ['review-stats-dashboard'], queryFn: () => reviewsApi.stats(), refetchInterval: 60_000,
+    queryKey: ['review-stats-dashboard'],
+    queryFn:  () => reviewsApi.stats(),
+    enabled: true,
+    retry: false,
   });
 
-  const rangeDays = useMemo(() => {
-    if (range === '7d') return 7;
-    if (range === '90d') return 90;
-    return 30;
-  }, [range]);
-
-  const stats = statsData?.stats || {};
+  // ── Computed values ──────────────────────────────────────────────────────
+  const stats  = statsData?.stats  || {};
   const recent = recentData?.orders || [];
   const analyticsOrders = analyticsData?.orders || [];
+  const allInvoices = invoiceData?.invoices || [];
 
-  const dailyRevenue = useMemo(() => computeDailyRevenue(analyticsOrders, rangeDays), [analyticsOrders, rangeDays]);
-  const funnel = useMemo(() => computeFunnel(analyticsOrders), [analyticsOrders]);
-  const totalRevSum = useMemo(() => dailyRevenue.reduce((sum, d) => sum + d.revenue, 0), [dailyRevenue]);
+  const dailyRevenue = useMemo(() => computeDailyRevenue(analyticsOrders, 30), [analyticsOrders]);
+  const funnel       = useMemo(() => computeFunnel(analyticsOrders), [analyticsOrders]);
+  const hasRevenue   = dailyRevenue.some(d => d.revenue > 0);
+  const funnelMax    = Math.max(funnel[0]?.count || 0, 1);
 
-  const revSparkline = useMemo(() => dailyRevenue.map(d => d.revenue), [dailyRevenue]);
-  const orderSparkline = useMemo(() => {
-    const map = {};
-    const now = new Date();
-    for (let i = rangeDays - 1; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      map[d.toISOString().split('T')[0]] = 0;
-    }
-    analyticsOrders.forEach(o => {
-      const key = new Date(o.createdAt).toISOString().split('T')[0];
-      if (key in map) map[key] += 1;
-    });
-    return Object.values(map);
-  }, [analyticsOrders, rangeDays]);
+  const invoiceStats = useMemo(() => ({
+    sent: allInvoices.filter(i => i.status === 'SENT').length,
+    paid: allInvoices.filter(i => i.status === 'PAID').length,
+    paidRevenue: allInvoices.filter(i => i.status === 'PAID').reduce((s, i) => s + (Number(i.billTotalUsdc) || 0), 0),
+  }), [allInvoices]);
 
   const resStats = resStatsData?.stats || {};
+  const checkInStats = checkInStatsData?.stats || {};
   const reviewStats = reviewStatsData?.stats || {};
   const trips = transitData?.trips || [];
 
-  const topCustomers = useMemo(() => {
-    const custMap = {};
-    analyticsOrders.forEach(o => {
-      if (!o.customer) return;
-      const key = o.customer.walletAddress || o.customer.email || 'anon';
-      if (!custMap[key]) {
-        custMap[key] = { name: o.customer.name || 'Anonymous Guest', address: o.customer.walletAddress ? `${o.customer.walletAddress.slice(0,6)}...${o.customer.walletAddress.slice(-4)}` : '—', avatarUrl: o.customer.avatarUrl, totalSpend: 0, ordersCount: 0 };
-      }
-      custMap[key].totalSpend += Number(o.amountUsdc) || 0;
-      custMap[key].ordersCount += 1;
-    });
-    return Object.values(custMap).sort((a, b) => b.totalSpend - a.totalSpend).slice(0, 5);
-  }, [analyticsOrders]);
-
-  const greeting = useMemo(() => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 18) return 'Good afternoon';
-    return 'Good evening';
-  }, []);
-
   const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
+  const needsKyb = bizProfile?.kybStatus !== 'VERIFIED';
 
-  if (statsLoading || recentLoading || analyticsLoading) return <DashboardSkeleton />;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const bizName = bizProfile?.businessName || 'there';
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show"
-      className="p-5 md:p-8 space-y-8 max-w-7xl mx-auto pb-24">
+    <div className="max-w-7xl mx-auto px-6 py-6 space-y-6 animate-fade-in">
+        <OnboardingChecklist />
+      {/* Employee Summary Widget with motion stagger */}
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
+      >
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Total Employees" value="42" delta="+2 this month" deltaType="positive" icon={Users} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Active Shifts" value="12" delta="Right now" deltaType="positive" icon={Clock} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Time Off Requests" value="3" delta="Pending approval" deltaType="positive" icon={CalendarCheck} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Monthly Payroll" value="24,500 USDC" delta="+5% vs last" deltaType="positive" icon={DollarSign} />
+        </motion.div>
+      </motion.div>
 
-      {/* Hero */}
-      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--az-text)' }}>
-              {greeting},{' '}
-              <span style={{ color: 'var(--az-accent)' }}>{bizProfile?.businessName || 'Business Owner'}</span>
-            </h1>
-            <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ repeat: Infinity, duration: 2.5, repeatDelay: 6 }}>
-              <Sparkles className="w-5 h-5" style={{ color: '#E2A33D' }} />
-            </motion.div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-              style={{ background: 'var(--az-accent-subtle)', color: 'var(--az-accent)', border: '1px solid var(--az-accent-border)' }}>
-              <TypeIcon className="w-3 h-3" />
-              {typeConfig?.label}
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--az-text-muted)' }}>
-              <span className="w-2 h-2 rounded-full" style={{ background: bizProfile?.kybStatus === 'VERIFIED' ? 'var(--az-success)' : 'var(--az-warning)' }} />
-              {bizProfile?.kybStatus || 'UNVERIFIED'} KYB
+      {/* ── Header with business type badge ──────────────────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-az-text flex items-center gap-2">
+            {greeting}, {bizName}
+          </h1>
+          <div className="flex items-center gap-2 mt-1.5">
+            <p className="text-sm text-az-text-secondary">Here's what's happening today.</p>
+            <span
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-az-accent-subtle text-az-accent border border-az-accent-border"
+            >
+              <TypeIcon className="w-2.5 h-2.5" />
+              {typeConfig.label}
             </span>
           </div>
         </div>
-        <div className="flex p-1 rounded-xl" style={{ background: 'var(--az-surface)', border: '1px solid var(--az-border)' }}>
-          {['7d', '30d', '90d'].map(t => (
-            <button key={t} onClick={() => setRange(t)}
-              className="px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200"
-              style={{
-                background: range === t ? 'var(--az-accent)' : 'transparent',
-                color: range === t ? '#fff' : 'var(--az-text-muted)',
-              }}>
-              {t === '7d' ? '7 Days' : t === '30d' ? '30 Days' : '90 Days'}
-            </button>
-          ))}
-        </div>
-      </motion.div>
+        <Link
+          to="/orders"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-az-lg text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors"
+        >
+          View all orders <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
 
-      {/* KPI Cards */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCardItem label="Total Revenue" value={totalRevSum} isCurrency delta="▲ 14.2%" positive sparkData={revSparkline} Icon={DollarSign} color="#6C4FD1" />
-        <KpiCardItem label="Active Orders" value={analyticsOrders.length} delta="▲ 8.1%" positive sparkData={orderSparkline} Icon={ShoppingBag} color="#3B82F6" />
-        <KpiCardItem label="Reservations" value={resStats.total || 0} delta={resStats.pending ? `${resStats.pending} pending` : '—'} positive sparkData={[4,8,5,9,12,10,15,14,18,22]} Icon={CalendarCheck} color="#10B981" />
-        <KpiCardItem label="Avg Rating" value={reviewStats.avgRating || 4.8} isFloat delta={`${reviewStats.totalReviews || 0} reviews`} positive sparkData={[5,5,4,5,5,5,4,5,5,5]} Icon={Star} color="#F59E0B" />
-      </motion.div>
+      {/* ── Business-type-aware hero quick-action section ────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {typeConfig.type === 'TRANSIT' && (
+          <>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <Bus className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Manage Fleet</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Assign drivers, optimize routes, and manage vehicles.</p>
+              </div>
+              <Link to="/transit/fleet" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                Go to Fleet <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <Route className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Trip Manifests</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Review passenger rosters and finalize check-ins.</p>
+              </div>
+              <Link to="/transit/manifests" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                View Manifests <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <QrCode className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Scan Tickets</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Quickly boarding check-in with QR code scanners.</p>
+              </div>
+              <Link to="/checkin" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                Launch Scanner <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+          </>
+        )}
+        {typeConfig.type === 'RESTAURANT' && (
+          <>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <Utensils className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Floor Plan & Tables</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Monitor table statuses, covers, and real-time seating.</p>
+              </div>
+              <Link to="/restaurant/tables" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                Manage Tables <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <Clock className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Active Kitchen Queue</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Monitor live kitchen prep times and dish dispatch statuses.</p>
+              </div>
+              <Link to="/restaurant/kitchen" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                Kitchen Screen <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <Package className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Inventory & Ingredients</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Track low stock ingredients and automate supplier orders.</p>
+              </div>
+              <Link to="/restaurant/inventory" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                Check Stock <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+          </>
+        )}
+        {typeConfig.type === 'HOTEL' && (
+          <>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <Hotel className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Front Desk</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Manage guest arrivals, assignments, and keycard creation.</p>
+              </div>
+              <Link to="/hotel/frontdesk" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                Front Desk <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <Clock className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Housekeeping Panel</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Track clean, dirty, and inspection room statuses.</p>
+              </div>
+              <Link to="/hotel/housekeeping" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                Housekeeping <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+            <GlassPanel className="p-5 flex flex-col justify-between" hover>
+              <div>
+                <div className="w-10 h-10 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border mb-3">
+                  <Users className="w-5 h-5 text-az-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-az-text">Guest Profiles</h3>
+                <p className="text-xs text-az-text-secondary mt-1">Access CRM history, VIP details, and preferences.</p>
+              </div>
+              <Link to="/guests" className="flex items-center gap-1.5 text-xs font-semibold text-az-accent mt-4 hover:underline">
+                View Guests <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </GlassPanel>
+          </>
+        )}
+      </div>
 
-      {/* Revenue Chart */}
-      <motion.div variants={itemVariants}>
-        <GlassPanel className="p-6 border" style={{ borderColor: 'var(--az-border)' }}>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-base font-bold" style={{ color: 'var(--az-text)' }}>Revenue Performance</h3>
-              <p className="text-xs" style={{ color: 'var(--az-text-muted)' }}>Net sales across completed orders</p>
+      {/* ── Quick Actions ─────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Link to="/reservations?new=true" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-az-md text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors">
+          <CalendarPlus className="w-3.5 h-3.5" /> New Reservation
+        </Link>
+        <Link to="/products?new=true" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-az-md text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors">
+          <Plus className="w-3.5 h-3.5" /> Add Product
+        </Link>
+        <Link to="/employees?invite=true" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-az-md text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors">
+          <UserPlus className="w-3.5 h-3.5" /> Invite Employee
+        </Link>
+        <Link to="/marketing?new_promo=true" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-az-md text-xs font-semibold text-az-accent bg-az-accent-subtle border border-az-accent-border hover:bg-az-surface transition-colors">
+          <Tag className="w-3.5 h-3.5" /> New Promo
+        </Link>
+      </div>
+
+      {/* ── At-Risk Widget ─────────────────────────────────────────────────── */}
+      <AtRiskWidget />
+
+      {/* ── KYB banner ────────────────────────────────────────────────────── */}
+      {needsKyb && (
+        <Link to="/kyb">
+          <div
+            className="flex items-center gap-4 p-4 rounded-az-lg border cursor-pointer hover:opacity-90 transition-opacity bg-az-surface backdrop-blur-glass shadow-az-card"
+            style={{ borderColor: `${kybMeta.color}40` }}
+          >
+            <div className="w-10 h-10 rounded-az-md flex items-center justify-center flex-shrink-0 bg-az-accent-subtle border border-az-accent-border">
+              <FileCheck className="w-5 h-5 text-az-accent" />
             </div>
-            <Link to="/finance" className="text-xs font-semibold flex items-center gap-1"
-              style={{ color: 'var(--az-accent)' }}>View Finance <ArrowRight className="w-3.5 h-3.5" /></Link>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-az-text">
+                {bizProfile?.kybStatus === 'UNVERIFIED' && 'Complete your business verification'}
+                {bizProfile?.kybStatus === 'PENDING' && 'Verification is under review'}
+                {bizProfile?.kybStatus === 'REJECTED' && 'Verification rejected — please resubmit'}
+              </p>
+              <p className="text-xs text-az-text-secondary mt-0.5">
+                {bizProfile?.kybStatus === 'UNVERIFIED' && 'Upload your business documents to start receiving orders publicly.'}
+                {bizProfile?.kybStatus === 'PENDING' && "We're reviewing your documents. This usually takes 24–48 hours."}
+                {bizProfile?.kybStatus === 'REJECTED' && 'Review the feedback and upload corrected documents.'}
+              </p>
+            </div>
+            <ArrowRight className="w-4 h-4 flex-shrink-0 text-az-text-secondary" />
           </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={dailyRevenue} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--az-accent)" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="var(--az-accent)" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="label" axisLine={false} tickLine={false}
-                  tick={{ fill: 'var(--az-text-muted)', fontSize: 10, fontWeight: 600 }} />
-                <YAxis axisLine={false} tickLine={false}
-                  tick={{ fill: 'var(--az-text-muted)', fontSize: 10 }}
-                  tickFormatter={v => `$${v}`} />
-                <Tooltip content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null;
-                  return (
-                    <div className="px-3 py-2 rounded-xl shadow-lg text-xs"
-                      style={{ background: 'var(--az-surface-solid)', border: '1px solid var(--az-border)' }}>
-                      <p className="font-bold" style={{ color: 'var(--az-text-muted)' }}>{payload[0].payload.label}</p>
-                      <p className="font-extrabold" style={{ color: 'var(--az-accent)' }}>{fmtUSDC(payload[0].value)}</p>
-                    </div>
-                  );
-                }} />
-                <Area type="monotone" dataKey="revenue" stroke="var(--az-accent)" strokeWidth={2.5}
-                  fillOpacity={1} fill="url(#revenueGrad)" />
-              </AreaChart>
-            </ResponsiveContainer>
+        </Link>
+      )}
+
+      {/* ── Core stats widgets (all business types) ───────────────────────── */}
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Total Orders" value={fmt(stats.totalOrders || 0, 0)} delta="All time" deltaType="positive" icon={ShoppingBag} loading={statsLoading} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Revenue" value={fmtUSDC(stats.totalRevenue || 0)} delta="Completed orders" deltaType="positive" icon={TrendingUp} loading={statsLoading} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Pending" value={fmt(stats.pendingOrders || 0, 0)} delta="Awaiting action" deltaType="positive" icon={Clock} loading={statsLoading} />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <KpiCard label="Completed" value={fmt(stats.completedOrders || 0, 0)} delta="All time" deltaType="positive" icon={CheckCircle2} loading={statsLoading} />
+        </motion.div>
+      </motion.div>
+
+      {/* ── Business-type-specific widgets ────────────────────────────────── */}
+      {typeConfig.type === 'TRANSIT' && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <KpiCard
+            label="Active Trips"
+            value={fmt(trips.filter(t => ['SCHEDULED','BOARDING'].includes(t.status)).length, 0)}
+            delta="Scheduled + boarding"
+            icon={Bus}
+          />
+          <KpiCard
+            label="Seats Sold"
+            value={fmt(trips.reduce((s, t) => s + (t._count?.seats || 0), 0), 0)}
+            delta="All trips"
+            icon={Users}
+          />
+          <KpiCard
+            label="Check-Ins Today"
+            value={fmt(checkInStats.todayCount || 0, 0)}
+            delta="Passengers checked in"
+            icon={QrCode}
+          />
+          <KpiCard
+            label="Transit Revenue"
+            value={fmtUSDC(trips.reduce((s, t) => s + (t._count?.seats || 0) * (Number(t.fareUsdc) || 0), 0))}
+            delta="From seat bookings"
+            icon={DollarSign}
+          />
+        </div>
+      )}
+
+      {['RESTAURANT', 'HOTEL', 'SERVICES'].includes(typeConfig.type) && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <KpiCard label="Reservations" value={fmt(resStats.total || 0, 0)} delta="All bookings" icon={CalendarCheck} />
+          <KpiCard label="Pending" value={fmt(resStats.pending || 0, 0)} delta="Awaiting confirmation" icon={Clock} />
+          <KpiCard label="Checked In" value={fmt(checkInStats.todayCount || 0, 0)} delta="Seated/checked in today" icon={UserCheck} />
+          <KpiCard label="No-Shows" value={fmt(resStats.noShows || 0, 0)} delta="Penalties applied" icon={UserX} />
+        </div>
+      )}
+
+      {/* ── Invoice KPIs (all types) ──────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <KpiCard label="Invoices Sent" value={fmt(invoiceStats.sent, 0)} delta="Awaiting payment" icon={Receipt} />
+        <KpiCard label="Invoices Paid" value={fmt(invoiceStats.paid, 0)} delta="Settled" icon={CheckCircle2} />
+        <KpiCard label="Invoice Revenue" value={fmtUSDC(invoiceStats.paidRevenue)} delta="From paid invoices" icon={DollarSign} />
+      </div>
+
+      {/* ── Revenue trend + Order funnel ──────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Revenue trend — Area chart */}
+        <div className="lg:col-span-2">
+          <GlassPanel className="p-6 h-full flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-bold text-az-text">Revenue Trend</h3>
+                <p className="text-xs text-az-text-secondary mt-0.5">Completed orders · last 30 days</p>
+              </div>
+              <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+                <TrendingUp className="w-4 h-4 text-az-accent" />
+              </div>
+            </div>
+            {!hasRevenue ? (
+              <div className="h-[200px] flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-2xl bg-az-accent-subtle border border-az-accent-border flex items-center justify-center mb-3">
+                  <TrendingUp className="w-6 h-6 text-az-accent" />
+                </div>
+                <p className="text-sm text-az-text-secondary">Complete your first order to see revenue.</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={dailyRevenue} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--az-accent)" stopOpacity={0.25} />
+                      <stop offset="100%" stopColor="var(--az-accent)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="label" tick={{ fill: 'var(--az-text-muted)', fontSize: 10 }} tickLine={false} axisLine={false} interval={4} />
+                  <YAxis tick={{ fill: 'var(--az-text-muted)', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v.toFixed(0)}`} />
+                  <Tooltip
+                    cursor={{ stroke: 'var(--az-border)', strokeDasharray: '4 4', strokeOpacity: 0.4 }}
+                    contentStyle={{ background: 'var(--az-surface-solid)', border: '1px solid var(--az-border)', borderRadius: '6px' }}
+                    labelStyle={{ color: 'var(--az-text)', fontSize: 12 }}
+                    formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="var(--az-accent)" strokeWidth={2} fill="url(#revGrad)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </GlassPanel>
+        </div>
+
+        {/* Order funnel */}
+        <GlassPanel className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-az-text">Order Funnel</h3>
+              <p className="text-xs text-az-text-secondary mt-0.5">Lifecycle progression</p>
+            </div>
+            <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+              <Package className="w-4 h-4 text-az-accent" />
+            </div>
+          </div>
+          <div className="space-y-4 pt-2">
+            {funnel.map(stage => (
+              <div key={stage.label}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold text-az-text-muted uppercase tracking-wider">{stage.label}</span>
+                  <span className="text-xs font-bold text-az-text">{stage.count}</span>
+                </div>
+                <div className="h-2 rounded-full bg-az-bg-alt overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${(stage.count / funnelMax) * 100}%`, background: stage.color }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </GlassPanel>
-      </motion.div>
+      </div>
 
-      {/* Widgets Grid */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          {typeConfig?.type === 'REAL_ESTATE' && <HotelWidget resStats={resStats} />}
-          {typeConfig?.type === 'FOOD_BEVERAGE' && <RestaurantWidget orders={analyticsOrders} />}
-          {typeConfig?.type === 'TRANSIT' && <TransitWidget trips={trips} />}
-          {(!typeConfig?.type || !['REAL_ESTATE','FOOD_BEVERAGE','TRANSIT'].includes(typeConfig.type)) && <RetailWidget funnel={funnel} />}
-        </div>
-        <div className="space-y-6">
-          <RecentActivityFeed orders={recent} />
-          <TopCustomersList customers={topCustomers} />
-        </div>
-      </motion.div>
-
-      {/* Floating Quick Actions */}
-      <motion.div
-        initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6, type: 'spring', stiffness: 220, damping: 22 }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 px-1.5 py-1.5 rounded-full shadow-xl flex items-center gap-1"
-        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(108,79,209,0.15)', maxWidth: '480px', width: '90%' }}>
-        <Link to={typeConfig?.type === 'FOOD_BEVERAGE' ? '/orders' : '/reservations'}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors"
-          style={{ color: 'var(--az-text)' }}>
-          <PlusCircle className="w-4 h-4" style={{ color: 'var(--az-accent)' }} />New Booking
-        </Link>
-        <div className="w-px h-4" style={{ background: 'var(--az-border)' }} />
-        <Link to="/orders"
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors"
-          style={{ color: 'var(--az-text)' }}>
-          <ShoppingBag className="w-4 h-4" style={{ color: 'var(--az-accent)' }} />Orders
-        </Link>
-        <div className="w-px h-4" style={{ background: 'var(--az-border)' }} />
-        <Link to="/finance"
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-white"
-          style={{ background: 'var(--az-accent)' }}>
-          <TrendingUp className="w-3.5 h-3.5" />Finance
-        </Link>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-function KpiCardItem({ label, value, isCurrency, isFloat, delta, positive, sparkData = [], Icon, color }) {
-  return (
-    <motion.div whileHover={{ y: -3 }}
-      className="p-5 rounded-xl flex flex-col justify-between"
-      style={{ background: 'var(--az-surface)', border: '1px solid var(--az-border)' }}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--az-text-muted)' }}>{label}</p>
-          <p className="text-2xl font-black mt-1 flex items-baseline" style={{ color: 'var(--az-text)' }}>
-            {isCurrency && <span className="text-base mr-0.5" style={{ color: 'var(--az-text-muted)' }}>$</span>}
-            <AnimatedNumber value={typeof value === 'number' ? value : 0}
-              format={n => n.toLocaleString(undefined, { maximumFractionDigits: isFloat ? 1 : 0 })} />
-          </p>
-        </div>
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center"
-          style={{ background: `${color}15`, border: `1px solid ${color}25` }}>
-          <Icon className="w-4 h-4" style={{ color }} />
-        </div>
-      </div>
-      <div className="mt-4 flex items-end justify-between">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-          style={{ background: positive ? 'rgba(31,163,122,0.1)' : 'rgba(225,83,97,0.1)', color: positive ? 'var(--az-success)' : 'var(--az-danger)' }}>
-          {delta}
-        </span>
-        {sparkData.length > 1 && (
-          <svg viewBox="0 0 60 24" className="w-14 h-6 opacity-70">
-            <path d={sparkData.reduce((p, v, i) => {
-              const x = (i / (sparkData.length - 1)) * 60;
-              const max = Math.max(...sparkData, 1); const min = Math.min(...sparkData, 0);
-              const y = 24 - ((v - min) / ((max - min) || 1)) * 20 - 2;
-              return `${p} ${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-            }, '')} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-function HotelWidget({ resStats }) {
-  const occupied = 78;
-  const data = [{ name: 'Occupied', value: occupied, color: 'var(--az-accent)' }, { name: 'Available', value: 100 - occupied, color: 'rgba(200,200,200,0.3)' }];
-  return (
-    <GlassPanel className="p-6 border space-y-4" style={{ borderColor: 'var(--az-border)' }}>
-      <div>
-        <h3 className="text-base font-bold" style={{ color: 'var(--az-text)' }}>Hotel Occupancy</h3>
-        <p className="text-xs" style={{ color: 'var(--az-text-muted)' }}>Real-time room status</p>
-      </div>
-      <div className="flex items-center gap-6">
-        <div className="relative w-32 h-32 flex-shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={data} innerRadius={46} outerRadius={62} paddingAngle={3} dataKey="value" startAngle={90} endAngle={-270}>
-                {data.map((e, i) => <Cell key={i} fill={e.color} />)}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-black" style={{ color: 'var(--az-text)' }}>{occupied}%</span>
-            <span className="text-[9px] font-bold uppercase" style={{ color: 'var(--az-text-muted)' }}>Occupancy</span>
-          </div>
-        </div>
-        <div className="space-y-2.5 flex-1">
-          {[['Available', 14, 'var(--az-success)'], ['Occupied', 38, 'var(--az-accent)'], ['Maintenance', 3, 'var(--az-warning)']].map(([label, count, color]) => (
-            <div key={label} className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1.5" style={{ color: 'var(--az-text)' }}>
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
-                {label}
-              </span>
-              <span className="font-bold" style={{ color: 'var(--az-text)' }}>{count} rooms</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </GlassPanel>
-  );
-}
-
-function RestaurantWidget({ orders }) {
-  const turnoverData = [
-    { name: 'Mon', v: 4.2 }, { name: 'Tue', v: 4.8 }, { name: 'Wed', v: 5.1 },
-    { name: 'Thu', v: 6.2 }, { name: 'Fri', v: 7.8 }, { name: 'Sat', v: 8.4 }, { name: 'Sun', v: 7.2 },
-  ];
-  return (
-    <GlassPanel className="p-6 border space-y-4" style={{ borderColor: 'var(--az-border)' }}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-base font-bold" style={{ color: 'var(--az-text)' }}>Dine-In Operations</h3>
-          <p className="text-xs" style={{ color: 'var(--az-text-muted)' }}>Table turnover & popular items</p>
-        </div>
-        <Coffee className="w-5 h-5" style={{ color: 'var(--az-accent)' }} />
-      </div>
-      <div className="h-36">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={turnoverData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--az-text-muted)', fontSize: 10 }} />
-            <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ fontSize: 11 }} />
-            <Bar dataKey="v" fill="var(--az-accent)" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="space-y-2">
-        {[['Truffle Tagliolini', 85], ['Dry Aged Ribeye', 65], ['Passionfruit Soufflé', 40]].map(([name, pct]) => (
-          <div key={name}>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="font-medium" style={{ color: 'var(--az-text)' }}>{name}</span>
-              <span style={{ color: 'var(--az-text-muted)' }}>{pct}%</span>
-            </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--az-border)' }}>
-              <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'var(--az-accent)' }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </GlassPanel>
-  );
-}
-
-function TransitWidget({ trips = [] }) {
-  return (
-    <GlassPanel className="p-6 border space-y-4" style={{ borderColor: 'var(--az-border)' }}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-base font-bold" style={{ color: 'var(--az-text)' }}>Fleet Operations</h3>
-          <p className="text-xs" style={{ color: 'var(--az-text-muted)' }}>Live dispatch & active routes</p>
-        </div>
-        <Bus className="w-5 h-5" style={{ color: 'var(--az-accent)' }} />
-      </div>
-      <div className="h-28 rounded-xl flex flex-col items-center justify-center"
-        style={{ background: 'var(--az-bg-alt)', border: '1px solid var(--az-border)' }}>
-        <MapPin className="w-8 h-8 mb-1.5" style={{ color: 'var(--az-accent)' }} />
-        <p className="text-xs font-bold" style={{ color: 'var(--az-text)' }}>Live Fleet Map</p>
-        <p className="text-[10px]" style={{ color: 'var(--az-text-muted)' }}>4 vehicles active</p>
-      </div>
-      <div className="space-y-2">
-        {trips.slice(0, 3).map((trip, i) => (
-          <div key={i} className="flex items-center justify-between p-2.5 rounded-xl text-xs"
-            style={{ background: 'var(--az-bg-alt)', border: '1px solid var(--az-border)' }}>
-            <div>
-              <p className="font-bold" style={{ color: 'var(--az-text)' }}>{trip.routeNumber || `RT-${100 + i}`}</p>
-              <p style={{ color: 'var(--az-text-muted)' }}>{trip.driverName || 'Driver'}</p>
-            </div>
-            <Badge variant="success">En Route</Badge>
-          </div>
-        ))}
-        {trips.length === 0 && <p className="text-center text-xs py-4" style={{ color: 'var(--az-text-muted)' }}>No active dispatches today</p>}
-      </div>
-    </GlassPanel>
-  );
-}
-
-function RetailWidget({ funnel }) {
-  const maxVal = Math.max(...funnel.map(f => f.count), 1);
-  return (
-    <GlassPanel className="p-6 border space-y-4" style={{ borderColor: 'var(--az-border)' }}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-base font-bold" style={{ color: 'var(--az-text)' }}>Purchase Conversion</h3>
-          <p className="text-xs" style={{ color: 'var(--az-text-muted)' }}>Escrow payment lifecycle</p>
-        </div>
-        <ClipboardList className="w-5 h-5" style={{ color: 'var(--az-accent)' }} />
-      </div>
-      <div className="space-y-3.5">
-        {funnel.map((item, i) => {
-          const pct = Math.round((item.count / maxVal) * 100);
-          return (
-            <div key={i} className="space-y-1.5">
-              <div className="flex justify-between text-xs">
-                <span className="font-medium flex items-center gap-1.5" style={{ color: 'var(--az-text)' }}>
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: item.color }} />
-                  {item.label}
-                </span>
-                <span style={{ color: 'var(--az-text-muted)' }}>{item.count} ({pct}%)</span>
-              </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--az-border)' }}>
-                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: item.color }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </GlassPanel>
-  );
-}
-
-function RecentActivityFeed({ orders = [] }) {
-  return (
-    <GlassPanel className="p-5 border space-y-4" style={{ borderColor: 'var(--az-border)' }}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-bold" style={{ color: 'var(--az-text)' }}>Live Activity</h3>
-          <p className="text-[10px]" style={{ color: 'var(--az-text-muted)' }}>Recent transactions</p>
-        </div>
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-        </span>
-      </div>
-      <div className="space-y-3 max-h-48 overflow-y-auto">
-        {orders.slice(0, 5).map((order) => {
-          const meta = ORDER_STATUS_META[order.status] || { label: order.status, color: 'secondary' };
-          return (
-            <div key={order.id} className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
-                  style={{ background: 'var(--az-accent-subtle)', color: 'var(--az-accent)' }}>
-                  {(order.customer?.name || 'WK').slice(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-semibold" style={{ color: 'var(--az-text)' }}>{order.customer?.name || 'Walk-in'}</p>
-                  <p style={{ color: 'var(--az-text-muted)' }}>{relativeTime(order.createdAt)}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-bold" style={{ color: 'var(--az-text)' }}>{fmtUSDC(order.amountUsdc)}</p>
-                <Badge variant={meta.color}>{meta.label}</Badge>
-              </div>
-            </div>
-          );
-        })}
-        {orders.length === 0 && (
-          <p className="text-center text-xs py-6" style={{ color: 'var(--az-text-muted)' }}>No recent activity</p>
-        )}
-      </div>
-    </GlassPanel>
-  );
-}
-
-function TopCustomersList({ customers = [] }) {
-  return (
-    <GlassPanel className="p-5 border space-y-4" style={{ borderColor: 'var(--az-border)' }}>
-      <div>
-        <h3 className="text-sm font-bold" style={{ color: 'var(--az-text)' }}>Top Customers</h3>
-        <p className="text-[10px]" style={{ color: 'var(--az-text-muted)' }}>Highest spending patrons</p>
-      </div>
-      <div className="space-y-3">
-        {customers.map((c, i) => (
-          <div key={i} className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2.5">
-              {c.avatarUrl ? (
-                <img src={c.avatarUrl} className="w-7 h-7 rounded-full object-cover" alt="" />
-              ) : (
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
-                  style={{ background: 'var(--az-accent-subtle)', color: 'var(--az-accent)' }}>
-                  {c.name.slice(0, 2).toUpperCase()}
-                </div>
-              )}
+      {/* ── Transit-specific: upcoming trips widget ────────────────────────── */}
+      {typeConfig.type === 'TRANSIT' && trips.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <GlassPanel className="p-6">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="font-semibold" style={{ color: 'var(--az-text)' }}>{c.name}</p>
-                <p className="font-mono" style={{ color: 'var(--az-text-muted)' }}>{c.address}</p>
+                <h3 className="text-sm font-bold text-az-text">Upcoming Trips</h3>
+                <p className="text-xs text-az-text-secondary mt-0.5">Next departures</p>
+              </div>
+              <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+                <Route className="w-4 h-4 text-az-accent" />
               </div>
             </div>
-            <div className="text-right">
-              <p className="font-bold" style={{ color: 'var(--az-text)' }}>{fmtUSDC(c.totalSpend)}</p>
-              <p style={{ color: 'var(--az-text-muted)' }}>{c.ordersCount} orders</p>
+            <div className="space-y-0 max-h-[240px] overflow-y-auto">
+              {trips
+                .filter(t => ['SCHEDULED', 'BOARDING'].includes(t.status))
+                .sort((a, b) => new Date(a.departureAt) - new Date(b.departureAt))
+                .slice(0, 5)
+                .map(trip => {
+                  const booked = trip._count?.seats || 0;
+                  const total = trip.vehicle?.capacity || 0;
+                  const pct = total > 0 ? (booked / total) * 100 : 0;
+                  return (
+                    <WidgetRow
+                      key={trip.id}
+                      label={trip.routeName}
+                      value={`${booked}/${total}`}
+                      badge={<Badge color={pct > 80 ? 'var(--az-warning)' : 'var(--az-accent)'}>{pct > 80 ? 'Filling Up' : 'Available'}</Badge>}
+                      onClick={() => window.location.href = '/transit'}
+                    />
+                  );
+                })}
+            </div>
+          </GlassPanel>
+
+          {/* Recent check-ins for transit */}
+          <GlassPanel className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-bold text-az-text">Recent Check-Ins</h3>
+                <p className="text-xs text-az-text-secondary mt-0.5">Passenger activity</p>
+              </div>
+              <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+                <QrCode className="w-4 h-4 text-az-accent" />
+              </div>
+            </div>
+            <div className="space-y-0">
+              <WidgetRow label="Checked in today" value={fmt(checkInStats.todayCount || 0, 0)} badge={<Badge color="var(--az-accent)">Today</Badge>} />
+              <WidgetRow label="Pending" value={fmt(checkInStats.pending || 0, 0)} badge={<Badge color="var(--az-warning)">Waiting</Badge>} />
+              <WidgetRow label="No-shows" value={fmt(checkInStats.noShows || 0, 0)} badge={<Badge color="var(--az-danger)">Today</Badge>} />
+              <WidgetRow label="Total guests" value={fmt(checkInStats.totalGuests || 0, 0)} badge={<Badge color="var(--az-info)">All time</Badge>} />
+            </div>
+          </GlassPanel>
+        </div>
+      )}
+
+      {/* ── Reservation-specific widgets ──────────────────────────────────── */}
+      {['RESTAURANT', 'HOTEL', 'SERVICES'].includes(typeConfig.type) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <GlassPanel className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-bold text-az-text">Reservation Summary</h3>
+                <p className="text-xs text-az-text-secondary mt-0.5">By status</p>
+              </div>
+              <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+                <CalendarCheck className="w-4 h-4 text-az-accent" />
+              </div>
+            </div>
+            <div className="space-y-0">
+              <WidgetRow label="Pending" value={fmt(resStats.pending || 0, 0)} badge={<Badge color="var(--az-warning)">Action needed</Badge>} />
+              <WidgetRow label="Confirmed" value={fmt(resStats.confirmed || 0, 0)} badge={<Badge color="var(--az-info)">Upcoming</Badge>} />
+              <WidgetRow label="Checked In" value={fmt(resStats.checkedIn || 0, 0)} badge={<Badge color="var(--az-accent)">Today</Badge>} />
+              <WidgetRow label="No-Shows" value={fmt(resStats.noShows || 0, 0)} badge={<Badge color="var(--az-danger)">Penalized</Badge>} />
+            </div>
+          </GlassPanel>
+
+          <GlassPanel className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-bold text-az-text">Check-In Activity</h3>
+                <p className="text-xs text-az-text-secondary mt-0.5">Today</p>
+              </div>
+              <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+                <QrCode className="w-4 h-4 text-az-accent" />
+              </div>
+            </div>
+            <div className="space-y-0">
+              <WidgetRow label="Checked in" value={fmt(checkInStats.todayCount || 0, 0)} badge={<Badge color="var(--az-accent)">Today</Badge>} />
+              <WidgetRow label="Pending" value={fmt(checkInStats.pending || 0, 0)} badge={<Badge color="var(--az-warning)">Waiting</Badge>} />
+              <WidgetRow label="No-shows" value={fmt(checkInStats.noShows || 0, 0)} badge={<Badge color="var(--az-danger)">Today</Badge>} />
+              <WidgetRow label="Total guests" value={fmt(checkInStats.totalGuests || 0, 0)} badge={<Badge color="var(--az-info)">All time</Badge>} />
+            </div>
+          </GlassPanel>
+        </div>
+      )}
+
+      {/* ── Reviews widget (all types) ────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <GlassPanel className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-az-text">Customer Rating</h3>
+              <p className="text-xs text-az-text-secondary mt-0.5">Aggregated rating score</p>
+            </div>
+            <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+              <Star className="w-4 h-4 text-az-accent" />
             </div>
           </div>
-        ))}
-        {customers.length === 0 && (
-          <p className="text-center text-xs py-4" style={{ color: 'var(--az-text-muted)' }}>Populate after completed orders</p>
-        )}
-      </div>
-    </GlassPanel>
-  );
-}
+          <div className="flex items-center gap-3">
+            <WidgetStat value={fmt(reviewStats.avgRating || 0, 1)} color="var(--az-accent)" />
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map(s => (
+                <Star key={s} className={cn('w-4 h-4', s <= Math.round(reviewStats.avgRating || 0) ? 'text-az-accent fill-az-accent' : 'text-az-border')} />
+              ))}
+            </div>
+          </div>
+          <p className="text-[11px] text-az-text-muted mt-2">{reviewStats.total || 0} reviews</p>
+        </GlassPanel>
 
-function DashboardSkeleton() {
-  return (
-    <div className="p-6 space-y-8 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
-          <div className="h-8 w-64 rounded-xl animate-pulse" style={{ background: 'var(--az-border)' }} />
-          <div className="h-4 w-40 rounded animate-pulse" style={{ background: 'var(--az-border)' }} />
-        </div>
-        <div className="h-10 w-36 rounded-full animate-pulse" style={{ background: 'var(--az-border)' }} />
-      </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1,2,3,4].map(i => <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: 'var(--az-border)' }} />)}
-      </div>
-      <div className="h-64 rounded-xl animate-pulse" style={{ background: 'var(--az-border)' }} />
-      <div className="grid grid-cols-2 gap-6">
-        <div className="h-52 rounded-xl animate-pulse" style={{ background: 'var(--az-border)' }} />
-        <div className="h-52 rounded-xl animate-pulse" style={{ background: 'var(--az-border)' }} />
+        <GlassPanel className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-az-text">Stories Promoted</h3>
+              <p className="text-xs text-az-text-secondary mt-0.5">Shared review count</p>
+            </div>
+            <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+              <Sparkles className="w-4 h-4 text-az-accent" />
+            </div>
+          </div>
+          <WidgetStat value={fmt(reviewStats.storiesPromoted || 0, 0)} label="From reviews" color="var(--az-accent)" />
+        </GlassPanel>
+
+        {/* Recent orders widget */}
+        <GlassPanel className="p-6" loading={recentLoading}>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-az-text">Recent Orders</h3>
+              <p className="text-xs text-az-text-secondary mt-0.5">Latest activity</p>
+            </div>
+            <div className="w-8 h-8 rounded-az-md flex items-center justify-center bg-az-accent-subtle border border-az-accent-border">
+              <ShoppingBag className="w-4 h-4 text-az-accent" />
+            </div>
+          </div>
+          {recent.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full min-h-[80px] text-center">
+              <p className="text-xs text-az-text-secondary">No orders yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-0 max-h-[160px] overflow-y-auto">
+              {recent.map(o => {
+                const meta = ORDER_STATUS_META[o.status] || {};
+                return (
+                  <WidgetRow
+                    key={o.id}
+                    label={o.azamanId || o.reference || `#${o.id.slice(-6)}`}
+                    value={o.amountUsdc ? fmtUSDC(o.amountUsdc) : '—'}
+                    badge={<Badge color={meta.color}>{meta.label}</Badge>}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </GlassPanel>
       </div>
     </div>
   );

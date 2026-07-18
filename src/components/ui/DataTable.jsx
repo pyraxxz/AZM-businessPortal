@@ -62,11 +62,11 @@ export function DataTable({
   if (data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-12 h-12 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] flex items-center justify-center mb-3">
-          <EmptyIcon className="w-5 h-5 text-[var(--sn-text-muted)]" />
+        <div className="w-12 h-12 rounded-xl bg-[var(--az-black)] border border-[var(--az-border)] flex items-center justify-center mb-3">
+          <EmptyIcon className="w-5 h-5 text-[var(--az-text-muted)]" />
         </div>
-        <p className="text-sm text-[var(--sn-text-muted)] font-medium">{emptyMessage}</p>
-        {emptyDescription && <p className="text-xs text-[var(--sn-text-muted)] mt-1 max-w-xs">{emptyDescription}</p>}
+        <p className="text-sm text-[var(--az-text-muted)] font-medium">{emptyMessage}</p>
+        {emptyDescription && <p className="text-xs text-[var(--az-text-muted)] mt-1 max-w-xs">{emptyDescription}</p>}
       </div>
     );
   }
@@ -77,13 +77,13 @@ export function DataTable({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[var(--sn-border)]">
+            <tr className="border-b border-[var(--az-border)]">
               {columns.map(col => (
                 <th
                   key={col.key}
                   className={cn(
-                    'text-left py-2.5 px-3 text-[11px] font-bold text-[var(--sn-text-muted)] uppercase tracking-wider whitespace-nowrap',
-                    col.sortable && 'cursor-pointer hover:text-[var(--sn-text-muted)] transition-colors select-none',
+                    'text-left py-2.5 px-3 text-[11px] font-bold text-[var(--az-text-muted)] uppercase tracking-wider whitespace-nowrap',
+                    col.sortable && 'cursor-pointer hover:text-[var(--az-text-muted)] transition-colors select-none',
                     col.className
                   )}
                   style={col.width ? { width: col.width } : undefined}
@@ -104,13 +104,13 @@ export function DataTable({
               <tr
                 key={row[rowKey] || i}
                 className={cn(
-                  'border-b border-[var(--sn-card)] transition-colors',
+                  'border-b border-[var(--az-surface)] transition-colors',
                   onRowClick && 'cursor-pointer hover:bg-[var(--az-black)]'
                 )}
                 onClick={() => onRowClick?.(row)}
               >
                 {columns.map(col => (
-                  <td key={col.key} className={cn('py-3 px-3 text-xs text-[var(--sn-text)]', col.className)}>
+                  <td key={col.key} className={cn('py-3 px-3 text-xs text-[var(--az-text)]', col.className)}>
                     {col.render ? col.render(row) : row[col.key]}
                   </td>
                 ))}
@@ -122,25 +122,25 @@ export function DataTable({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-3 py-3 border-t border-[var(--sn-border)]">
-          <span className="text-[11px] text-[var(--sn-text-muted)]">
+        <div className="flex items-center justify-between px-3 py-3 border-t border-[var(--az-border)]">
+          <span className="text-[11px] text-[var(--az-text-muted)]">
             {page * pageSize + 1}–{Math.min((page + 1) * pageSize, sorted.length)} of {sorted.length}
           </span>
           <div className="flex items-center gap-1">
             <button
               disabled={page === 0}
               onClick={() => setPage(p => p - 1)}
-              className="p-1 rounded-lg text-[var(--sn-text-muted)] hover:bg-[var(--sn-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1 rounded-lg text-[var(--az-text-muted)] hover:bg-[var(--az-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-[11px] text-[var(--sn-text-muted)] font-medium px-2">
+            <span className="text-[11px] text-[var(--az-text-muted)] font-medium px-2">
               {page + 1} / {totalPages}
             </span>
             <button
               disabled={page >= totalPages - 1}
               onClick={() => setPage(p => p + 1)}
-              className="p-1 rounded-lg text-[var(--sn-text-muted)] hover:bg-[var(--sn-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-1 rounded-lg text-[var(--az-text-muted)] hover:bg-[var(--az-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

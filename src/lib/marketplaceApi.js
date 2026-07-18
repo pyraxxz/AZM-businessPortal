@@ -23,7 +23,7 @@ export const transit = {
   // Backend: PUT /api/marketplace-seat-map/:tripId — expects { layout, rows, cols, tierFares } at top level
   updateSeatMap: (tripId, payload) => request(`/api/marketplace-seat-map/${tripId}`, { method: 'PUT', body: JSON.stringify(payload) }),
   // Backend: GET /api/marketplace/transit/trips/:id/book (not quite - check)
-  bookings: (tripId) => request(`/api/marketplace/transit/trips/${tripId}/book`),
+  bookings: (tripId) => request(`/api/marketplace/transit/trips/${tripId}/book`, { method: 'POST' }),
 };
 
 export const reservations = {
@@ -126,9 +126,9 @@ export const marketplaceApi = {
 
   // ── Reservations: counter-propose (uses existing reservation routes) ──────
   counterProposeReservation: (resId, data) =>
-    request(`/api/business/reservations/${resId}/counter-propose`, { method: "POST", body: JSON.stringify(data) }),
+    request(`/api/reservations/${resId}/counter-propose`, { method: "POST", body: JSON.stringify(data) }),
   acceptCounterProposal: (resId) =>
-    request(`/api/business/reservations/${resId}/accept-counter`, { method: "POST" }),
+    request(`/api/reservations/${resId}/accept-counter`, { method: "POST" }),
 };
 
 // ── Employee Management ──────────────────────────────────────────────────
@@ -146,8 +146,6 @@ export const employeeApi = {
   addEmployee: (data) => request('/api/business-os/employees', { method: 'POST', body: JSON.stringify(data) }),
   create: (data) => request('/api/business-os/employees', { method: 'POST', body: JSON.stringify(data) }),
   update: (id, data) => request(`/api/business-os/employees/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-  terminate: (id, reason) => request(`/api/business-os/employees/${id}/terminate`, { method: 'POST', body: JSON.stringify({ reason }) }),
-  terminateEmployee: (id, reason) => request(`/api/business-os/employees/${id}/terminate`, { method: 'POST', body: JSON.stringify({ reason }) }),
   remove: (id) => request(`/api/business-os/employees/${id}`, { method: 'DELETE' }),
   updatePermissions: (id, permissions) => request(`/api/business-os/employees/${id}/permissions`, { method: 'POST', body: JSON.stringify({ permissions }) }),
   // Self-service (employee's own data)
@@ -255,8 +253,6 @@ export const feedbackApi = {
 
 export const financeApi = {
   getLedger: () => request('/api/business-os/ledger'),
-  getCashFlow: (days = 30) => request(`/api/business-os/finance/cash-flow?days=${days}`),
-  getPnl: (month) => request(`/api/business-os/finance/pnl?month=${month}`),
   payOut: (amount, destination) => request('/api/business-os/finance/payout', { method: 'POST', body: JSON.stringify({ amount, destination }) }),
   getDashboard: (params) => {
     const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
@@ -369,7 +365,7 @@ export const restaurantOpsApi = {
   getKitchenStats: () => request('/api/business-os/restaurant/kds/stats'),
 
   // Tables
-  getTables: () => request('/api/business-os/restaurant/tables'),
+  getTables: (params) => request(`/api/business-os/restaurant/tables${params?.locationId ? '?locationId=' + params.locationId : ''}`),
   tables: () => restaurantOpsApi.getTables(),  // alias
   updateTableStatus: (id, status) => request(`/api/business-os/restaurant/tables/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 

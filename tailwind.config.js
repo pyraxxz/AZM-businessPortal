@@ -5,89 +5,45 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // ── Phase 2 Design System: Light-first 'liquid glass' ──
-        // Light surface stack (default)
-        'az-bg':            '#F7F5F2',
-        'az-bg-alt':        '#FBFAF8',
-        'az-surface':       'rgba(255,255,255,0.72)',
-        'az-surface-solid': '#FFFFFF',
-        'az-border':        'rgba(17,17,17,0.08)',
-        'az-border-strong': 'rgba(17,17,17,0.14)',
-        'az-text':           '#15141A',
-        'az-text-secondary': '#5D5A66',
-        'az-text-muted':     '#9A96A3',
-
-        // Dark surface stack (toggleable)
-        'az-bg-dark':        '#0F0E13',
-        'az-surface-dark':   'rgba(30,28,38,0.65)',
-        'az-border-dark':    'rgba(255,255,255,0.08)',
+        // ── Phase 3 Design System: CSS-variable-driven (respects .dark toggle) ──
+        'az-bg':             'var(--az-bg)',
+        'az-bg-alt':         'var(--az-bg-alt)',
+        'az-surface':        'var(--az-surface)',
+        'az-surface-solid':  'var(--az-surface-solid)',
+        'az-border':         'var(--az-border)',
+        'az-border-strong':  'var(--az-border-strong)',
+        'az-text':           'var(--az-text)',
+        'az-text-secondary': 'var(--az-text-secondary)',
+        'az-text-muted':     'var(--az-text-muted)',
 
         // Accent
-        'az-accent':         '#6C4FD1',
-        'az-accent-hover':   '#7C61DD',
-        'az-accent-subtle':  'rgba(108,79,209,0.10)',
-        'az-accent-border':  'rgba(108,79,209,0.28)',
+        'az-accent':         'var(--az-accent)',
+        'az-accent-hover':   'var(--az-accent-hover)',
+        'az-accent-subtle':  'var(--az-accent-subtle)',
+        'az-accent-border':  'var(--az-accent-border)',
 
         // Semantic
-        'az-success':        '#1FA37A',
-        'az-success-subtle': 'rgba(31,163,122,0.10)',
-        'az-warning':        '#E2A33D',
-        'az-warning-subtle': 'rgba(226,163,61,0.12)',
-        'az-danger':         '#E15361',
-        'az-danger-subtle':  'rgba(225,83,97,0.10)',
-        'az-info':           '#3D74DB',
+        'az-success':        'var(--az-success)',
+        'az-success-subtle': 'var(--az-success-subtle)',
+        'az-warning':        'var(--az-warning)',
+        'az-warning-subtle': 'var(--az-warning-subtle)',
+        'az-danger':         'var(--az-danger)',
+        'az-danger-subtle':  'var(--az-danger-subtle)',
+        'az-info':           'var(--az-info)',
 
-        // ── Sentry v3 palette — deep indigo-black (NOT purple) ──
-        'sn-black':          '#16141c',
-        'sn-surface':        '#1a1822',
-        'sn-elevated':       '#211f2a',
-        'sn-hover':          '#272531',
-        'sn-card':           '#1e1c26',
-        'sn-card-hover':     '#25232f',
-        'sn-border':         '#2a2732',
-        'sn-border-hover':   '#36333f',
-        'sn-border-bright':  '#3d3a47',
+        // Legacy aliases (now var()-driven, same as primary tokens)
+        'az-black':          'var(--az-surface-solid)',
+        'az-card':           'var(--az-surface-solid)',
+        'az-card-elevated':  'var(--az-surface-solid)',
+        'az-border-bright':  'var(--az-border-strong)',
+        'az-emerald':        'var(--az-success)',
+        'az-blue':           'var(--az-info)',
+        'az-purple':         'var(--az-accent)',
+        'az-amber':          'var(--az-warning)',
+        'az-red':            'var(--az-danger)',
+        'az-cyan':           'var(--az-info)',
 
-        // Text
-        'sn-text':           '#f0f0f5',
-        'sn-text-secondary': '#c6bdcf',
-        'sn-text-muted':     '#776589',
-
-        // Accents — purple constrained to buttons/active/progress only
-        'sn-purple':         '#6C5FC7',
-        'sn-purple-h':       '#7B70D4',
-        'sn-purple-subtle':  '#6C5FC71a',
-        'sn-purple-border':  '#6C5FC740',
-
-        'sn-blue':           '#3D74DB',
-        'sn-blue-subtle':    '#3D74DB1a',
-
-        'sn-green':          '#33BF9E',
-        'sn-green-subtle':   '#33BF9E1a',
-
-        'sn-red':            '#F55459',
-        'sn-red-subtle':     '#F554591a',
-        'sn-red-solid':      '#F55459',
-
-        'sn-amber':          '#FFC227',
-        'sn-amber-subtle':   '#FFC2271a',
-
-        'sn-orange':         '#FF7738',
-        'sn-pink':           '#F05781',
-
-        // Legacy aliases (backward compat)
-        'az-black':          '#16141c',
-        'az-card':           '#1e1c26',
-        'az-card-elevated':  '#211f2a',
-        'az-border-bright':  '#3d3a47',
-        'az-emerald':        '#33BF9E',
-        'az-blue':           '#3D74DB',
-        'az-purple':         '#6C5FC7',
-        'az-amber':          '#FFC227',
-        'az-red':            '#F55459',
-        'az-cyan':           '#3D74DB',
-
-        // ── shadcn/ui compatibility (mapped to CSS vars → Sentry theme) ──
+        // ── shadcn/ui compatibility (mapped to CSS vars) ──
         background: 'var(--background)',
         foreground: 'var(--foreground)',
         card: { DEFAULT: 'var(--card)', foreground: 'var(--card-foreground)' },
@@ -120,11 +76,11 @@ module.exports = {
         glass: '20px',
       },
       boxShadow: {
-        'az-card':      '0 1px 2px rgba(17,17,17,0.04), 0 8px 24px -8px rgba(17,17,17,0.08)',
-        'az-card-hover':'0 4px 16px rgba(17,17,17,0.06), 0 16px 40px -12px rgba(17,17,17,0.14)',
-        'az-glass':     '0 8px 32px rgba(17,17,17,0.10), inset 0 1px 0 rgba(255,255,255,0.4)',
-        'az-modal':     '0 24px 64px rgba(17,17,17,0.24), 0 0 0 1px rgba(17,17,17,0.06)',
-        'az-focus':     '0 0 0 3px rgba(108,79,209,0.18)',
+        'az-card':       '0 4px 20px rgba(17,17,17,0.04), 0 1px 3px rgba(17,17,17,0.02)',
+        'az-card-hover': '0 8px 30px rgba(17,17,17,0.08), 0 4px 10px rgba(17,17,17,0.04)',
+        'az-glass':      '0 8px 32px rgba(17,17,17,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
+        'az-modal':      '0 24px 64px rgba(17,17,17,0.15), 0 0 0 1px rgba(17,17,17,0.06)',
+        'az-focus':      '0 0 0 3px rgba(108,79,209,0.18)',
 
         'sn-button':        '0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
         'sn-button-active': '0 0 0 rgba(0,0,0,0), inset 0 1px 2px rgba(0,0,0,0.3)',

@@ -36,11 +36,11 @@ import {
 } from 'lucide-react';
 
 const COLUMNS = [
-  { key: 'PENDING', label: 'Pending', color: 'var(--sn-text-muted)', bg: 'rgba(154, 160, 172, 0.15)', icon: Sparkles },
-  { key: 'IN_PROGRESS', label: 'In Progress', color: 'var(--sn-blue)', bg: 'rgba(0, 122, 255, 0.15)', icon: Bath },
-  { key: 'AWAITING_INSPECTION', label: 'Awaiting Inspection', color: 'var(--sn-amber)', bg: 'rgba(255, 159, 10, 0.15)', icon: ClipboardList },
-  { key: 'COMPLETED', label: 'Completed', color: 'var(--sn-green)', bg: 'rgba(48, 209, 88, 0.15)', icon: CheckCircle2 },
-  { key: 'FAILED', label: 'Failed', color: 'var(--sn-red)', bg: 'rgba(255, 69, 58, 0.15)', icon: AlertTriangle }
+  { key: 'PENDING', label: 'Pending', color: 'var(--az-text-muted)', bg: 'rgba(154, 160, 172, 0.15)', icon: Sparkles },
+  { key: 'IN_PROGRESS', label: 'In Progress', color: 'var(--az-info)', bg: 'rgba(0, 122, 255, 0.15)', icon: Bath },
+  { key: 'AWAITING_INSPECTION', label: 'Awaiting Inspection', color: 'var(--az-warning)', bg: 'rgba(255, 159, 10, 0.15)', icon: ClipboardList },
+  { key: 'COMPLETED', label: 'Completed', color: 'var(--az-success)', bg: 'rgba(48, 209, 88, 0.15)', icon: CheckCircle2 },
+  { key: 'FAILED', label: 'Failed', color: 'var(--az-danger)', bg: 'rgba(255, 69, 58, 0.15)', icon: AlertTriangle }
 ];
 
 const SLA_LIMITS = {
@@ -51,18 +51,18 @@ const SLA_LIMITS = {
 };
 
 const TASK_TYPE_META = {
-  CHECKOUT_CLEAN: { label: 'Checkout Clean', color: 'var(--sn-amber)', sla: '45m' },
-  DAILY_REFRESH: { label: 'Daily Refresh', color: 'var(--sn-blue)', sla: '30m' },
-  DEEP_CLEAN: { label: 'Deep Clean', color: 'var(--sn-purple)', sla: '90m' },
-  INSPECTION: { label: 'Inspection', color: 'var(--sn-text-muted)', sla: '20m' }
+  CHECKOUT_CLEAN: { label: 'Checkout Clean', color: 'var(--az-warning)', sla: '45m' },
+  DAILY_REFRESH: { label: 'Daily Refresh', color: 'var(--az-info)', sla: '30m' },
+  DEEP_CLEAN: { label: 'Deep Clean', color: 'var(--az-accent)', sla: '90m' },
+  INSPECTION: { label: 'Inspection', color: 'var(--az-text-muted)', sla: '20m' }
 };
 
 const PRIORITY_META = {
-  1: { label: 'URGENT', color: 'var(--sn-red)' },
-  2: { label: 'HIGH', color: 'var(--sn-amber)' },
-  3: { label: 'HIGH', color: 'var(--sn-amber)' },
-  4: { label: 'HIGH', color: 'var(--sn-amber)' },
-  5: { label: 'NORMAL', color: 'var(--sn-text-muted)' }
+  1: { label: 'URGENT', color: 'var(--az-danger)' },
+  2: { label: 'HIGH', color: 'var(--az-warning)' },
+  3: { label: 'HIGH', color: 'var(--az-warning)' },
+  4: { label: 'HIGH', color: 'var(--az-warning)' },
+  5: { label: 'NORMAL', color: 'var(--az-text-muted)' }
 };
 
 function ElapsedTimer({ task }) {
@@ -86,11 +86,11 @@ function ElapsedTimer({ task }) {
   const slaMax = SLA_LIMITS[task.taskType] || SLA_LIMITS.INSPECTION;
   const isOverdue = elapsed > slaMax;
 
-  let timerColor = 'var(--sn-green)';
+  let timerColor = 'var(--az-success)';
   if (isOverdue) {
-    timerColor = 'var(--sn-red)';
+    timerColor = 'var(--az-danger)';
   } else if (elapsed > slaMax * 0.75) {
-    timerColor = 'var(--sn-amber)';
+    timerColor = 'var(--az-warning)';
   }
 
   const formatTime = (secs) => {
@@ -106,7 +106,7 @@ function ElapsedTimer({ task }) {
       <Clock className="w-3.5 h-3.5" />
       <span className="text-xs font-mono font-medium">{formatTime(elapsed)}</span>
       {isOverdue && (
-        <span className="text-[10px] uppercase font-bold tracking-wider px-1 bg-[var(--sn-red)]/10 text-[var(--sn-red)] rounded">
+        <span className="text-[10px] uppercase font-bold tracking-wider px-1 bg-[var(--az-danger)]/10 text-[var(--az-danger)] rounded">
           Overdue
         </span>
       )}
@@ -461,13 +461,13 @@ export default function HotelHousekeeping() {
   }
 
   return (
-    <div className="space-y-6 p-6 min-h-screen text-[var(--sn-text)]" style={{ background: 'var(--az-black)' }}>
+    <div className="space-y-6 p-6 min-h-screen text-[var(--az-text)]" style={{ background: 'var(--az-black)' }}>
       
       {/* Top Header & Stats */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Hotel Housekeeping</h1>
-          <p className="text-sm text-[var(--sn-text-muted)] mt-0.5">Manage daily refreshes, deep cleans, tasks, and room inspections.</p>
+          <p className="text-sm text-[var(--az-text-muted)] mt-0.5">Manage daily refreshes, deep cleans, tasks, and room inspections.</p>
         </div>
         <Button variant="primary" onClick={() => setCreateModalOpen(true)} className="flex items-center gap-2 self-start md:self-auto">
           <Plus className="w-4 h-4" /> Create Task
@@ -476,17 +476,17 @@ export default function HotelHousekeeping() {
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Pending" value={totalPending} icon={Sparkles} color="var(--sn-text-muted)" />
-        <StatCard label="In Progress" value={totalInProgress} icon={Bath} color="var(--sn-blue)" />
-        <StatCard label="Awaiting Inspection" value={totalAwaiting} icon={ClipboardList} color="var(--sn-amber)" />
-        <StatCard label="Overdue Tasks" value={totalOverdue} icon={AlertTriangle} color="var(--sn-red)" />
+        <StatCard label="Pending" value={totalPending} icon={Sparkles} color="var(--az-text-muted)" />
+        <StatCard label="In Progress" value={totalInProgress} icon={Bath} color="var(--az-info)" />
+        <StatCard label="Awaiting Inspection" value={totalAwaiting} icon={ClipboardList} color="var(--az-warning)" />
+        <StatCard label="Overdue Tasks" value={totalOverdue} icon={AlertTriangle} color="var(--az-danger)" />
       </div>
 
       {/* Filter Bar */}
       <Card className="p-4 flex flex-wrap gap-4 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[var(--sn-text-muted)]" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--sn-text-muted)]">Filters</span>
+          <Filter className="w-4 h-4 text-[var(--az-text-muted)]" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--az-text-muted)]">Filters</span>
         </div>
         <div className="flex flex-wrap gap-3 flex-1 justify-end">
           <div className="w-40">
@@ -568,7 +568,7 @@ export default function HotelHousekeeping() {
                 </div>
 
                 {/* Column Tasks List */}
-                <div className="flex flex-col gap-3 min-h-[400px] rounded-xl bg-[var(--sn-card)]/30 p-2">
+                <div className="flex flex-col gap-3 min-h-[400px] rounded-xl bg-[var(--az-surface)]/30 p-2">
                   {colTasks.map(task => {
                     const typeMeta = TASK_TYPE_META[task.taskType] || TASK_TYPE_META.INSPECTION;
                     const priorityMeta = PRIORITY_META[task.priority] || PRIORITY_META[5];
@@ -583,15 +583,15 @@ export default function HotelHousekeeping() {
                           setSelectedTask(task);
                           setDetailModalOpen(true);
                         }}
-                        className="p-4 border-[var(--sn-border)] hover:border-[var(--sn-purple)] flex flex-col gap-3 shadow-md"
+                        className="p-4 border-[var(--az-border)] hover:border-[var(--az-accent)] flex flex-col gap-3 shadow-md"
                       >
                         {/* Title & Priority Badge */}
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="font-bold text-sm tracking-tight text-[var(--sn-text)]">
+                            <h3 className="font-bold text-sm tracking-tight text-[var(--az-text)]">
                               Room {task.room?.roomNumber || 'N/A'}
                             </h3>
-                            <span className="text-[10px] text-[var(--sn-text-muted)] font-medium uppercase tracking-wider block">
+                            <span className="text-[10px] text-[var(--az-text-muted)] font-medium uppercase tracking-wider block">
                               Floor {task.room?.roomNumber?.toString().substring(0, 1) || 'N/A'}
                             </span>
                           </div>
@@ -605,7 +605,7 @@ export default function HotelHousekeeping() {
                           <Badge color={typeMeta.color} className="text-[10px]">
                             {typeMeta.label}
                           </Badge>
-                          <span className="text-[10px] text-[var(--sn-text-muted)] flex items-center gap-1">
+                          <span className="text-[10px] text-[var(--az-text-muted)] flex items-center gap-1">
                             <Clock className="w-3 h-3" /> SLA: {typeMeta.sla}
                           </span>
                         </div>
@@ -613,13 +613,13 @@ export default function HotelHousekeeping() {
                         {/* Checklist progress bar */}
                         {chkTotal > 0 && (
                           <div className="space-y-1">
-                            <div className="flex justify-between text-[10px] text-[var(--sn-text-muted)]">
+                            <div className="flex justify-between text-[10px] text-[var(--az-text-muted)]">
                               <span>Checklist Progress</span>
                               <span>{chkDone}/{chkTotal} done</span>
                             </div>
-                            <div className="w-full h-1.5 bg-[var(--sn-border)] rounded-full overflow-hidden">
+                            <div className="w-full h-1.5 bg-[var(--az-border)] rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-[var(--sn-purple)] transition-all duration-300"
+                                className="h-full bg-[var(--az-accent)] transition-all duration-300"
                                 style={{ width: `${(chkDone / chkTotal) * 100}%` }}
                               />
                             </div>
@@ -627,14 +627,14 @@ export default function HotelHousekeeping() {
                         )}
 
                         {/* Housekeeper Info */}
-                        <div className="flex items-center gap-2 pt-2 border-t border-[var(--sn-border)]/50">
+                        <div className="flex items-center gap-2 pt-2 border-t border-[var(--az-border)]/50">
                           <Avatar
                             name={task.assignedTo?.user?.fullName || task.assignedTo?.name || 'Unassigned'}
                             size="xs"
                           />
                           <div className="text-xs truncate flex-1">
-                            <span className="text-[var(--sn-text-muted)]">By: </span>
-                            <span className="font-medium text-[var(--sn-text)]">
+                            <span className="text-[var(--az-text-muted)]">By: </span>
+                            <span className="font-medium text-[var(--az-text)]">
                               {task.assignedTo?.user?.fullName || task.assignedTo?.name || 'Unassigned'}
                             </span>
                           </div>
@@ -648,8 +648,8 @@ export default function HotelHousekeeping() {
 
                   {colTasks.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <col.icon className="w-6 h-6 text-[var(--sn-text-muted)] opacity-40 mb-2" />
-                      <p className="text-xs font-medium text-[var(--sn-text-muted)]">No tasks in {col.label}</p>
+                      <col.icon className="w-6 h-6 text-[var(--az-text-muted)] opacity-40 mb-2" />
+                      <p className="text-xs font-medium text-[var(--az-text-muted)]">No tasks in {col.label}</p>
                     </div>
                   )}
                 </div>
@@ -677,21 +677,21 @@ export default function HotelHousekeeping() {
             {/* Header info blocks */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <span className="text-[10px] text-[var(--sn-text-muted)] uppercase font-semibold">Task Type</span>
+                <span className="text-[10px] text-[var(--az-text-muted)] uppercase font-semibold">Task Type</span>
                 <p className="font-bold text-sm mt-0.5">{TASK_TYPE_META[selectedTask.taskType]?.label || selectedTask.taskType}</p>
               </div>
               <div>
-                <span className="text-[10px] text-[var(--sn-text-muted)] uppercase font-semibold">Priority</span>
+                <span className="text-[10px] text-[var(--az-text-muted)] uppercase font-semibold">Priority</span>
                 <p className="font-bold text-sm mt-0.5" style={{ color: PRIORITY_META[selectedTask.priority]?.color }}>
                   {PRIORITY_META[selectedTask.priority]?.label || 'NORMAL'}
                 </p>
               </div>
               <div>
-                <span className="text-[10px] text-[var(--sn-text-muted)] uppercase font-semibold">Room Status</span>
+                <span className="text-[10px] text-[var(--az-text-muted)] uppercase font-semibold">Room Status</span>
                 <p className="font-bold text-sm mt-0.5 uppercase">{selectedTask.room?.status || 'N/A'}</p>
               </div>
               <div>
-                <span className="text-[10px] text-[var(--sn-text-muted)] uppercase font-semibold">Current SLA</span>
+                <span className="text-[10px] text-[var(--az-text-muted)] uppercase font-semibold">Current SLA</span>
                 <p className="font-bold text-sm mt-0.5">{TASK_TYPE_META[selectedTask.taskType]?.sla || '20m'}</p>
               </div>
             </div>
@@ -700,32 +700,32 @@ export default function HotelHousekeeping() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <h4 className="font-bold text-sm flex items-center gap-1.5">
-                  <ClipboardList className="w-4 h-4 text-[var(--sn-purple)]" /> Checklist
+                  <ClipboardList className="w-4 h-4 text-[var(--az-accent)]" /> Checklist
                 </h4>
-                <span className="text-xs text-[var(--sn-text-muted)]">
+                <span className="text-xs text-[var(--az-text-muted)]">
                   {selectedTask.checklist?.filter(i => i.completed).length || 0} of {selectedTask.checklist?.length || 0} items completed
                 </span>
               </div>
-              <div className="max-h-56 overflow-y-auto space-y-2 pr-1 border border-[var(--sn-border)]/50 rounded-xl p-3 bg-[var(--az-black)]">
+              <div className="max-h-56 overflow-y-auto space-y-2 pr-1 border border-[var(--az-border)]/50 rounded-xl p-3 bg-[var(--az-black)]">
                 {selectedTask.checklist && selectedTask.checklist.length > 0 ? (
                   selectedTask.checklist.map((item, index) => (
                     <div
                       key={index}
                       onClick={() => handleToggleChecklistItem(index)}
-                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-[var(--sn-border)]/20 cursor-pointer transition-colors"
+                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-[var(--az-border)]/20 cursor-pointer transition-colors"
                     >
                       {item.completed ? (
-                        <CheckSquare className="w-4 h-4 text-[var(--sn-purple)] mt-0.5 flex-shrink-0" />
+                        <CheckSquare className="w-4 h-4 text-[var(--az-accent)] mt-0.5 flex-shrink-0" />
                       ) : (
-                        <Square className="w-4 h-4 text-[var(--sn-text-muted)] mt-0.5 flex-shrink-0" />
+                        <Square className="w-4 h-4 text-[var(--az-text-muted)] mt-0.5 flex-shrink-0" />
                       )}
-                      <span className={`text-xs flex-1 ${item.completed ? 'line-through text-[var(--sn-text-muted)]' : 'text-[var(--sn-text)]'}`}>
+                      <span className={`text-xs flex-1 ${item.completed ? 'line-through text-[var(--az-text-muted)]' : 'text-[var(--az-text)]'}`}>
                         {item.item || item.name || `Task checklist item #${index + 1}`}
                       </span>
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-[var(--sn-text-muted)] text-center py-4">No checklist items defined.</p>
+                  <p className="text-xs text-[var(--az-text-muted)] text-center py-4">No checklist items defined.</p>
                 )}
               </div>
             </div>
@@ -733,7 +733,7 @@ export default function HotelHousekeeping() {
             {/* Assignment Section */}
             <div className="space-y-3">
               <h4 className="font-bold text-sm flex items-center gap-1.5">
-                <UserCheck className="w-4 h-4 text-[var(--sn-purple)]" /> Assign Housekeeper
+                <UserCheck className="w-4 h-4 text-[var(--az-accent)]" /> Assign Housekeeper
               </h4>
               <div className="flex gap-2">
                 <div className="flex-1">
@@ -755,26 +755,26 @@ export default function HotelHousekeeping() {
             {/* Photos section */}
             <div className="space-y-3">
               <h4 className="font-bold text-sm flex items-center gap-1.5">
-                <Camera className="w-4 h-4 text-[var(--sn-purple)]" /> Before / After Proof
+                <Camera className="w-4 h-4 text-[var(--az-accent)]" /> Before / After Proof
               </h4>
               <div className="grid grid-cols-2 gap-4">
-                <div className="border border-[var(--sn-border)]/50 rounded-xl p-3 bg-[var(--az-black)] text-center space-y-2">
-                  <span className="text-[10px] text-[var(--sn-text-muted)] uppercase block">Before Photo</span>
+                <div className="border border-[var(--az-border)]/50 rounded-xl p-3 bg-[var(--az-black)] text-center space-y-2">
+                  <span className="text-[10px] text-[var(--az-text-muted)] uppercase block">Before Photo</span>
                   {selectedTask.photoBeforeUrl ? (
                     <img src={selectedTask.photoBeforeUrl} alt="Before housekeeping" className="h-28 w-full object-cover rounded-lg" />
                   ) : (
-                    <div className="h-28 bg-[var(--sn-card)] rounded-lg flex items-center justify-center border border-dashed border-[var(--sn-border)]">
-                      <Camera className="w-6 h-6 text-[var(--sn-text-muted)] opacity-40" />
+                    <div className="h-28 bg-[var(--az-surface)] rounded-lg flex items-center justify-center border border-dashed border-[var(--az-border)]">
+                      <Camera className="w-6 h-6 text-[var(--az-text-muted)] opacity-40" />
                     </div>
                   )}
                 </div>
-                <div className="border border-[var(--sn-border)]/50 rounded-xl p-3 bg-[var(--az-black)] text-center space-y-2">
-                  <span className="text-[10px] text-[var(--sn-text-muted)] uppercase block">After Photo</span>
+                <div className="border border-[var(--az-border)]/50 rounded-xl p-3 bg-[var(--az-black)] text-center space-y-2">
+                  <span className="text-[10px] text-[var(--az-text-muted)] uppercase block">After Photo</span>
                   {selectedTask.photoProofUrl || selectedTask.photoAfterUrl ? (
                     <img src={selectedTask.photoProofUrl || selectedTask.photoAfterUrl} alt="After housekeeping" className="h-28 w-full object-cover rounded-lg" />
                   ) : (
-                    <div className="h-28 bg-[var(--sn-card)] rounded-lg flex items-center justify-center border border-dashed border-[var(--sn-border)]">
-                      <Camera className="w-6 h-6 text-[var(--sn-text-muted)] opacity-40" />
+                    <div className="h-28 bg-[var(--az-surface)] rounded-lg flex items-center justify-center border border-dashed border-[var(--az-border)]">
+                      <Camera className="w-6 h-6 text-[var(--az-text-muted)] opacity-40" />
                     </div>
                   )}
                 </div>
@@ -783,16 +783,16 @@ export default function HotelHousekeeping() {
 
             {/* Notes */}
             {selectedTask.notes && (
-              <div className="p-3 bg-[var(--sn-border)]/10 rounded-xl border border-[var(--sn-border)]/50">
-                <span className="text-[10px] text-[var(--sn-text-muted)] uppercase font-semibold flex items-center gap-1">
+              <div className="p-3 bg-[var(--az-border)]/10 rounded-xl border border-[var(--az-border)]/50">
+                <span className="text-[10px] text-[var(--az-text-muted)] uppercase font-semibold flex items-center gap-1">
                   <Info className="w-3.5 h-3.5" /> Notes
                 </span>
-                <p className="text-xs mt-1 italic text-[var(--sn-text)]">{selectedTask.notes}</p>
+                <p className="text-xs mt-1 italic text-[var(--az-text)]">{selectedTask.notes}</p>
               </div>
             )}
 
             {/* Status Actions */}
-            <div className="pt-4 border-t border-[var(--sn-border)] flex flex-col gap-4">
+            <div className="pt-4 border-t border-[var(--az-border)] flex flex-col gap-4">
               <div className="flex flex-wrap gap-2 items-center justify-end">
                 {/* PENDING -> START TASK */}
                 {(selectedTask.status === 'PENDING') && (
@@ -827,13 +827,13 @@ export default function HotelHousekeeping() {
                     <div className="flex gap-2 justify-end">
                       <Button
                         onClick={() => handleInspection(selectedTask.id, false)}
-                        className="bg-[var(--sn-red)] text-white hover:bg-red-600 border-none px-4 py-2"
+                        className="bg-[var(--az-danger)] text-white hover:bg-red-600 border-none px-4 py-2"
                       >
                         Fail Inspection
                       </Button>
                       <Button
                         onClick={() => handleInspection(selectedTask.id, true)}
-                        className="bg-[var(--sn-green)] text-black hover:bg-green-500 border-none px-4 py-2"
+                        className="bg-[var(--az-success)] text-black hover:bg-green-500 border-none px-4 py-2"
                       >
                         Pass Inspection
                       </Button>
@@ -845,12 +845,12 @@ export default function HotelHousekeeping() {
                 {(selectedTask.status === 'FAILED' || selectedTask.status === 'COMPLETED' || selectedTask.status === 'DONE') && (
                   <div className="w-full flex flex-col gap-2">
                     {selectedTask.status === 'FAILED' && selectedTask.notes && (
-                      <div className="p-3 bg-[var(--sn-red)]/10 text-[var(--sn-red)] rounded-xl text-xs mb-2">
+                      <div className="p-3 bg-[var(--az-danger)]/10 text-[var(--az-danger)] rounded-xl text-xs mb-2">
                         <span className="font-bold">Failure Reason:</span> {selectedTask.notes}
                       </div>
                     )}
                     <div className="flex gap-2 justify-end items-center">
-                      <span className="text-xs text-[var(--sn-text-muted)] font-medium">Reassign to:</span>
+                      <span className="text-xs text-[var(--az-text-muted)] font-medium">Reassign to:</span>
                       <div className="w-48">
                         <Select
                           value={selectedTask.assignedTo?.id || selectedTask.assignedToId || ''}
@@ -923,8 +923,8 @@ export default function HotelHousekeeping() {
             />
           </div>
 
-          <div className="flex items-center justify-between py-2 border-y border-[var(--sn-border)]/50">
-            <span className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Use Template Checklist</span>
+          <div className="flex items-center justify-between py-2 border-y border-[var(--az-border)]/50">
+            <span className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider">Use Template Checklist</span>
             <Switch
               checked={createForm.useTemplateChecklist}
               onChange={(checked) => setCreateForm({ ...createForm, useTemplateChecklist: checked })}
@@ -933,15 +933,15 @@ export default function HotelHousekeeping() {
 
           {!createForm.useTemplateChecklist && (
             <div>
-              <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider block mb-1">Custom Checklist Items</label>
+              <label className="text-xs font-semibold text-[var(--az-text-muted)] uppercase tracking-wider block mb-1">Custom Checklist Items</label>
               <textarea
-                className="w-full p-3 text-sm bg-[var(--az-black)] border border-[var(--sn-border)] rounded-xl outline-none focus:border-[var(--sn-purple)] text-white"
+                className="w-full p-3 text-sm bg-[var(--az-black)] border border-[var(--az-border)] rounded-xl outline-none focus:border-[var(--az-accent)] text-white"
                 rows={3}
                 placeholder="Item 1&#10;Item 2&#10;Item 3"
                 value={createForm.customChecklist}
                 onChange={(e) => setCreateForm({ ...createForm, customChecklist: e.target.value })}
               />
-              <p className="text-[10px] text-[var(--sn-text-muted)] mt-1">Write each checklist item on a new line.</p>
+              <p className="text-[10px] text-[var(--az-text-muted)] mt-1">Write each checklist item on a new line.</p>
             </div>
           )}
 

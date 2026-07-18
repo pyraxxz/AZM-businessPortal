@@ -44,14 +44,14 @@ function StockBar({ current, minimum }) {
   const safeCur = parseFloat(current) || 0;
   const pct = safeMin > 0 ? Math.min(100, (safeCur / (safeMin * 3)) * 100) : safeCur > 0 ? 100 : 0;
   const color = safeCur <= 0
-    ? 'var(--sn-red)'
+    ? 'var(--az-danger)'
     : safeCur <= safeMin
-      ? 'var(--sn-amber)'
-      : 'var(--sn-green)';
+      ? 'var(--az-warning)'
+      : 'var(--az-success)';
   return (
     <Progress
       value={pct}
-      className="h-2 rounded-full bg-[var(--sn-border)] overflow-hidden"
+      className="h-2 rounded-full bg-[var(--az-border)] overflow-hidden"
       style={{ '--progress-color': color }}
     />
   );
@@ -281,10 +281,10 @@ export default function RestaurantInventory() {
 
   if (!canView) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-[var(--sn-bg)]">
-        <AlertCircle className="w-12 h-12 text-[var(--sn-red)] mb-4" />
-        <h2 className="text-lg font-bold text-[var(--sn-text)]">Permission Denied</h2>
-        <p className="text-sm text-[var(--sn-text-muted)] mt-1">You do not have permission to view or manage the restaurant inventory.</p>
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-[var(--az-bg)]">
+        <AlertCircle className="w-12 h-12 text-[var(--az-danger)] mb-4" />
+        <h2 className="text-lg font-bold text-[var(--az-text)]">Permission Denied</h2>
+        <p className="text-sm text-[var(--az-text-muted)] mt-1">You do not have permission to view or manage the restaurant inventory.</p>
       </div>
     );
   }
@@ -318,20 +318,21 @@ export default function RestaurantInventory() {
   }, 0);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 md:px-6 py-6 text-[var(--sn-text)]">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 md:px-6 py-6 text-[var(--az-text)]">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--sn-text)] flex items-center gap-2">
-            <Package className="w-6 h-6 text-[var(--sn-purple)]" />
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--az-text)] flex items-center gap-2">
+            <Package className="w-6 h-6 text-[var(--az-accent)]" />
             Restaurant Inventory & Recipe Manager
           </h1>
-          <p className="text-sm text-[var(--sn-text-muted)]">
+          <p className="text-sm text-[var(--az-text-muted)]">
             Manage ingredient stock levels, cost sheets, and link ingredients directly to product menus.
           </p>
         </div>
         {canManage && (
           <div className="flex gap-2 flex-wrap">
+            {import.meta.env.DEV && (
             <Button
               variant="outline"
               size="sm"
@@ -339,11 +340,12 @@ export default function RestaurantInventory() {
                 const dummyOrder = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
                 deductMutation.mutate(dummyOrder);
               }}
-              className="flex items-center gap-1.5 border-[var(--sn-border)] hover:border-[var(--sn-purple)] text-xs text-[var(--sn-text-muted)]"
+              className="flex items-center gap-1.5 border-[var(--az-border)] hover:border-[var(--az-accent)] text-xs text-[var(--az-text-muted)]"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Test Deduct Order
             </Button>
+            )}
             <Button
               variant="primary"
               size="sm"
@@ -359,8 +361,8 @@ export default function RestaurantInventory() {
 
       {/* Low Stock Highlight Alert Panel */}
       {lowStockItems.length > 0 && (
-        <Card className="border-[var(--sn-red)] bg-[rgba(239,68,68,0.03)] p-4 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-[var(--sn-red)] font-semibold">
+        <Card className="border-[var(--az-danger)] bg-[rgba(239,68,68,0.03)] p-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-[var(--az-danger)] font-semibold">
             <AlertTriangle className="w-5 h-5" />
             <span>CRITICAL ALERT: {lowStockItems.length} Low Stock Ingredients detected</span>
           </div>
@@ -370,17 +372,17 @@ export default function RestaurantInventory() {
               return (
                 <div
                   key={item.id}
-                  className="bg-[var(--az-black)] border border-[var(--sn-border)] p-3 rounded-xl flex flex-col justify-between"
+                  className="bg-[var(--az-black)] border border-[var(--az-border)] p-3 rounded-xl flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span className="font-semibold text-sm truncate">{item.name}</span>
-                      <Badge color={isOut ? 'var(--sn-red)' : 'var(--sn-amber)'}>
+                      <Badge color={isOut ? 'var(--az-danger)' : 'var(--az-warning)'}>
                         {isOut ? '86 Needed' : 'Low'}
                       </Badge>
                     </div>
-                    <p className="text-xs text-[var(--sn-text-muted)]">
-                      Current: <strong className="text-[var(--sn-text)]">{item.currentStock} {item.unit}</strong> (Min: {item.minimumStock})
+                    <p className="text-xs text-[var(--az-text-muted)]">
+                      Current: <strong className="text-[var(--az-text)]">{item.currentStock} {item.unit}</strong> (Min: {item.minimumStock})
                     </p>
                   </div>
                   {canManage && (
@@ -390,13 +392,13 @@ export default function RestaurantInventory() {
                           setRestockItem(item);
                           setRestockQty('');
                         }}
-                        className="flex-1 bg-[var(--sn-purple)] hover:bg-[#00c870] text-[var(--az-black)] text-xs font-semibold py-1 rounded-lg transition-colors"
+                        className="flex-1 bg-[var(--az-accent)] hover:bg-[#00c870] text-[var(--az-black)] text-xs font-semibold py-1 rounded-lg transition-colors"
                       >
                         Restock
                       </button>
                       <button
                         onClick={() => quick86Mutation.mutate(item)}
-                        className="px-2 py-1 bg-[rgba(239,68,68,0.1)] hover:bg-[var(--sn-red)] text-[var(--sn-red)] hover:text-white rounded-lg text-xs font-semibold transition-colors border border-[rgba(239,68,68,0.2)]"
+                        className="px-2 py-1 bg-[rgba(239,68,68,0.1)] hover:bg-[var(--az-danger)] text-[var(--az-danger)] hover:text-white rounded-lg text-xs font-semibold transition-colors border border-[rgba(239,68,68,0.2)]"
                         title="Mark item out of stock (86 menu)"
                       >
                         86 Item
@@ -412,56 +414,56 @@ export default function RestaurantInventory() {
 
       {/* Main KPI Summary Widgets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="flex items-center gap-4 bg-[var(--sn-card)] p-4 border border-[var(--sn-border)]">
-          <div className="p-3 bg-[var(--sn-border)] rounded-xl text-[var(--sn-purple)]">
+        <Card className="flex items-center gap-4 bg-[var(--az-surface)] p-4 border border-[var(--az-border)]">
+          <div className="p-3 bg-[var(--az-border)] rounded-xl text-[var(--az-accent)]">
             <Package className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--sn-text-muted)]">Total Ingredients</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--az-text-muted)]">Total Ingredients</p>
             <p className="text-xl font-bold az-mono mt-0.5">{itemsList.length}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 bg-[var(--sn-card)] p-4 border border-[var(--sn-border)]">
-          <div className="p-3 bg-[rgba(245,158,11,0.1)] rounded-xl text-[var(--sn-amber)]">
+        <Card className="flex items-center gap-4 bg-[var(--az-surface)] p-4 border border-[var(--az-border)]">
+          <div className="p-3 bg-[rgba(245,158,11,0.1)] rounded-xl text-[var(--az-warning)]">
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--sn-text-muted)]">Low Stock Items</p>
-            <p className="text-xl font-bold az-mono mt-0.5 text-[var(--sn-amber)]">{lowStockItems.length}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--az-text-muted)]">Low Stock Items</p>
+            <p className="text-xl font-bold az-mono mt-0.5 text-[var(--az-warning)]">{lowStockItems.length}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 bg-[var(--sn-card)] p-4 border border-[var(--sn-border)]">
-          <div className="p-3 bg-[rgba(239,68,68,0.1)] rounded-xl text-[var(--sn-red)]">
+        <Card className="flex items-center gap-4 bg-[var(--az-surface)] p-4 border border-[var(--az-border)]">
+          <div className="p-3 bg-[rgba(239,68,68,0.1)] rounded-xl text-[var(--az-danger)]">
             <TrendingDown className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--sn-text-muted)]">Out of Stock</p>
-            <p className="text-xl font-bold az-mono mt-0.5 text-[var(--sn-red)]">{outOfStockItems.length}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--az-text-muted)]">Out of Stock</p>
+            <p className="text-xl font-bold az-mono mt-0.5 text-[var(--az-danger)]">{outOfStockItems.length}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 bg-[var(--sn-card)] p-4 border border-[var(--sn-border)]">
-          <div className="p-3 bg-[rgba(16,185,129,0.1)] rounded-xl text-[var(--sn-green)]">
+        <Card className="flex items-center gap-4 bg-[var(--az-surface)] p-4 border border-[var(--az-border)]">
+          <div className="p-3 bg-[rgba(16,185,129,0.1)] rounded-xl text-[var(--az-success)]">
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--sn-text-muted)]">Total Assets Value</p>
-            <p className="text-xl font-bold az-mono mt-0.5 text-[var(--sn-green)]">GHS {totalValueGhs.toFixed(2)}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--az-text-muted)]">Total Assets Value</p>
+            <p className="text-xl font-bold az-mono mt-0.5 text-[var(--az-success)]">GHS {totalValueGhs.toFixed(2)}</p>
           </div>
         </Card>
       </div>
 
       {/* Tabs Menu */}
-      <div className="flex items-center justify-between border-b border-[var(--sn-border)] pb-px">
+      <div className="flex items-center justify-between border-b border-[var(--az-border)] pb-px">
         <div className="flex gap-4">
           <button
             onClick={() => setActiveTab('stock')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === 'stock'
-                ? 'border-[var(--sn-purple)] text-[var(--sn-purple)]'
-                : 'border-transparent text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'
+                ? 'border-[var(--az-accent)] text-[var(--az-accent)]'
+                : 'border-transparent text-[var(--az-text-muted)] hover:text-[var(--az-text)]'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -471,8 +473,8 @@ export default function RestaurantInventory() {
             onClick={() => setActiveTab('recipes')}
             className={`pb-3 text-sm font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
               activeTab === 'recipes'
-                ? 'border-[var(--sn-purple)] text-[var(--sn-purple)]'
-                : 'border-transparent text-[var(--sn-text-muted)] hover:text-[var(--sn-text)]'
+                ? 'border-[var(--az-accent)] text-[var(--az-accent)]'
+                : 'border-transparent text-[var(--az-text-muted)] hover:text-[var(--az-text)]'
             }`}
           >
             <Scale className="w-4 h-4" />
@@ -492,8 +494,8 @@ export default function RestaurantInventory() {
                 onClick={() => setFilterCat(cat)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
                   filterCat === cat
-                    ? 'bg-[var(--sn-purple)] text-[var(--az-black)] border-[var(--sn-purple)] font-bold'
-                    : 'bg-[var(--sn-card)] text-[var(--sn-text-muted)] border-[var(--sn-border)] hover:text-[var(--sn-text)]'
+                    ? 'bg-[var(--az-accent)] text-[var(--az-black)] border-[var(--az-accent)] font-bold'
+                    : 'bg-[var(--az-surface)] text-[var(--az-text-muted)] border-[var(--az-border)] hover:text-[var(--az-text)]'
                 }`}
               >
                 {cat}
@@ -517,7 +519,7 @@ export default function RestaurantInventory() {
             <div className="space-y-6">
               {Object.keys(groupedItems).map(category => (
                 <div key={category} className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--sn-text-muted)] border-l-2 border-[var(--sn-purple)] pl-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--az-text-muted)] border-l-2 border-[var(--az-accent)] pl-2">
                     {category} ({groupedItems[category].length})
                   </h3>
                   <div className="grid grid-cols-1 gap-3">
@@ -530,30 +532,30 @@ export default function RestaurantInventory() {
                       return (
                         <Card
                           key={item.id}
-                          className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--sn-card)] p-4 hover:border-[var(--sn-purple)]/40 transition-colors"
+                          className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--az-surface)] p-4 hover:border-[var(--az-accent)]/40 transition-colors"
                         >
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-semibold text-base text-[var(--sn-text)] truncate">{item.name}</h4>
-                              <Badge color={isOut ? 'var(--sn-red)' : isLow ? 'var(--sn-amber)' : 'var(--sn-green)'}>
+                              <h4 className="font-semibold text-base text-[var(--az-text)] truncate">{item.name}</h4>
+                              <Badge color={isOut ? 'var(--az-danger)' : isLow ? 'var(--az-warning)' : 'var(--az-success)'}>
                                 {isOut ? 'OUT' : isLow ? 'LOW' : 'IN STOCK'}
                               </Badge>
                               {item.supplier && (
-                                <span className="text-[10px] bg-[var(--sn-border)] text-[var(--sn-text-muted)] px-1.5 py-0.5 rounded flex items-center gap-1">
+                                <span className="text-[10px] bg-[var(--az-border)] text-[var(--az-text-muted)] px-1.5 py-0.5 rounded flex items-center gap-1">
                                   <Truck className="w-3 h-3" />
                                   {item.supplier}
                                 </span>
                               )}
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 mt-2 text-xs text-[var(--sn-text-muted)]">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 mt-2 text-xs text-[var(--az-text-muted)]">
                               <div>
-                                Cost per unit: <strong className="text-[var(--sn-text)]">GHS {parseFloat(item.costPerUnit || 0).toFixed(2)} / {item.unit}</strong>
+                                Cost per unit: <strong className="text-[var(--az-text)]">GHS {parseFloat(item.costPerUnit || 0).toFixed(2)} / {item.unit}</strong>
                               </div>
                               <div>
-                                Supplier: <span className="text-[var(--sn-text)] font-semibold">{item.supplier || 'N/A'}</span>
+                                Supplier: <span className="text-[var(--az-text)] font-semibold">{item.supplier || 'N/A'}</span>
                               </div>
                               <div>
-                                Total Value: <strong className="text-[var(--sn-text)]">GHS {(cur * parseFloat(item.costPerUnit || 0)).toFixed(2)}</strong>
+                                Total Value: <strong className="text-[var(--az-text)]">GHS {(cur * parseFloat(item.costPerUnit || 0)).toFixed(2)}</strong>
                               </div>
                             </div>
                           </div>
@@ -562,7 +564,7 @@ export default function RestaurantInventory() {
                           <div className="w-full md:w-48">
                             <div className="flex justify-between text-xs font-semibold mb-1">
                               <span>{cur} {item.unit}</span>
-                              <span className="text-[var(--sn-text-muted)]">min: {min} {item.unit}</span>
+                              <span className="text-[var(--az-text-muted)]">min: {min} {item.unit}</span>
                             </div>
                             <StockBar current={cur} minimum={min} />
                           </div>
@@ -577,7 +579,7 @@ export default function RestaurantInventory() {
                                   setRestockItem(item);
                                   setRestockQty('');
                                 }}
-                                className="flex items-center gap-1 border-[var(--sn-border)] text-xs h-9"
+                                className="flex items-center gap-1 border-[var(--az-border)] text-xs h-9"
                               >
                                 <RefreshCw className="w-3.5 h-3.5" />
                                 Restock
@@ -586,7 +588,7 @@ export default function RestaurantInventory() {
                                 variant="secondary"
                                 size="sm"
                                 onClick={() => setEditingItem(item)}
-                                className="flex items-center gap-1 border-[var(--sn-border)] text-xs h-9"
+                                className="flex items-center gap-1 border-[var(--az-border)] text-xs h-9"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                                 Edit
@@ -609,7 +611,7 @@ export default function RestaurantInventory() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left / Middle side: Product List */}
           <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-base font-bold text-[var(--sn-text)]">Restaurant Products Catalog</h3>
+            <h3 className="text-base font-bold text-[var(--az-text)]">Restaurant Products Catalog</h3>
             {recipesLoading ? (
               <div className="space-y-3">
                 <Skeleton className="h-16 w-full" />
@@ -635,37 +637,37 @@ export default function RestaurantInventory() {
                       onClick={() => setSelectedProduct(product)}
                       className={`cursor-pointer transition-all border p-4 ${
                         selectedProduct?.id === product.id
-                          ? 'border-[var(--sn-purple)] bg-[rgba(168,85,247,0.02)]'
-                          : 'bg-[var(--sn-card)] border-[var(--sn-border)] hover:border-[var(--sn-purple)]/40'
+                          ? 'border-[var(--az-accent)] bg-[rgba(168,85,247,0.02)]'
+                          : 'bg-[var(--az-surface)] border-[var(--az-border)] hover:border-[var(--az-accent)]/40'
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-base text-[var(--sn-text)]">{product.name}</h4>
-                            <span className="text-[10px] bg-[var(--sn-border)] text-[var(--sn-text-muted)] px-1.5 py-0.5 rounded font-mono">
+                            <h4 className="font-semibold text-base text-[var(--az-text)]">{product.name}</h4>
+                            <span className="text-[10px] bg-[var(--az-border)] text-[var(--az-text-muted)] px-1.5 py-0.5 rounded font-mono">
                               ID: {product.id}
                             </span>
                           </div>
                           <div className="flex gap-4 mt-2 text-xs">
-                            <span className="text-[var(--sn-text-muted)]">
-                              Sells: <strong className="text-[var(--sn-text)]">GHS {sellingPrice.toFixed(2)}</strong>
+                            <span className="text-[var(--az-text-muted)]">
+                              Sells: <strong className="text-[var(--az-text)]">GHS {sellingPrice.toFixed(2)}</strong>
                             </span>
-                            <span className="text-[var(--sn-text-muted)]">
-                              Cost: <strong className="text-[var(--sn-text)]">GHS {totalCost.toFixed(2)}</strong>
+                            <span className="text-[var(--az-text-muted)]">
+                              Cost: <strong className="text-[var(--az-text)]">GHS {totalCost.toFixed(2)}</strong>
                             </span>
                           </div>
                         </div>
 
                         {/* Cost analysis badge */}
                         <div className="text-right flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
-                          <span className="text-xs text-[var(--sn-text-muted)] uppercase tracking-wider font-semibold">Margin</span>
+                          <span className="text-xs text-[var(--az-text-muted)] uppercase tracking-wider font-semibold">Margin</span>
                           <span className={`text-sm font-bold px-2 py-0.5 rounded-full ${
                             marginPct <= 20
-                              ? 'bg-[rgba(239,68,68,0.1)] text-[var(--sn-red)]'
+                              ? 'bg-[rgba(239,68,68,0.1)] text-[var(--az-danger)]'
                               : marginPct <= 45
-                                ? 'bg-[rgba(245,158,11,0.1)] text-[var(--sn-amber)]'
-                                : 'bg-[rgba(16,185,129,0.1)] text-[var(--sn-green)]'
+                                ? 'bg-[rgba(245,158,11,0.1)] text-[var(--az-warning)]'
+                                : 'bg-[rgba(16,185,129,0.1)] text-[var(--az-success)]'
                           }`}>
                             {marginPct.toFixed(0)}%
                           </span>
@@ -673,19 +675,19 @@ export default function RestaurantInventory() {
                       </div>
 
                       {/* Ingredients inside product summary */}
-                      <div className="mt-4 pt-3 border-t border-[var(--sn-border)]">
+                      <div className="mt-4 pt-3 border-t border-[var(--az-border)]">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold text-[var(--sn-text-muted)] flex items-center gap-1">
+                          <span className="text-xs font-semibold text-[var(--az-text-muted)] flex items-center gap-1">
                             <Layers className="w-3.5 h-3.5" />
                             Ingredients Linked ({ingredients.length})
                           </span>
                         </div>
                         {ingredients.length === 0 ? (
-                          <p className="text-xs text-[var(--sn-text-muted)] italic">No recipe elements configured yet.</p>
+                          <p className="text-xs text-[var(--az-text-muted)] italic">No recipe elements configured yet.</p>
                         ) : (
                           <div className="flex flex-wrap gap-1.5">
                             {ingredients.map(ing => (
-                              <Badge key={ing.inventoryItemId || ing.id} color="var(--sn-purple)">
+                              <Badge key={ing.inventoryItemId || ing.id} color="var(--az-accent)">
                                 {ing.inventoryItemName || ing.name}: {ing.quantityRequired || ing.quantity}
                               </Badge>
                             ))}
@@ -701,37 +703,37 @@ export default function RestaurantInventory() {
 
           {/* Right side: Detailed recipe inspector & linkages editor */}
           <div className="space-y-4">
-            <h3 className="text-base font-bold text-[var(--sn-text)] flex items-center gap-1">
-              <Scale className="w-5 h-5 text-[var(--sn-purple)]" />
+            <h3 className="text-base font-bold text-[var(--az-text)] flex items-center gap-1">
+              <Scale className="w-5 h-5 text-[var(--az-accent)]" />
               Recipe Cost Sheet Details
             </h3>
 
             {selectedProduct ? (
-              <Card className="bg-[var(--sn-card)] border-[var(--sn-purple)] p-5 space-y-4 sticky top-4">
-                <div className="flex items-start justify-between border-b border-[var(--sn-border)] pb-3">
+              <Card className="bg-[var(--az-surface)] border-[var(--az-accent)] p-5 space-y-4 sticky top-4">
+                <div className="flex items-start justify-between border-b border-[var(--az-border)] pb-3">
                   <div>
-                    <h4 className="font-bold text-lg text-[var(--sn-text)]">{selectedProduct.name}</h4>
-                    <span className="text-xs text-[var(--sn-text-muted)] font-mono">Product ID: {selectedProduct.id}</span>
+                    <h4 className="font-bold text-lg text-[var(--az-text)]">{selectedProduct.name}</h4>
+                    <span className="text-xs text-[var(--az-text-muted)] font-mono">Product ID: {selectedProduct.id}</span>
                   </div>
                   <button
                     onClick={() => setSelectedProduct(null)}
-                    className="p-1.5 hover:bg-[var(--sn-border)] rounded-lg text-[var(--sn-text-muted)] transition-colors"
+                    className="p-1.5 hover:bg-[var(--az-border)] rounded-lg text-[var(--az-text-muted)] transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
                 {/* Subtotals & calculations */}
-                <div className="grid grid-cols-2 gap-3 bg-[var(--az-black)] p-3 rounded-xl border border-[var(--sn-border)] text-center">
+                <div className="grid grid-cols-2 gap-3 bg-[var(--az-black)] p-3 rounded-xl border border-[var(--az-border)] text-center">
                   <div>
-                    <span className="text-xs text-[var(--sn-text-muted)]">Selling Price</span>
-                    <p className="text-base font-bold text-[var(--sn-text)] mt-0.5">
+                    <span className="text-xs text-[var(--az-text-muted)]">Selling Price</span>
+                    <p className="text-base font-bold text-[var(--az-text)] mt-0.5">
                       GHS {parseFloat(selectedProduct.priceUsdc || 0).toFixed(2)}
                     </p>
                   </div>
                   <div>
-                    <span className="text-xs text-[var(--sn-text-muted)]">Ingredient Cost</span>
-                    <p className="text-base font-bold text-[var(--sn-purple)] mt-0.5">
+                    <span className="text-xs text-[var(--az-text-muted)]">Ingredient Cost</span>
+                    <p className="text-base font-bold text-[var(--az-accent)] mt-0.5">
                       GHS {parseFloat(selectedProduct.totalCostGhs || 0).toFixed(2)}
                     </p>
                   </div>
@@ -739,16 +741,16 @@ export default function RestaurantInventory() {
 
                 {/* Ingredients List */}
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider">
+                  <span className="text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider">
                     Linked Ingredients & Quantity
                   </span>
 
                   {(selectedProduct.recipeIngredients || selectedProduct.ingredients || []).length === 0 ? (
-                    <div className="text-center py-6 border border-dashed border-[var(--sn-border)] rounded-xl">
-                      <p className="text-xs text-[var(--sn-text-muted)]">No ingredients linked yet.</p>
+                    <div className="text-center py-6 border border-dashed border-[var(--az-border)] rounded-xl">
+                      <p className="text-xs text-[var(--az-text-muted)]">No ingredients linked yet.</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-[var(--sn-border)] bg-[var(--az-black)] rounded-xl border border-[var(--sn-border)] overflow-hidden">
+                    <div className="divide-y divide-[var(--az-border)] bg-[var(--az-black)] rounded-xl border border-[var(--az-border)] overflow-hidden">
                       {(selectedProduct.recipeIngredients || selectedProduct.ingredients || []).map(ing => {
                         const itemCost = parseFloat(ing.costPerUnit || ing.cost) || 0;
                         const qty = parseFloat(ing.quantityRequired || ing.quantity) || 0;
@@ -757,20 +759,20 @@ export default function RestaurantInventory() {
                         return (
                           <div key={ing.inventoryItemId || ing.id} className="p-3 flex items-center justify-between text-xs">
                             <div>
-                              <p className="font-semibold text-[var(--sn-text)]">{ing.inventoryItemName || ing.name}</p>
-                              <p className="text-[10px] text-[var(--sn-text-muted)]">
+                              <p className="font-semibold text-[var(--az-text)]">{ing.inventoryItemName || ing.name}</p>
+                              <p className="text-[10px] text-[var(--az-text-muted)]">
                                 {qty} {ing.unit} x GHS {itemCost.toFixed(2)}
                               </p>
                             </div>
                             <div className="flex items-center gap-3">
-                              <span className="font-semibold text-[var(--sn-text)]">GHS {lineCost.toFixed(2)}</span>
+                              <span className="font-semibold text-[var(--az-text)]">GHS {lineCost.toFixed(2)}</span>
                               {canManage && (
                                 <button
                                   onClick={() => unlinkMutation.mutate({
                                     productId: selectedProduct.id,
                                     itemId: ing.inventoryItemId || ing.id
                                   })}
-                                  className="text-[var(--sn-red)] hover:bg-[rgba(239,68,68,0.1)] p-1.5 rounded-lg transition-colors"
+                                  className="text-[var(--az-danger)] hover:bg-[rgba(239,68,68,0.1)] p-1.5 rounded-lg transition-colors"
                                   title="Unlink ingredient"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -786,8 +788,8 @@ export default function RestaurantInventory() {
 
                 {/* Form to link new ingredient */}
                 {canManage && (
-                  <div className="border-t border-[var(--sn-border)] pt-4 space-y-3">
-                    <span className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider">
+                  <div className="border-t border-[var(--az-border)] pt-4 space-y-3">
+                    <span className="text-xs font-bold text-[var(--az-text-muted)] uppercase tracking-wider">
                       Link Ingredient
                     </span>
                     <div className="grid grid-cols-2 gap-2">
@@ -823,8 +825,8 @@ export default function RestaurantInventory() {
                 )}
               </Card>
             ) : (
-              <Card className="p-8 text-center border-dashed border-[var(--sn-border)]">
-                <p className="text-sm text-[var(--sn-text-muted)]">
+              <Card className="p-8 text-center border-dashed border-[var(--az-border)]">
+                <p className="text-sm text-[var(--az-text-muted)]">
                   Select a product from the catalog on the left to edit and inspect its recipe cost sheet, link ingredients and verify profit margins.
                 </p>
               </Card>
@@ -898,7 +900,7 @@ export default function RestaurantInventory() {
             onChange={(e) => setForm({ ...form, supplier: e.target.value })}
             placeholder="e.g. Accra Central Wholesale Foods"
           />
-          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--az-border)]">
             <Button variant="secondary" type="button" onClick={() => setIsCreateOpen(false)}>
               Cancel
             </Button>
@@ -968,7 +970,7 @@ export default function RestaurantInventory() {
               value={editingItem.supplier || ''}
               onChange={(e) => setEditingItem({ ...editingItem, supplier: e.target.value })}
             />
-            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--az-border)]">
               <Button variant="secondary" type="button" onClick={() => setEditingItem(null)}>
                 Cancel
               </Button>
@@ -984,15 +986,15 @@ export default function RestaurantInventory() {
       <Modal open={!!restockItem} onClose={() => setRestockItem(null)} title="Quick Restock">
         {restockItem && (
           <form onSubmit={handleRestockSubmit} className="space-y-4">
-            <div className="p-3 bg-[var(--az-black)] rounded-xl border border-[var(--sn-border)]">
-              <p className="text-xs text-[var(--sn-text-muted)] font-semibold uppercase tracking-wider">Item Details</p>
-              <p className="text-base font-bold text-[var(--sn-text)] mt-1">{restockItem.name}</p>
+            <div className="p-3 bg-[var(--az-black)] rounded-xl border border-[var(--az-border)]">
+              <p className="text-xs text-[var(--az-text-muted)] font-semibold uppercase tracking-wider">Item Details</p>
+              <p className="text-base font-bold text-[var(--az-text)] mt-1">{restockItem.name}</p>
               <div className="grid grid-cols-2 gap-4 mt-2 text-xs">
                 <div>
-                  Current Stock: <strong className="text-[var(--sn-text)]">{restockItem.currentStock} {restockItem.unit}</strong>
+                  Current Stock: <strong className="text-[var(--az-text)]">{restockItem.currentStock} {restockItem.unit}</strong>
                 </div>
                 <div>
-                  Unit Cost: <strong className="text-[var(--sn-text)]">GHS {parseFloat(restockItem.costPerUnit || 0).toFixed(2)}</strong>
+                  Unit Cost: <strong className="text-[var(--az-text)]">GHS {parseFloat(restockItem.costPerUnit || 0).toFixed(2)}</strong>
                 </div>
               </div>
             </div>
@@ -1006,7 +1008,7 @@ export default function RestaurantInventory() {
               onChange={(e) => setRestockQty(e.target.value)}
               placeholder="e.g. 25"
             />
-            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--sn-border)]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--az-border)]">
               <Button variant="secondary" type="button" onClick={() => setRestockItem(null)}>
                 Cancel
               </Button>
