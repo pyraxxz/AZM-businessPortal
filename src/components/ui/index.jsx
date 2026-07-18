@@ -6,12 +6,21 @@ export { GlassPanel } from './GlassPanel';
 export { AnimatedNumber } from './AnimatedNumber';
 
 // ── Badge ─────────────────────────────────────────────────────────────────────
-export function Badge({ children, color = 'var(--sn-purple)', bg, className }) {
-  const bgColor = bg || `${color}1a`;
+export function Badge({ children, color, bg, variant, className }) {
+  const variantColors = {
+    primary: { color: 'var(--az-accent)', bg: 'var(--az-accent-subtle)' },
+    success: { color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
+    danger:  { color: 'var(--az-danger)', bg: 'var(--az-danger-subtle)' },
+    warning: { color: 'var(--az-warning)', bg: 'var(--az-warning-subtle)' },
+    muted:   { color: 'var(--az-text-muted)', bg: 'var(--az-bg-alt)' },
+  };
+  const resolved = variant ? variantColors[variant] || variantColors.primary : null;
+  const finalColor = color || resolved?.color || 'var(--sn-purple)';
+  const finalBg    = bg    || resolved?.bg    || `${finalColor}1a`;
   return (
     <span
       className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold', className)}
-      style={{ color, background: bgColor }}
+      style={{ color: finalColor, background: finalBg }}
     >
       {children}
     </span>

@@ -47,6 +47,7 @@ import {
   CarFront,
   ShipWheel,
   FileSpreadsheet,
+  Store as StoreIcon,
 } from 'lucide-react';
 
 const SECTION_HEADERS = {
@@ -95,6 +96,7 @@ const ALL_NAVIGATION_ITEMS = [
   { label: 'Marketing', icon: Megaphone, to: '/marketing', section: 'marketing', perm: 'marketing.view' },
   { label: 'Reviews', icon: Star, to: '/reviews', section: 'marketing', perm: 'reviews.view' },
   { label: 'Showcase', icon: ImageIcon, to: '/showcase', section: 'marketing', perm: 'marketing.view' },
+  { label: 'Storefront', icon: StoreIcon, to: '/storefront', section: 'marketing', perm: 'marketing.view' },
 
   // Settings
   { label: 'Settings', icon: Settings, to: '/settings', section: 'settings', perm: null },

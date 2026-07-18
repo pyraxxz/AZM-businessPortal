@@ -1,280 +1,311 @@
-// src/pages/Settings.jsx
-// =============================================================================
-// Settings — Main hub with tabs for all governance sub-screens
-//
-// Tabs: Business Profile | Roles & Permissions | Notifications | Activity Log | Danger Zone
-// The existing Business Profile form (from the old Settings.jsx) lives in the
-// first tab; new governance screens are the remaining tabs.
-// =============================================================================
-
-import { useState, useEffect, useRef } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { business as businessApi, locations as locApi } from '@/lib/api';
-import { marketplaceApi } from '@/lib/marketplaceApi';
+import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { business as businessApi } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import { usePermission } from '@/hooks/usePermission';
-import { Card, Button, Input, Textarea, Badge, Switch, Tabs } from '@/components/ui';
+import { Card, Button, Badge, Switch, Avatar, GlassPanel } from '@/components/ui';
 import { KYB_STATUS_META } from '@/lib/utils';
-import { Building2, Save, Eye, BadgeCheck, QrCode, Wallet, ImagePlus, Palette, Shield, Bell, History, AlertTriangle, CheckCircle2, Users } from 'lucide-react';
-import { uploadImageToCloudinary, isCloudinaryConfigured, validateImageFile } from '@/lib/cloudinary';
+import {
+  Building2,
+  Users,
+  Bell,
+  Sliders,
+  ChevronRight,
+  ShieldAlert,
+  Moon,
+  Sun,
+  LogOut,
+  CheckCircle2,
+  Link,
+  Shield
+} from 'lucide-react';
 import { toast } from 'sonner';
-import PublicProfilePreview from '@/components/PublicProfilePreview';
-import QrCodePanel from '@/components/QrCodePanel';
-import RolesPermissions from '@/pages/settings/RolesPermissions';
-import NotificationPrefs from '@/pages/settings/NotificationPrefs';
-import ActivityLog from '@/pages/settings/ActivityLog';
-import DangerZone from '@/pages/settings/DangerZone';
-import TeamAccess from '@/pages/settings/TeamAccess';
-import BusinessMeta from '@/pages/settings/BusinessMeta';
-
-const CATEGORIES = [
-  { value: 'LOGISTICS',          label: 'Transit & Transport' },
-  { value: 'FOOD_BEVERAGE',      label: 'Restaurants' },
-  { value: 'REAL_ESTATE',        label: 'Hotels & Stays' },
-  { value: 'RETAIL',             label: 'Retail' },
-  { value: 'HEALTH_WELLNESS',    label: 'Health & Wellness' },
-  { value: 'EDUCATION',          label: 'Education' },
-  { value: 'ENTERTAINMENT',      label: 'Entertainment' },
-  { value: 'FREELANCE_SERVICES', label: 'Services' },
-  { value: 'TECHNOLOGY',         label: 'Technology' },
-  { value: 'FINANCIAL_SERVICES', label: 'Financial Services' },
-  { value: 'OTHER',              label: 'Other' },
-];
 
 export default function Settings() {
-  const { bizProfile, user, refreshProfile } = useAuth();
+  const { bizProfile, user, logout, refreshProfile } = useAuth();
   const { hasPermission } = usePermission();
   const canManage = hasPermission('settings.manage');
-  const qc = useQueryClient();
+  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
 
-  // ── Business Profile form state (from old Settings) ──────────────────────
-  const [form, setForm] = useState({
-    businessName: '', description: '', website: '', phoneNumber: '',
-    contactEmail: '', address: '', country: '', category: '',
-    logoUrl: '', coverPhotoUrl: '', adAccentColor: '',
-    businessMeta: {},
-  });
-  const [showPreview, setShowPreview] = useState(false);
-
-  useEffect(() => {
-    if (bizProfile) {
-      setForm({
-        businessName: bizProfile.businessName || '',
-        description:  bizProfile.description  || '',
-        website:       bizProfile.website      || '',
-        phoneNumber:   bizProfile.phoneNumber  || '',
-        contactEmail:  bizProfile.contactEmail || '',
-        address:       bizProfile.address      || '',
-        country:       bizProfile.country      || '',
-        category:      bizProfile.category     || '',
-        logoUrl:       bizProfile.logoUrl      || '',
-        coverPhotoUrl: bizProfile.coverPhotoUrl || '',
-        adAccentColor: bizProfile.adAccentColor || '',
-        businessMeta: bizProfile.businessMeta || {},
-      });
-    }
-  }, [bizProfile]);
-
-  const saveMutation = useMutation({
-    mutationFn: (data) => businessApi.update(data),
-    onSuccess: () => {
-      toast.success('Settings saved');
-      refreshProfile();
-    },
-    onError: (e) => toast.error('Save failed: ' + e.message),
-  });
-
-  const handleSave = () => {
-    saveMutation.mutate({
-      businessName: form.businessName,
-      description:  form.description,
-      website:      form.website,
-      phoneNumber:  form.phoneNumber,
-      contactEmail: form.contactEmail,
-      address:      form.address,
-      country:      form.country,
-      category:     form.category,
-      logoUrl:      form.logoUrl,
-      coverPhotoUrl: form.coverPhotoUrl,
-      adAccentColor: form.adAccentColor || null,
-      businessMeta: form.businessMeta,
-    });
+  const toggleTheme = () => {
+    const nextDark = !isDarkMode;
+    setIsDarkMode(nextDark);
+    document.documentElement.classList.toggle('dark');
+    toast.success(`${nextDark ? 'Dark' : 'Light'} mode enabled`);
   };
 
   const copyBizId = async () => {
     if (!bizProfile?.bizId) return;
     try {
       await navigator.clipboard.writeText(bizProfile.bizId);
-      toast.success('BIZ ID copied');
-    } catch { /* ignore */ }
+      toast.success('Business ID copied to clipboard');
+    } catch {
+      toast.error('Failed to copy Business ID');
+    }
   };
 
-  // ── Business Profile tab content ────────────────────────────────────────
-  const profileContent = (
-    <div className="space-y-6">
-      {/* Logo + Cover Photo */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Logo */}
-        <Card className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-[var(--sn-purple)]" />
-            <h3 className="text-sm font-semibold text-[var(--sn-text)]">Business Logo</h3>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[var(--sn-border)] flex-shrink-0">
-              {form.logoUrl
-                ? <img src={form.logoUrl} alt="logo" className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center bg-[var(--sn-purple-subtle)]">
-                    <span className="text-2xl font-black text-[var(--sn-purple)]">{(form.businessName || 'B').charAt(0)}</span>
-                  </div>
-              }
-            </div>
-            <Input
-              placeholder="Logo URL"
-              value={form.logoUrl}
-              onChange={e => setForm({ ...form, logoUrl: e.target.value })}
-              disabled={!canManage}
-            />
-          </div>
-        </Card>
-
-        {/* Cover Photo */}
-        <Card className="space-y-3">
-          <h3 className="text-sm font-semibold text-[var(--sn-text)]">Cover Photo</h3>
-          {form.coverPhotoUrl
-            ? <img src={form.coverPhotoUrl} alt="cover" className="w-full h-24 rounded-xl object-cover" />
-            : <div className="w-full h-24 rounded-xl border-2 border-dashed border-[var(--sn-border)] flex items-center justify-center">
-                <ImagePlus className="w-6 h-6 text-[var(--sn-text-muted)]" />
-              </div>
-          }
-          <Input
-            placeholder="Cover photo URL"
-            value={form.coverPhotoUrl}
-            onChange={e => setForm({ ...form, coverPhotoUrl: e.target.value })}
-            disabled={!canManage}
-          />
-        </Card>
-      </div>
-
-      {/* Basic info */}
-      <Card className="space-y-4">
-        <h3 className="text-sm font-semibold text-[var(--sn-text)]">Business Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="Business Name" value={form.businessName} onChange={e => setForm({ ...form, businessName: e.target.value })} disabled={!canManage} />
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[var(--sn-text-muted)] uppercase tracking-wider">Category</label>
-            <select
-              className="w-full px-4 py-3 rounded-xl bg-[var(--az-black)] border border-[var(--sn-border)] text-[var(--sn-text)] text-sm outline-none focus:border-[var(--sn-purple)]"
-              value={form.category}
-              onChange={e => setForm({ ...form, category: e.target.value })}
-              disabled={!canManage}
-            >
-              <option value="">Select category</option>
-              {CATEGORIES.map(c => <option key={c.value} value={c.value} style={{ background: 'var(--sn-card)' }}>{c.label}</option>)}
-            </select>
-          </div>
-          <Input label="Website" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} disabled={!canManage} />
-          <Input label="Phone" value={form.phoneNumber} onChange={e => setForm({ ...form, phoneNumber: e.target.value })} disabled={!canManage} />
-          <Input label="Email" value={form.contactEmail} onChange={e => setForm({ ...form, contactEmail: e.target.value })} disabled={!canManage} />
-          <Input label="Address" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} disabled={!canManage} />
-        </div>
-        <Textarea label="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} disabled={!canManage} rows={3} />
-      </Card>
-
-      {/* Accent color */}
-      <Card className="flex items-center gap-4">
-        <Palette className="w-5 h-5 text-[var(--sn-purple)]" />
-        <div className="flex-1">
-          <h3 className="text-sm font-semibold text-[var(--sn-text)]">Marketplace Accent Color</h3>
-          <p className="text-xs text-[var(--sn-text-muted)]">Customize the color of your marketplace card.</p>
-        </div>
-        <input
-          type="color"
-          value={form.adAccentColor || '#6C5FC7'}
-          onChange={e => setForm({ ...form, adAccentColor: e.target.value })}
-          disabled={!canManage}
-          className="w-12 h-10 rounded-lg border border-[var(--sn-border)] cursor-pointer bg-transparent"
-        />
-      </Card>
-
-      {/* KYB status + BIZ ID */}
-      <Card className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <BadgeCheck className="w-5 h-5" style={{ color: KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED']?.color }} />
-          <div>
-            <span className="text-xs text-[var(--sn-text-muted)]">KYB Status</span>
-            <p className="text-sm font-semibold text-[var(--sn-text)]">{KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED']?.label || bizProfile?.kybStatus}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 ml-auto">
-          <Badge className="font-mono">{bizProfile?.bizId}</Badge>
-          <Button size="sm" variant="ghost" onClick={copyBizId}>Copy BIZ ID</Button>
-        </div>
-      </Card>
-
-      {/* Category-specific fields */}
-      <BusinessMeta
-        meta={form.businessMeta}
-        setMeta={(m) => setForm({ ...form, businessMeta: m })}
-        category={form.category}
-        canManage={canManage}
-      />
-
-      {/* Save + Preview buttons */}
-      <div className="flex items-center gap-3 justify-end">
-        <Button variant="ghost" onClick={() => setShowPreview(!showPreview)}>
-          <Eye className="w-4 h-4 mr-1.5" /> {showPreview ? 'Hide Preview' : 'Preview'}
-        </Button>
-        <Button onClick={handleSave} disabled={!canManage || saveMutation.isPending} loading={saveMutation.isPending}>
-          <Save className="w-4 h-4 mr-1.5" /> Save Changes
-        </Button>
-      </div>
-
-      {!canManage && (
-        <p className="text-xs text-[var(--sn-text-muted)] italic text-center">
-          Only the owner or admins with "settings.manage" permission can edit these settings.
-        </p>
-      )}
-
-      {showPreview && bizProfile && (
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-[var(--sn-text)] mb-3">Public Profile Preview</h3>
-          <PublicProfilePreview bizProfile={{ ...bizProfile, ...form }} />
-        </Card>
-      )}
-
-      {bizProfile?.isPausedByOwner && (
-        <Card className="p-4 border-[var(--sn-red)]">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-[var(--sn-red)]" />
-            <p className="text-sm font-semibold text-[var(--sn-red)]">
-              Your business is currently paused. Go to the Danger Zone tab to resume.
-            </p>
-          </div>
-        </Card>
-      )}
-    </div>
-  );
-
-  // ── Build tabs array ────────────────────────────────────────────────────
-  const tabs = [
-    { label: 'Profile', icon: Building2, content: profileContent },
-    { label: 'Roles & Permissions', icon: Shield, content: <RolesPermissions /> },
-    { label: "Team Access", icon: Users, content: <TeamAccess /> },
-    { label: 'Notifications', icon: Bell, content: <NotificationPrefs /> },
-    { label: 'Activity Log', icon: History, content: <ActivityLog /> },
-    { label: 'Danger Zone', icon: AlertTriangle, content: <DangerZone /> },
+  // Quick settings items linked to sub-paths or handled gracefully
+  const QUICK_SETTINGS = [
+    {
+      icon: Users,
+      title: 'Team & Roles',
+      description: 'Manage staff roles, access permissions and invite members.',
+      link: '/employees',
+      color: '#6C4FD1'
+    },
+    {
+      icon: Bell,
+      title: 'Notification Prefs',
+      description: 'Choose which email, push, and SMS alerts you want to receive.',
+      link: '/notifications',
+      color: '#3B82F6'
+    },
+    {
+      icon: Sliders,
+      title: 'Business Meta',
+      description: 'Configure operational hours, category details, and metadata.',
+      link: '/settings',
+      color: '#10B981'
+    },
+    {
+      icon: ShieldAlert,
+      title: 'Danger Zone',
+      description: 'Permanently delete this business account, apps, and associated data.',
+      link: '/settings',
+      color: '#EF4444'
+    }
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold text-[var(--sn-text)]">Settings</h1>
-        {bizProfile?.isPausedByOwner && (
-          <Badge color="var(--sn-red)" className="text-xs">Paused</Badge>
-        )}
+    <div className="p-6 max-w-5xl mx-auto space-y-8 animate-fade-in" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+      
+      {/* Page Title */}
+      <div>
+        <h1 className="text-3xl font-extrabold text-[var(--az-text)] tracking-tight">Settings Hub</h1>
+        <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+          Configure business metadata, team access, connected services, and system preferences.
+        </p>
       </div>
-      <Tabs tabs={tabs} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Profile Card + Account Status */}
+        <div className="lg:col-span-1 space-y-6">
+          
+          {/* Business Profile Card */}
+          <GlassPanel className="overflow-hidden border border-[var(--az-border)] rounded-2xl relative flex flex-col">
+            {/* Cover Banner */}
+            <div className="h-28 w-full bg-gradient-to-r from-[#6C4FD1]/20 to-[#3B82F6]/20 relative overflow-hidden">
+              {bizProfile?.coverPhotoUrl ? (
+                <img src={bizProfile.coverPhotoUrl} alt="Cover" className="w-full h-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#6C4FD1] to-[#a29bfe] opacity-30" />
+              )}
+              {/* KYB Status Badge floating */}
+              <div className="absolute top-3 right-3">
+                <Badge
+                  className="backdrop-blur-md"
+                  color={KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED']?.color || '#EF4444'}
+                  bg="rgba(255, 255, 255, 0.85)"
+                >
+                  {bizProfile?.kybStatus || 'UNVERIFIED'}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Profile Avatar & Info */}
+            <div className="px-5 pb-5 pt-0 relative flex flex-col flex-1">
+              <div className="flex justify-between items-end -mt-10 mb-4">
+                <div className="w-20 h-20 rounded-2xl border-4 border-[var(--az-bg)] bg-white overflow-hidden shadow-md flex-shrink-0 flex items-center justify-center">
+                  {bizProfile?.logoUrl ? (
+                    <img src={bizProfile.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <Building2 className="w-10 h-10 text-[#6C4FD1]" />
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-1.5 flex-1">
+                <h2 className="text-lg font-bold text-[var(--az-text)] flex items-center gap-1.5">
+                  {bizProfile?.businessName || 'Business Portal'}
+                </h2>
+                <span className="inline-flex px-2 py-0.5 rounded text-[11px] font-bold bg-[#6C4FD1]/10 text-[#6C4FD1] uppercase tracking-wider">
+                  {bizProfile?.category || 'General Business'}
+                </span>
+                <p className="text-xs text-[var(--sn-text-muted)] line-clamp-2 mt-2">
+                  {bizProfile?.description || 'No business description provided yet.'}
+                </p>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-[var(--az-border)] flex items-center justify-between text-xs">
+                <span className="text-[var(--sn-text-muted)]">Business ID:</span>
+                <button
+                  onClick={copyBizId}
+                  className="font-mono text-[#6C4FD1] hover:underline cursor-pointer"
+                  title="Click to copy"
+                >
+                  {bizProfile?.bizId ? `${bizProfile.bizId.slice(0, 8)}...${bizProfile.bizId.slice(-6)}` : '—'}
+                </button>
+              </div>
+            </div>
+          </GlassPanel>
+
+          {/* Account Profile Card */}
+          <GlassPanel className="p-5 border border-[var(--az-border)] rounded-2xl space-y-4">
+            <h3 className="text-sm font-bold text-[var(--az-text)]">User Session</h3>
+            <div className="flex items-center gap-3.5">
+              <Avatar
+                name={user?.fullName || user?.email || 'User'}
+                src={user?.avatarUrl}
+                className="w-12 h-12 rounded-xl shadow-inner border border-[var(--az-border)]"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-[var(--az-text)] truncate">{user?.fullName || 'Active Operator'}</p>
+                <p className="text-xs text-[var(--sn-text-muted)] truncate">{user?.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs px-2 py-1 rounded-md bg-[var(--az-border)] text-[var(--az-text)] font-semibold uppercase tracking-wider">
+                {user?.role || 'Operator'}
+              </span>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={logout}
+                className="text-red-500 hover:text-red-600 hover:bg-red-50/50 border border-red-100/30 gap-1.5 h-9"
+              >
+                <LogOut className="w-3.5 h-3.5" /> Logout
+              </Button>
+            </div>
+          </GlassPanel>
+
+          {/* Theme Switcher Toggle */}
+          <GlassPanel className="p-5 border border-[var(--az-border)] rounded-2xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {isDarkMode ? (
+                <Moon className="w-5 h-5 text-[#6C4FD1]" />
+              ) : (
+                <Sun className="w-5 h-5 text-amber-500" />
+              )}
+              <div>
+                <p className="text-sm font-bold text-[var(--az-text)]">Theme Mode</p>
+                <p className="text-xs text-[var(--sn-text-muted)]">
+                  {isDarkMode ? 'Dark UI theme' : 'Light UI theme'} enabled
+                </p>
+              </div>
+            </div>
+            <Switch checked={isDarkMode} onChange={toggleTheme} />
+          </GlassPanel>
+
+        </div>
+
+        {/* Right Column: Quick Settings + Integrations */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Quick Settings Grid */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-[var(--az-text)] uppercase tracking-wider pl-1">Quick Settings</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {QUICK_SETTINGS.map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <GlassPanel
+                    key={idx}
+                    className="p-5 border border-[var(--az-border)] rounded-2xl flex items-start gap-4 hover:shadow-md hover:border-[#6C4FD1]/40 transition-all duration-300 group cursor-pointer"
+                    onClick={() => {
+                      window.location.href = item.link;
+                    }}
+                  >
+                    <div
+                      className="p-3 rounded-xl flex-shrink-0"
+                      style={{ backgroundColor: `${item.color}12`, color: item.color }}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold text-[var(--az-text)] group-hover:text-[#6C4FD1] transition-colors">
+                          {item.title}
+                        </h4>
+                        <ChevronRight className="w-4 h-4 text-[var(--sn-text-muted)] group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <p className="text-xs text-[var(--sn-text-muted)] mt-1.5 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  </GlassPanel>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Integrations & Connected Services */}
+          <GlassPanel className="p-6 border border-[var(--az-border)] rounded-2xl space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-[var(--az-text)]">Integration & Gateway Status</h3>
+                <p className="text-xs text-[var(--sn-text-muted)] mt-0.5">
+                  Monitor live synchronization, gateway tokens, and push webhooks.
+                </p>
+              </div>
+              <Badge color="#10B981" bg="rgba(16, 185, 129, 0.1)">Active Connection</Badge>
+            </div>
+
+            <div className="divide-y divide-[var(--az-border)]">
+              {/* API Token Status */}
+              <div className="py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <Shield className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--az-text)]">Merchant Scoped Token</p>
+                    <p className="text-[10px] text-[var(--sn-text-muted)]">Verified live backend operations</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[11px] font-semibold text-emerald-500">Authorized</span>
+                </div>
+              </div>
+
+              {/* Webhook Status */}
+              <div className="py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#6C4FD1]/10 flex items-center justify-center text-[#6C4FD1]">
+                    <Link className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--az-text)]">Webhooks Gateway</p>
+                    <p className="text-[10px] text-[var(--sn-text-muted)]">Pushing transaction status changes</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[11px] font-semibold text-emerald-500">Online</span>
+                </div>
+              </div>
+
+              {/* Service Status */}
+              <div className="py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[var(--az-text)]">AZM Blockchain Gateway</p>
+                    <p className="text-[10px] text-[var(--sn-text-muted)]">Escrow funding & settlement layer</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[11px] font-semibold text-emerald-500">Synced</span>
+                </div>
+              </div>
+            </div>
+          </GlassPanel>
+
+        </div>
+      </div>
     </div>
   );
 }

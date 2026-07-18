@@ -38,6 +38,7 @@ import TransitFleet from '@/pages/TransitFleet';
 import TransitDrivers from '@/pages/TransitDrivers';
 import TransitManifests from '@/pages/TransitManifests';
 import TransitCargo from '@/pages/TransitCargo';
+import StorefrontEditor from '@/pages/StorefrontEditor';
 import RestaurantInventory from '@/pages/RestaurantInventory';
 import { AppBackground } from '@/components/AppBackground';
 
@@ -118,6 +119,7 @@ function AppRoutes() {
         <Route path="/transit-manifests"    element={<TransitManifests />} />
         <Route path="/transit-cargo"         element={<TransitCargo />} />
         <Route path="/restaurant-inventory" element={<RestaurantInventory />} />
+        <Route path="/storefront"          element={<StorefrontEditor />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />

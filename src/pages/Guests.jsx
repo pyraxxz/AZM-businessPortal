@@ -1,121 +1,392 @@
-// src/pages/Guests.jsx
 import { useState, useEffect } from 'react';
-import { Search, Star, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Search, Sparkles, TrendingUp, DollarSign, RefreshCw, ShieldCheck } from 'lucide-react';
 import { marketplaceApi } from '../lib/marketplaceApi';
+import { Card, Button, Badge, Input, Empty, GlassPanel } from '@/components/ui';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { toast } from 'sonner';
 
-const TRUST_COLORS = {
-  EXCELLENT: 'text-emerald-600 bg-emerald-50',
-  GOOD: 'text-blue-600 bg-blue-50',
-  CAUTION: 'text-amber-600 bg-amber-50',
-  RISK: 'text-red-600 bg-red-50',
+const TIER_COLORS = {
+  GOLD: { color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.1)', border: '#F59E0B30' },
+  SILVER: { color: '#6B7280', bg: 'rgba(107, 114, 128, 0.1)', border: '#6B728030' },
+  BRONZE: { color: '#B45309', bg: 'rgba(180, 83, 9, 0.1)', border: '#B4530930' }
 };
 
 export default function Guests({ businessId }) {
   const [query, setQuery] = useState('');
   const [guests, setGuests] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [selectedGuest, setSelectedGuest] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activeSegment, setActiveSegment] = useState('ALL'); // ALL, VIP, RISK, NEW
+  const [sourceFilter, setSourceFilter] = useState('ALL'); // ALL, hotel, restaurant, transit
 
-  useEffect(() => { loadGuests(); }, []);
+  useEffect(() => {
+    loadGuests();
+  }, []);
 
   const loadGuests = async () => {
     setLoading(true);
     try {
       const res = await marketplaceApi.getGuests(businessId);
       setGuests(res.data || []);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      toast.error('Failed to retrieve intelligence directory');
+    }
     setLoading(false);
   };
 
-  const searchGuest = async () => {
-    if (!query.trim()) return loadGuests();
-    setLoading(true);
-    try {
-      const res = await marketplaceApi.searchGuest(businessId, query.trim());
-      setSelected(res.data);
-    } catch (e) { alert('Guest not found'); }
-    setLoading(false);
+  const getLoyaltyTier = (spend) => {
+    if (spend >= 500) return 'GOLD';
+    if (spend >= 150) return 'SILVER';
+    return 'BRONZE';
   };
 
-  const filtered = query.trim()
-    ? guests.filter(g => g.azamanId?.includes(query) || g.fullName?.toLowerCase().includes(query.toLowerCase()))
-    : guests;
+  // Pre-calculated stats row
+  const totalGuestsCount = guests.length;
+  const avgSpend = totalGuestsCount > 0 ? (guests.reduce((sum, g) => sum + (g.totalSpentUsdc || 0), 0) / totalGuestsCount) : 0;
+  const ltvEstimate = totalGuestsCount > 0 ? (guests.reduce((sum, g) => sum + (g.totalSpentUsdc || 0), 0) * 1.2 / totalGuestsCount) : 0;
+  const repeatRate = totalGuestsCount > 0 ? ((guests.filter(g => g.totalVisits > 1).length / totalGuestsCount) * 100) : 0;
+
+  // Filter pipeline: Search query + Segment buttons + Channel Sources
+  const filteredGuests = guests.filter((g) => {
+    const matchesSearch =
+      g.fullName?.toLowerCase().includes(query.toLowerCase()) ||
+      g.azamanId?.toLowerCase().includes(query.toLowerCase());
+
+    const matchesSource = sourceFilter === 'ALL' || (g.recentVisits || []).some(v => v.type === sourceFilter);
+
+    let matchesSegment = true;
+    if (activeSegment === 'VIP') {
+      matchesSegment = (g.totalVisits >= 5);
+    } else if (activeSegment === 'RISK') {
+      matchesSegment = (g.noShowCount > 0 || (g.trustLevel === 'CAUTION' || g.trustLevel === 'RISK'));
+    } else if (activeSegment === 'NEW') {
+      matchesSegment = (g.totalVisits === 1);
+    }
+
+    return matchesSearch && matchesSource && matchesSegment;
+  });
+
+  // Initials color helper
+  const getInitialsColor = (name) => {
+    if (!name) return '#6C4FD1';
+    const colors = ['#6C4FD1', '#10B981', '#3B82F6', '#EC4899', '#F59E0B', '#8B5CF6'];
+    const charCodeSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[charCodeSum % colors.length];
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+      
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Guests & Customers</h1>
-        <p className="text-sm text-muted-foreground mt-1">Customer history, trust scores, and engagement</p>
+        <h1 className="text-2xl font-bold text-[var(--az-text)]">Customer Intelligence</h1>
+        <p className="text-sm text-[var(--sn-text-muted)] mt-1">
+          Perform targeted segments, track retention metrics, review payment loyalty, and check trust records.
+        </p>
       </div>
 
-      {/* Search */}
-      <div className="flex gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input value={query} onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && searchGuest()}
-            placeholder="Search by AZM-ID or name..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-md border border-input bg-background text-sm" />
-        </div>
-      </div>
-
-      {/* Guest list */}
-      <div className="rounded-lg border bg-card divide-y">
-        {loading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading...</div>
-        ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">No guests found</div>
-        ) : filtered.map(guest => (
-          <div key={guest.id} className="px-4 py-4 flex items-center gap-4 hover:bg-accent/5 cursor-pointer"
-            onClick={() => setSelected(guest)}>
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-sm font-medium text-primary">{guest.fullName?.[0] ?? '?'}</span>
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-foreground">{guest.fullName}</p>
-              <p className="text-xs text-muted-foreground">{guest.azamanId}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-foreground">{guest.totalVisits} visits</p>
-              <p className="text-xs text-muted-foreground">{guest.totalSpentUsdc?.toFixed(2)} USDC</p>
-            </div>
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${TRUST_COLORS[guest.trustLevel] || TRUST_COLORS.GOOD}`}>
-              {guest.trustLevel}
-            </span>
+      {/* KPI Metrics Dashboard */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-[#6C4FD1]/10 text-[#6C4FD1]">
+            <Sparkles className="w-5 h-5" />
           </div>
+          <div>
+            <span className="text-xs text-[var(--sn-text-muted)]">Total Customers</span>
+            <p className="text-xl font-extrabold text-[var(--az-text)]">{totalGuestsCount}</p>
+          </div>
+        </GlassPanel>
+
+        <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500">
+            <RefreshCw className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-xs text-[var(--sn-text-muted)]">Repeat Rate %</span>
+            <p className="text-xl font-extrabold text-[var(--az-text)]">{repeatRate.toFixed(1)}%</p>
+          </div>
+        </GlassPanel>
+
+        <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500">
+            <DollarSign className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-xs text-[var(--sn-text-muted)]">Avg Spend</span>
+            <p className="text-xl font-extrabold text-[var(--az-text)]">{avgSpend.toFixed(2)} USDC</p>
+          </div>
+        </GlassPanel>
+
+        <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500">
+            <TrendingUp className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-xs text-[var(--sn-text-muted)]">LTV Estimate</span>
+            <p className="text-xl font-extrabold text-[var(--az-text)]">{ltvEstimate.toFixed(2)} USDC</p>
+          </div>
+        </GlassPanel>
+      </div>
+
+      {/* Segmentation Filter Row */}
+      <div className="flex flex-wrap gap-2 border-b border-[var(--az-border)] pb-3">
+        {[
+          { key: 'ALL', label: 'All Segments' },
+          { key: 'VIP', label: 'VIP (5+ Visits)' },
+          { key: 'RISK', label: 'At Risk / Caution' },
+          { key: 'NEW', label: 'New (< 30 days)' }
+        ].map((seg) => (
+          <button
+            key={seg.key}
+            onClick={() => setActiveSegment(seg.key)}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+              activeSegment === seg.key
+                ? 'bg-[#6C4FD1]/15 text-[#6C4FD1] border-[#6C4FD1]'
+                : 'bg-white text-[var(--sn-text-muted)] border-[var(--az-border)] hover:bg-[var(--az-border)]/10'
+            }`}
+          >
+            {seg.label}
+          </button>
         ))}
       </div>
 
-      {/* Guest detail modal */}
-      {selected && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-          onClick={() => setSelected(null)}>
-          <div className="bg-card rounded-lg max-w-md w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between">
-              <h2 className="text-xl font-semibold">{selected.fullName}</h2>
-              <button onClick={() => setSelected(null)} className="text-muted-foreground">✕</button>
+      {/* Search Bar & Legend Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Search and Filters Table Column */}
+        <div className="lg:col-span-2 space-y-4">
+          <GlassPanel className="p-4 border border-[var(--az-border)] rounded-2xl flex flex-col md:flex-row gap-4 items-center">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--sn-text-muted)]" />
+              <Input
+                placeholder="Search by customer name or identity..."
+                className="pl-10 w-full"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><span className="text-muted-foreground">AZM-ID:</span> {selected.azamanId}</div>
-              <div><span className="text-muted-foreground">Visits:</span> {selected.totalVisits}</div>
-              <div><span className="text-muted-foreground">Total Spent:</span> {selected.totalSpentUsdc?.toFixed(2)} USDC</div>
-              <div><span className="text-muted-foreground">No-shows:</span> {selected.noShowCount}</div>
+            
+            <div className="w-full md:w-48">
+              <select
+                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[var(--az-border)] text-[var(--az-text)] text-sm outline-none focus:border-[#6C4FD1]"
+                value={sourceFilter}
+                onChange={(e) => setSourceFilter(e.target.value)}
+              >
+                <option value="ALL">All Event Types</option>
+                <option value="ORDER">Orders</option>
+                <option value="RESERVATION">Reservations</option>
+                <option value="NO_SHOW">No Shows</option>
+              </select>
             </div>
-            <div className={`px-3 py-2 rounded-md text-sm font-medium ${TRUST_COLORS[selected.trustLevel]}`}>
-              Trust Level: {selected.trustLevel}
-            </div>
-            {selected.recentVisits?.map((v, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm border-t pt-2">
-                {v.type === 'ORDER' ? <CheckCircle className="h-4 w-4 text-emerald-500" />
-                  : v.type === 'RESERVATION' ? <Clock className="h-4 w-4 text-blue-500" />
-                  : v.type === 'NO_SHOW' ? <AlertTriangle className="h-4 w-4 text-amber-500" /> : null}
-                <span className="flex-1">{v.description}</span>
-                <span className="text-muted-foreground">{v.date}</span>
+          </GlassPanel>
+
+          {/* Customer Table */}
+          <GlassPanel className="border border-[var(--az-border)] rounded-2xl overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[var(--az-border)]/20 text-xs font-semibold text-[var(--sn-text-muted)] border-b border-[var(--az-border)]">
+                  <th className="p-4">Customer Name</th>
+                  <th className="p-4">Loyalty Tier</th>
+                  <th className="p-4">Total Visits</th>
+                  <th className="p-4">Aggregate Spend</th>
+                  <th className="p-4">System Trust</th>
+                  <th className="p-4 text-right">Details</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--az-border)] text-xs text-[var(--az-text)]">
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center"><Skeleton className="h-20 w-full" /></td>
+                  </tr>
+                ) : filteredGuests.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-[var(--sn-text-muted)]">No active customer profiles found.</td>
+                  </tr>
+                ) : (
+                  filteredGuests.map((guest) => {
+                    const tier = getLoyaltyTier(guest.totalSpentUsdc || 0);
+                    const tierMeta = TIER_COLORS[tier] || TIER_COLORS.BRONZE;
+                    return (
+                      <tr
+                        key={guest.id}
+                        onClick={() => setSelectedGuest(guest)}
+                        className="hover:bg-[var(--az-border)]/10 cursor-pointer transition-colors"
+                      >
+                        <td className="p-4 flex items-center gap-3">
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs"
+                            style={{ backgroundColor: getInitialsColor(guest.fullName) }}
+                          >
+                            {guest.fullName?.[0] || '?'}
+                          </div>
+                          <div>
+                            <p className="font-bold">{guest.fullName}</p>
+                            <p className="text-[10px] text-[var(--sn-text-muted)] font-mono">{guest.azamanId}</p>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide border"
+                            style={{ color: tierMeta.color, backgroundColor: tierMeta.bg, borderColor: tierMeta.border }}
+                          >
+                            {tier}
+                          </span>
+                        </td>
+                        <td className="p-4 font-semibold">{guest.totalVisits} visits</td>
+                        <td className="p-4 font-mono font-semibold">{(guest.totalSpentUsdc || 0).toFixed(2)} USDC</td>
+                        <td className="p-4">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            guest.trustLevel === 'EXCELLENT' ? 'text-emerald-500 bg-emerald-50' : 'text-blue-500 bg-blue-50'
+                          }`}>
+                            {guest.trustLevel}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right text-[#6C4FD1] font-semibold hover:underline">Drawer →</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </GlassPanel>
+        </div>
+
+        {/* Legend Panel & Quick insights */}
+        <div className="space-y-6 col-span-1">
+          <GlassPanel className="p-5 border border-[var(--az-border)] rounded-2xl space-y-4">
+            <h3 className="text-sm font-bold text-[var(--az-text)]">Loyalty Tier Thresholds</h3>
+            <p className="text-xs text-[var(--sn-text-muted)] leading-relaxed">
+              Customers automatically upgrade tiers based on cumulative lifetime purchase volume.
+            </p>
+
+            <div className="space-y-3.5">
+              <div className="flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: TIER_COLORS.GOLD.color }} />
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-[var(--az-text)]">Gold Segment</p>
+                  <p className="text-[10px] text-[var(--sn-text-muted)]">Cumulative spend ≥ 500 USDC</p>
+                </div>
               </div>
-            ))}
+              <div className="flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: TIER_COLORS.SILVER.color }} />
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-[var(--az-text)]">Silver Segment</p>
+                  <p className="text-[10px] text-[var(--sn-text-muted)]">Cumulative spend ≥ 150 USDC</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: TIER_COLORS.BRONZE.color }} />
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-[var(--az-text)]">Bronze Segment</p>
+                  <p className="text-[10px] text-[var(--sn-text-muted)]">Initial Tier &lt; 150 USDC</p>
+                </div>
+              </div>
+            </div>
+          </GlassPanel>
+
+          <GlassPanel className="p-5 border border-[var(--az-border)] rounded-2xl space-y-3">
+            <h3 className="text-sm font-bold text-[var(--az-text)] flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#6C4FD1]" /> System Trust Score
+            </h3>
+            <p className="text-xs text-[var(--sn-text-muted)] leading-relaxed">
+              Calculated based on booking retention, no-show histories, and verified payments across the network.
+            </p>
+          </GlassPanel>
+        </div>
+      </div>
+
+      {/* Guest Detail Drawer */}
+      {selectedGuest && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-end p-0 z-50 animate-fade-in"
+          onClick={() => setSelectedGuest(null)}
+        >
+          <div
+            className="bg-white max-w-md w-full h-full p-6 space-y-6 flex flex-col shadow-2xl overflow-y-auto animate-slide-in"
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
+          >
+            <div className="flex justify-between items-center border-b border-[var(--az-border)] pb-4">
+              <div>
+                <h2 className="text-lg font-bold text-[var(--az-text)]">{selectedGuest.fullName}</h2>
+                <span className="text-xs font-mono text-[var(--sn-text-muted)]">{selectedGuest.azamanId}</span>
+              </div>
+              <button onClick={() => setSelectedGuest(null)} className="text-[var(--sn-text-muted)] hover:text-black font-bold">✕</button>
+            </div>
+
+            {/* Spend Insights & Loyalty */}
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="p-3 bg-[var(--az-border)]/15 border border-[var(--az-border)] rounded-xl">
+                <span className="text-[var(--sn-text-muted)] block mb-1">Total Visits</span>
+                <span className="font-extrabold text-[var(--az-text)] text-sm">{selectedGuest.totalVisits}</span>
+              </div>
+              <div className="p-3 bg-[var(--az-border)]/15 border border-[var(--az-border)] rounded-xl">
+                <span className="text-[var(--sn-text-muted)] block mb-1">Lifetime Volume</span>
+                <span className="font-extrabold text-[var(--az-text)] text-sm font-mono">{(selectedGuest.totalSpentUsdc || 0).toFixed(2)} USDC</span>
+              </div>
+            </div>
+
+            {/* Visit Breakdown chart simulation */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider">Spend Progression</h4>
+              <div className="h-44 bg-[var(--az-border)]/10 rounded-xl p-3 flex flex-col justify-end">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={[
+                    { name: 'Jan', spend: (selectedGuest.totalSpentUsdc || 0) * 0.2 },
+                    { name: 'Mar', spend: (selectedGuest.totalSpentUsdc || 0) * 0.4 },
+                    { name: 'May', spend: (selectedGuest.totalSpentUsdc || 0) * 0.7 },
+                    { name: 'Jul', spend: (selectedGuest.totalSpentUsdc || 0) }
+                  ]}>
+                    <defs>
+                      <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6C4FD1" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#6C4FD1" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="name" fontSize={10} tickLine={false} />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="spend" stroke="#6C4FD1" fillOpacity={1} fill="url(#colorSpend)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Visit History Timeline */}
+            <div className="space-y-3 flex-1">
+              <h4 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider">Activity Timeline</h4>
+              <div className="space-y-3.5">
+                {selectedGuest.recentVisits && selectedGuest.recentVisits.length > 0 ? (
+                  selectedGuest.recentVisits.map((v, i) => (
+                    <div key={i} className="flex gap-3 items-start text-xs border-l-2 border-[#6C4FD1]/30 pl-3 ml-1.5 py-1">
+                      <div className="flex-1">
+                        <p className="font-bold text-[var(--az-text)]">{v.description}</p>
+                        <p className="text-[10px] text-[var(--sn-text-muted)] mt-0.5">{v.date || 'Recent Event'}</p>
+                      </div>
+                      <Badge color="#6C4FD1" bg="rgba(108, 79, 209, 0.08)">{v.type}</Badge>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-[var(--sn-text-muted)] italic">No recent timeline events recorded.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Sticky Admin note field */}
+            <div className="space-y-2 border-t border-[var(--az-border)] pt-4">
+              <h4 className="text-xs font-bold text-[var(--sn-text-muted)] uppercase tracking-wider">Internal Desk Notes</h4>
+              <textarea
+                className="w-full text-xs p-3 rounded-xl border border-[var(--az-border)] outline-none focus:border-[#6C4FD1] min-h-[60px]"
+                placeholder="Write optional operational notes here (such as diet preferences or table assignments)..."
+              />
+            </div>
+
+            <Button onClick={() => setSelectedGuest(null)} className="w-full bg-[#6C4FD1] text-white hover:bg-[#5b42b1]">
+              Close Directory Profile
+            </Button>
           </div>
         </div>
       )}
+
     </div>
   );
 }
