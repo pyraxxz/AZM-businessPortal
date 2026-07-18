@@ -190,12 +190,14 @@ export default function Dashboard() {
     queryKey: ['checkin-stats-dashboard'],
     queryFn:  () => checkInApi.todayStats(),
     enabled: typeConfig.navItems.includes('checkin'),
+    retry: false,
   });
 
   const { data: reviewStatsData } = useQuery({
     queryKey: ['review-stats-dashboard'],
     queryFn:  () => reviewsApi.stats(),
     enabled: true,
+    retry: false,
   });
 
   // ── Computed values ──────────────────────────────────────────────────────
