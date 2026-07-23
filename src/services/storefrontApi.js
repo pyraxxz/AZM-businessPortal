@@ -1,4 +1,6 @@
 // src/services/storefrontApi.js
+// All authenticated endpoints use /me/* — the backend resolves businessProfileId from the JWT.
+// Public endpoints use /:businessProfileId/* for unauthenticated access.
 import { request } from '@/lib/apiCore';
 
 const BASE = '/api/storefront';
@@ -6,6 +8,7 @@ const BASE = '/api/storefront';
 async function sfRequest(path, options) {
   try {
     const response = await request(path, options);
+    // Backend wraps responses in { success, data } — unwrap transparently
     return response?.data !== undefined ? response.data : response;
   } catch (err) {
     throw err;
@@ -13,35 +16,70 @@ async function sfRequest(path, options) {
 }
 
 export const storefrontApi = {
-  // Public
-  getPublishedLayout: (businessId) => sfRequest(`${BASE}/${businessId}/layout`),
-  listThemes:         (category) => sfRequest(`${BASE}/themes${category ? `?category=${category}` : ''}`),
-  listWidgets:        (category) => sfRequest(`${BASE}/widgets${category ? `?category=${category}` : ''}`),
-  listTemplates:      (category) => sfRequest(`${BASE}/templates${category ? `?category=${category}` : ''}`),
-  checkEligibility:   (businessId) => sfRequest(`${BASE}/${businessId}/eligibility`),
+  // ── PUBLIC (no auth — uses businessProfileId in URL) ──────────────────────
+  /** Render the published storefront for a business (used by Flutter + public web) */
+  getPublishedLayout: (businessProfileId) =>
+    sfRequest(`${BASE}/${businessProfileId}/render`),
 
-  // Authenticated (business owner)
-  getDraftLayout: (businessId) => sfRequest(`${BASE}/${businessId}/draft`),
-  saveDraftLayout: (businessId, layoutJson, themeId, expectedUpdatedAt) =>
-    sfRequest(`${BASE}/${businessId}/draft`, {
+  /** Public theme tokens for web ordering integration */
+  getPublicTheme: (businessProfileId) =>
+    sfRequest(`${BASE}/${businessProfileId}/public-theme`),
+
+  // ── CATALOG (public, no businessId needed) ─────────────────────────────────
+  listThemes:    (category) => sfRequest(`${BASE}/themes${category ? `?category=${category}` : ''}`),
+  listWidgets:   (category) => sfRequest(`${BASE}/widgets${category ? `?category=${category}` : ''}`),
+  listTemplates: (category) => sfRequest(`${BASE}/templates${category ? `?category=${category}` : ''}`),
+
+  // ── AUTHENTICATED — /me/* (JWT resolves businessProfileId) ─────────────────
+  /** Get or create the draft layout for the authenticated business */
+  getDraft: () =>
+    sfRequest(`${BASE}/me/draft`),
+
+  /** Save the current draft (PUT) */
+  saveDraft: (layoutJson, themeId, expectedUpdatedAt) =>
+    sfRequest(`${BASE}/me/draft`, {
       method: 'PUT',
-      body: JSON.stringify({ layoutJson, themeId, expectedUpdatedAt }),
+      body: JSON.stringify({ layoutJson, themeId, ...(expectedUpdatedAt ? { expectedUpdatedAt } : {}) }),
     }),
-  publishLayout: (businessId) =>
-    sfRequest(`${BASE}/${businessId}/publish`, { method: 'POST' }),
-  getHistory: (businessId, limit) =>
-    sfRequest(`${BASE}/${businessId}/history${limit ? `?limit=${limit}` : ''}`),
-  revertToVersion: (businessId, versionId) =>
-    sfRequest(`${BASE}/${businessId}/revert/${versionId}`, { method: 'POST' }),
-  applyTemplate: (businessId, templateId) =>
-    sfRequest(`${BASE}/${businessId}/apply-template/${templateId}`, { method: 'POST' }),
-  uploadMedia: (businessId, formData) =>
-    sfRequest(`${BASE}/${businessId}/media`, {
+
+  /** Publish the draft */
+  publish: () =>
+    sfRequest(`${BASE}/me/publish`, { method: 'POST' }),
+
+  /** Get version history */
+  getHistory: (limit) =>
+    sfRequest(`${BASE}/me/history${limit ? `?limit=${limit}` : ''}`),
+
+  /** Revert draft to a previous version */
+  revertToVersion: (versionId) =>
+    sfRequest(`${BASE}/me/revert`, {
       method: 'POST',
-      headers: {},
+      body: JSON.stringify({ versionId }),
+    }),
+
+  /** Apply a template to the draft */
+  applyTemplate: (templateId) =>
+    sfRequest(`${BASE}/me/apply-template`, {
+      method: 'POST',
+      body: JSON.stringify({ templateId }),
+    }),
+
+  /** Check AZM staking eligibility / tier */
+  checkEligibility: () =>
+    sfRequest(`${BASE}/me/eligibility`),
+
+  /** Record a storefront analytics event */
+  recordEvent: (eventType, metadata) =>
+    sfRequest(`${BASE}/me/analytics`, {
+      method: 'POST',
+      body: JSON.stringify({ eventType, metadata }),
+    }),
+
+  /** Upload media for a tile (multipart) */
+  uploadMedia: (formData) =>
+    sfRequest(`${BASE}/me/media`, {
+      method: 'POST',
+      headers: {}, // let browser set Content-Type with boundary
       body: formData,
     }),
-
-  // Public theme for WebOrdering
-  getPublicTheme: (businessId) => sfRequest(`${BASE}/${businessId}/public-theme`),
 };

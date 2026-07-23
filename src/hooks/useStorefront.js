@@ -1,20 +1,22 @@
 // src/hooks/useStorefront.js
+// All authenticated API calls use /me/* — no businessId passed to API layer.
+// businessId is only used as a React dependency to know WHEN to load.
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { storefrontApi } from '@/services/storefrontApi';
 
 export function useStorefront(businessId) {
-  const [draft, setDraft] = useState(null);
-  const [published, setPublished] = useState(null);
-  const [themes, setThemes] = useState([]);
-  const [widgets, setWidgets] = useState([]);
+  const [draft, setDraft]           = useState(null);
+  const [published, setPublished]   = useState(null);
+  const [themes, setThemes]         = useState([]);
+  const [widgets, setWidgets]       = useState([]);
   const [eligibility, setEligibility] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
-  const autoSaveTimer = useRef(null);
+  const [loading, setLoading]       = useState(true);
+  const [saving, setSaving]         = useState(false);
+  const [error, setError]           = useState(null);
+  const autoSaveTimer               = useRef(null);
 
   useEffect(() => {
-    if (!businessId) return;
+    if (!businessId) { setLoading(false); return; }
     loadAll();
     return () => clearTimeout(autoSaveTimer.current);
   }, [businessId]);
@@ -23,13 +25,18 @@ export function useStorefront(businessId) {
     setLoading(true);
     setError(null);
     try {
-      const [draftData, publishedData, themesData, widgetsData, eligibilityData] = await Promise.all([
-        storefrontApi.getDraftLayout(businessId).catch(() => null),
-        storefrontApi.getPublishedLayout(businessId).catch(() => null),
+      const [draftData, themesData, widgetsData, eligibilityData] = await Promise.all([
+        storefrontApi.getDraft().catch(() => null),
         storefrontApi.listThemes().catch(() => []),
         storefrontApi.listWidgets().catch(() => []),
-        storefrontApi.checkEligibility(businessId).catch(() => null),
+        storefrontApi.checkEligibility().catch(() => null),
       ]);
+      // getPublishedLayout uses the public endpoint — read from draft if available,
+      // otherwise fetch separately using businessId
+      let publishedData = null;
+      if (businessId) {
+        publishedData = await storefrontApi.getPublishedLayout(businessId).catch(() => null);
+      }
       setDraft(draftData);
       setPublished(publishedData);
       setThemes(Array.isArray(themesData) ? themesData : themesData?.themes ?? []);
@@ -46,7 +53,7 @@ export function useStorefront(businessId) {
     setSaving(true);
     setError(null);
     try {
-      const updated = await storefrontApi.saveDraftLayout(businessId, layoutJson, themeId, draft?.updatedAt);
+      const updated = await storefrontApi.saveDraft(layoutJson, themeId, draft?.updatedAt);
       setDraft(updated);
       return updated;
     } catch (err) {
@@ -60,13 +67,13 @@ export function useStorefront(businessId) {
     } finally {
       setSaving(false);
     }
-  }, [businessId, draft?.updatedAt]);
+  }, [draft?.updatedAt]);
 
   const publish = useCallback(async () => {
     setSaving(true);
     setError(null);
     try {
-      const result = await storefrontApi.publishLayout(businessId);
+      const result = await storefrontApi.publish();
       setPublished(result);
       setDraft(null);
       return result;
@@ -76,7 +83,7 @@ export function useStorefront(businessId) {
     } finally {
       setSaving(false);
     }
-  }, [businessId]);
+  }, []);
 
   const scheduleAutoSave = useCallback((layoutJson, themeId) => {
     clearTimeout(autoSaveTimer.current);
@@ -92,10 +99,10 @@ export function useStorefront(businessId) {
     saveDraft(draft.layoutJson, themeId).catch(() => {});
   }, [draft, saveDraft]);
 
-  const addTile = useCallback((widgetType, defaultProps) => {
+  const addTile = useCallback((widgetType, defaultProps = {}) => {
     if (!draft) return;
     const tiles = draft.layoutJson?.tiles ?? [];
-    const maxRow = tiles.reduce((max, t) => Math.max(max, t.position.row + t.position.rowSpan), 0);
+    const maxRow = tiles.reduce((max, t) => Math.max(max, (t.position?.row ?? 0) + (t.position?.rowSpan ?? 1)), 0);
     const newTile = {
       id: `tile_${Math.random().toString(36).substring(2, 10)}`,
       widgetType,
@@ -148,7 +155,7 @@ export function useStorefront(businessId) {
   const applyTemplate = useCallback(async (templateId) => {
     setSaving(true);
     try {
-      const newDraft = await storefrontApi.applyTemplate(businessId, templateId);
+      const newDraft = await storefrontApi.applyTemplate(templateId);
       setDraft(newDraft);
     } catch (err) {
       setError(err.message);
@@ -156,12 +163,12 @@ export function useStorefront(businessId) {
     } finally {
       setSaving(false);
     }
-  }, [businessId]);
+  }, []);
 
   const revertToVersion = useCallback(async (versionId) => {
     setSaving(true);
     try {
-      const newDraft = await storefrontApi.revertToVersion(businessId, versionId);
+      const newDraft = await storefrontApi.revertToVersion(versionId);
       setDraft(newDraft);
     } catch (err) {
       setError(err.message);
@@ -169,7 +176,7 @@ export function useStorefront(businessId) {
     } finally {
       setSaving(false);
     }
-  }, [businessId]);
+  }, []);
 
   return {
     draft, published, themes, widgets, eligibility, loading, saving, error,

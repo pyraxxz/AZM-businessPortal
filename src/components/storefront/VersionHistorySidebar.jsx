@@ -12,7 +12,7 @@ export default function VersionHistorySidebar({ businessId, onRevert, onClose })
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await storefrontApi.getHistory(businessId, 10);
+        const data = await storefrontApi.getHistory(10);
         setVersions(data?.versions ?? []);
       } catch (e) {
         console.error(e);

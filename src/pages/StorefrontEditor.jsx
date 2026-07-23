@@ -151,7 +151,7 @@ export default function StorefrontEditor() {
           {/* Phone Preview inline in right panel */}
           {showPreview && (
             <div className="p-4 border-t" style={{ borderColor: 'var(--az-border)' }}>
-              <StorefrontPhonePreview draft={draft} theme={theme} widgets={widgets} />
+              <StorefrontPhonePreview draft={draft} theme={theme} widgets={widgets} business={bizProfile} />
             </div>
           )}
         </div>
