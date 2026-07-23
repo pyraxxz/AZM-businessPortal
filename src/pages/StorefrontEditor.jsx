@@ -12,6 +12,7 @@ import StorefrontPhonePreview from '@/components/storefront/StorefrontPhonePrevi
 import NitroUpsellBanner from '@/components/storefront/NitroUpsellBanner';
 import PublishConfirmModal from '@/components/storefront/PublishConfirmModal';
 import VersionHistorySidebar from '@/components/storefront/VersionHistorySidebar';
+import KeyboardTileManager from '@/components/storefront/KeyboardTileManager';
 import { Eye, EyeOff, History, Save, Rocket, AlertCircle, X, Layout } from 'lucide-react';
 
 export default function StorefrontEditor() {
@@ -121,15 +122,25 @@ export default function StorefrontEditor() {
 
         {/* Center: Canvas */}
         <div className="flex-1 overflow-y-auto p-6" style={{ background: 'var(--az-bg)' }}>
-          <StorefrontCanvas
-            draft={draft}
-            theme={theme}
+          <KeyboardTileManager
+            tiles={draft?.tiles || []}
             selectedTileId={selectedTileId}
             onSelectTile={setSelectedTileId}
             onUpdateTile={updateTile}
             onRemoveTile={removeTile}
             onReorderTiles={reorderTiles}
-          />
+            onOpenConfig={() => {}}
+          >
+            <StorefrontCanvas
+              draft={draft}
+              theme={theme}
+              selectedTileId={selectedTileId}
+              onSelectTile={setSelectedTileId}
+              onUpdateTile={updateTile}
+              onRemoveTile={removeTile}
+              onReorderTiles={reorderTiles}
+            />
+          </KeyboardTileManager>
         </div>
 
         {/* Right: Config + Preview */}
