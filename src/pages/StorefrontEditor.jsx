@@ -19,7 +19,7 @@ import StorefrontHealthScore from '@/components/storefront/StorefrontHealthScore
 import TemplateGallery from '@/components/storefront/TemplateGallery';
 import QrCodePanel from '@/components/QrCodePanel';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, History, Save, Rocket, AlertCircle, X, Layout, LayoutTemplate, QrCode, BarChart3 } from 'lucide-react';
+import { Eye, EyeOff, History, Save, Rocket, AlertCircle, X, Layout, LayoutTemplate, QrCode, BarChart3, ExternalLink, Copy } from 'lucide-react';
 
 export default function StorefrontEditor() {
   const { bizProfile } = useAuth();
@@ -123,6 +123,17 @@ export default function StorefrontEditor() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
               style={{ color: 'var(--az-text)', borderColor: 'var(--az-border)', background: showQR ? 'var(--az-accent-subtle)' : 'transparent' }}>
               <QrCode className="w-4 h-4" />QR
+            </button>
+          )}
+          {published && (
+            <button onClick={() => {
+              const url = \`https://azaman.app/storefront/\${bizProfile?.id}\`;
+              navigator.clipboard.writeText(url);
+              navigator.open?.(url, '_blank') || window.open(url, '_blank');
+            }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
+              style={{ color: 'var(--az-text)', borderColor: 'var(--az-border)' }}>
+              <ExternalLink className="w-4 h-4" />View Live
             </button>
           )}
           <button onClick={() => saveDraft(draft?.layoutJson, draft?.themeId)} disabled={saving}

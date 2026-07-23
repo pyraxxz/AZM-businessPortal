@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { storefrontApi } from '@/services/storefrontApi';
 import { AreaChartCard, BarChartCard, DonutChartCard, KpiCard } from '@/components/charts';
 import { GlassPanel } from '@/components/ui/GlassPanel';
-import { Eye, MousePointerClick, Users, Target, BarChart3, TrendingUp, Loader2, AlertCircle, BarChart2 } from 'lucide-react';
+import { Eye, MousePointerClick, Users, Target, BarChart3, TrendingUp, Loader2, AlertCircle, BarChart2, ShoppingBag, ExternalLink } from 'lucide-react';
 
 const TIME_RANGES = [
   { label: '7 days', value: 7 },
@@ -171,7 +171,7 @@ export default function StorefrontAnalytics() {
       ) : (
         <>
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <KpiCard
               label="Total Views"
               value={summary.totalViews + summary.totalWidgetViews}
@@ -198,6 +198,13 @@ export default function StorefrontAnalytics() {
               value={`${summary.avgCTR}%`}
               icon={Target}
               color="#E15361"
+              loading={false}
+            />
+            <KpiCard
+              label="Orders Placed"
+              value={summary.totalOrders || 0}
+              icon={ShoppingBag}
+              color="#7C3AED"
               loading={false}
             />
           </div>

@@ -142,6 +142,8 @@ function AppRoutes() {
         <Route path="/groups"               element={<BusinessGroups />} />
         <Route path="/settings/messaging"  element={<MessagingChannels />} />
         <Route path="/marketing/web-ordering" element={<WebOrdering />} />
+        <Route path="/storefront"             element={<StorefrontEditor />} />
+        <Route path="/storefront/analytics"   element={<StorefrontAnalytics />} />
       </Route>
       <Route path="/login"      element={<Navigate to="/" replace />} />
       <Route path="/onboarding" element={<Navigate to="/" replace />} />
