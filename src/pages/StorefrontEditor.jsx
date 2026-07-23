@@ -127,7 +127,7 @@ export default function StorefrontEditor() {
           )}
           {published && (
             <button onClick={() => {
-              const url = \`https://azaman.app/storefront/\${bizProfile?.id}\`;
+              const url = `https://azaman.app/storefront/${bizProfile?.id}`;
               navigator.clipboard.writeText(url);
               navigator.open?.(url, '_blank') || window.open(url, '_blank');
             }}
