@@ -1,10 +1,30 @@
 // src/components/storefront/ThemePicker.jsx
 import { Badge } from '@/components/ui';
-import { Lock, Check, Palette } from 'lucide-react';
+import { Lock, Check, Palette, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function ThemePicker({ themes, currentThemeId, eligibility, onThemeChange }) {
+// Map business types to theme categories for "Recommended" badges
+const BUSINESS_TO_THEME_CATEGORY = {
+  RESTAURANT: 'RESTAURANT',
+  HOTEL: 'HOTEL',
+  TRANSIT: 'UNIVERSAL', // no specific transit theme yet
+  RETAIL: 'RETAIL',
+  SERVICES: 'UNIVERSAL',
+  GENERAL: 'UNIVERSAL',
+};
+
+export default function ThemePicker({ themes, currentThemeId, eligibility, onThemeChange, businessType = 'GENERAL' }) {
   if (!themes?.length) return null;
+  const recommendedCategory = BUSINESS_TO_THEME_CATEGORY[businessType] || 'UNIVERSAL';
+
+  // Sort themes: recommended first, then by displayOrder
+  const sortedThemes = [...themes].sort((a, b) => {
+    const aRec = a.category === recommendedCategory && a.category !== 'UNIVERSAL' ? 0 : 1;
+    const bRec = b.category === recommendedCategory && b.category !== 'UNIVERSAL' ? 0 : 1;
+    if (aRec !== bRec) return aRec - bRec;
+    return (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+  });
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 mb-2">
@@ -12,9 +32,10 @@ export default function ThemePicker({ themes, currentThemeId, eligibility, onThe
         <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--az-text)' }}>Theme</h3>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {themes.map(theme => {
+        {sortedThemes.map(theme => {
           const locked = theme.minAzmStake > (eligibility?.stakedBalance ?? 0);
           const isActive = theme.id === currentThemeId;
+          const isRecommended = theme.category === recommendedCategory && theme.category !== 'UNIVERSAL';
           const tokens = theme.tokenSet || {};
           const accent = tokens.accent || 'var(--az-accent)';
           const bg = tokens.background || 'var(--az-bg)';
@@ -26,6 +47,12 @@ export default function ThemePicker({ themes, currentThemeId, eligibility, onThe
                 borderColor: isActive ? 'var(--az-accent)' : 'var(--az-border)',
                 boxShadow: isActive ? '0 0 0 3px var(--az-accent-subtle)' : 'none',
               }}>
+              {isRecommended && !isActive && !locked && (
+                <div className="absolute -top-1.5 -right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold"
+                  style={{ background: 'var(--az-accent)', color: '#fff' }}>
+                  <Sparkles size={8} />FOR YOU
+                </div>
+              )}
               <div className="flex gap-1 mb-2">
                 <div className="w-5 h-5 rounded-md" style={{ background: accent }} />
                 <div className="w-5 h-5 rounded-md border" style={{ background: tokens.surface || 'var(--az-surface)', borderColor: 'var(--az-border)' }} />

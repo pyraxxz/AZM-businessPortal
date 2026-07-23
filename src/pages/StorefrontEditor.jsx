@@ -1,6 +1,7 @@
 // src/pages/StorefrontEditor.jsx
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import { getTypeConfig, getWidgetDefaults } from '@/lib/businessTypes';
 import { useStorefront } from '@/hooks/useStorefront';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Badge } from '@/components/ui';
@@ -33,6 +34,7 @@ export default function StorefrontEditor() {
   const selectedTile   = useMemo(() => draft?.layoutJson?.tiles?.find(t => t.id === selectedTileId) ?? null, [draft, selectedTileId]);
   const selectedWidget = useMemo(() => selectedTile ? widgets.find(w => w.widgetType === selectedTile.widgetType) : null, [selectedTile, widgets]);
   const theme          = useMemo(() => themes.find(t => t.id === draft?.themeId) ?? null, [draft?.themeId, themes]);
+  const bizType        = useMemo(() => bizProfile ? getTypeConfig(bizProfile).type : 'GENERAL', [bizProfile]);
 
   const isTileLocked = useCallback((widgetType) => {
     if (!eligibility) return false;
@@ -117,13 +119,16 @@ export default function StorefrontEditor() {
 
         {/* Left: Widget Palette */}
         <div className="w-64 flex-shrink-0 overflow-y-auto border-r" style={{ background: 'var(--az-bg-alt)', borderColor: 'var(--az-border)' }}>
-          <WidgetPalette widgets={widgets} eligibility={eligibility} onAdd={addTile} isLocked={isTileLocked} />
+          <WidgetPalette widgets={widgets} eligibility={eligibility} businessType={bizType} onAdd={(widgetType, defaultProps) => {
+              const typeDefaults = getWidgetDefaults(widgetType, bizType);
+              addTile(widgetType, { ...defaultProps, ...typeDefaults });
+            }} isLocked={isTileLocked} />
         </div>
 
         {/* Center: Canvas */}
         <div className="flex-1 overflow-y-auto p-6" style={{ background: 'var(--az-bg)' }}>
           <KeyboardTileManager
-            tiles={draft?.tiles || []}
+            tiles={draft?.layoutJson?.tiles || []}
             selectedTileId={selectedTileId}
             onSelectTile={setSelectedTileId}
             onUpdateTile={updateTile}
@@ -154,7 +159,7 @@ export default function StorefrontEditor() {
             />
           ) : (
             <div className="p-4">
-              <ThemePicker themes={themes} currentThemeId={draft?.themeId} eligibility={eligibility} onThemeChange={changeTheme} />
+              <ThemePicker themes={themes} currentThemeId={draft?.themeId} eligibility={eligibility} onThemeChange={changeTheme} businessType={bizType} />
               <NitroUpsellBanner eligibility={eligibility} />
             </div>
           )}
@@ -162,7 +167,7 @@ export default function StorefrontEditor() {
           {/* Phone Preview inline in right panel */}
           {showPreview && (
             <div className="p-4 border-t" style={{ borderColor: 'var(--az-border)' }}>
-              <StorefrontPhonePreview draft={draft} theme={theme} widgets={widgets} business={bizProfile} />
+              <StorefrontPhonePreview draft={draft} theme={theme} widgets={widgets} business={bizProfile} businessType={bizType} />
             </div>
           )}
         </div>

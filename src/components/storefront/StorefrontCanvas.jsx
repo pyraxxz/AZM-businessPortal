@@ -1,7 +1,27 @@
 // src/components/storefront/StorefrontCanvas.jsx
 import { GlassPanel } from '@/components/ui/GlassPanel';
-import { Trash2, GripVertical, Plus, ArrowUp, ArrowDown } from 'lucide-react';
+import { Trash2, GripVertical, Plus, ArrowUp, ArrowDown, Image, Info, ShoppingBag, Star, Phone, MapPin, MousePointerClick, Video, BadgePercent, Instagram, BarChart, Hash, Code, Sparkles, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+
+const WIDGET_ICONS = {
+  hero_header: Image,
+  quick_info_bar: Info,
+  product_grid: ShoppingBag,
+  showcase_gallery: Layers,
+  review_carousel: Star,
+  contact_card: Phone,
+  location_map: MapPin,
+  action_buttons: MousePointerClick,
+  video_player: Video,
+  promo_banner: BadgePercent,
+  social_feed: Instagram,
+  live_stats: BarChart,
+  animated_counter: Hash,
+  custom_html: Code,
+  gradient_hero: Sparkles,
+};
+
 
 // Drag-free reorder canvas — fully functional without react-grid-layout ESM issues
 // Uses manual up/down reorder buttons + future DnD via @dnd-kit
@@ -79,10 +99,10 @@ export default function StorefrontCanvas({
             {/* Widget icon */}
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ background: selectedTileId === tile.id ? 'var(--az-accent-subtle)' : 'var(--az-bg-alt)' }}>
-              <span className="text-sm font-black"
-                style={{ color: selectedTileId === tile.id ? 'var(--az-accent)' : 'var(--az-text-muted)' }}>
-                {(tile.widgetType || 'W').charAt(0)}
-              </span>
+              {(() => {
+              const Icon = WIDGET_ICONS[tile.widgetType] || Layers;
+              return <Icon className="w-4 h-4" style={{ color: selectedTileId === tile.id ? 'var(--az-accent)' : 'var(--az-text-muted)' }} />;
+            })()}
             </div>
 
             {/* Info */}

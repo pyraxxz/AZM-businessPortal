@@ -1,8 +1,9 @@
 // src/components/storefront/StorefrontPhonePreview.jsx
 // Real, per-widget preview that mirrors how Flutter renders each tile.
-// Every widget type has its own mini renderer that uses the tile's actual props.
+// Every widget type has its own mini-renderer that uses the tile's actual props.
+// Widget types aligned with backend seedWidgetCatalog.js
 import { GlassPanel } from '@/components/ui/GlassPanel';
-import { Smartphone, Star, MapPin, Phone, MessageCircle, ShoppingBag, Image, Users, Clock, ChevronRight, Play, ExternalLink } from 'lucide-react';
+import { Smartphone, Star, MapPin, Phone, MessageCircle, ShoppingBag, Image, Users, Clock, ChevronRight, Play, ExternalLink, Globe, BarChart, Hash, Code, Sparkles, Instagram, TrendingUp } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────
 // Individual mini-widget renderers (mirror Flutter widget layout)
@@ -14,13 +15,12 @@ function HeroHeader({ props, business, tokens }) {
     : tokens.accent || '#6C4FD1';
   const overlayAlpha = Math.round((props.overlayOpacity ?? 0.3) * 255).toString(16).padStart(2, '0');
   const overlayColor = `#000000${overlayAlpha}`;
-  const heightPx = props.height === 'tall' ? 100 : props.height === 'short' ? 60 : 80;
+  const heightMap = { compact: 60, standard: 80, tall: 100 };
+  const heightPx = heightMap[props.height] || 80;
 
   return (
     <div style={{ height: heightPx, background: bg, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-      {/* Overlay */}
       <div style={{ position: 'absolute', inset: 0, background: overlayColor }} />
-      {/* Fallback to business coverPhoto */}
       {!props.mediaUrl && business?.coverPhotoUrl && (
         <img src={business.coverPhotoUrl} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       )}
@@ -48,7 +48,7 @@ function QuickInfoBar({ props, business, tokens }) {
         </div>
       )}
       {props.showCategory && business?.category && (
-        <span style={{ fontSize: 8, color: textColor, textTransform: 'capitalize' }}>{business.category.toLowerCase()}</span>
+        <span style={{ fontSize: 8, color: textColor, textTransform: 'capitalize' }}>{business.category.toLowerCase().replace(/_/g, ' ')}</span>
       )}
       {props.showHours && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -67,7 +67,7 @@ function ProductGrid({ props, tokens }) {
   const accent = tokens.accent || '#6C4FD1';
   const surface = tokens.surface || '#f8f8f8';
   const cols = props.columns || 2;
-  const count = Math.min(props.maxItems || 4, 4); // cap at 4 for preview
+  const count = Math.min(props.maxItems || 4, 4);
   const items = Array.from({ length: count });
   return (
     <div style={{ padding: '8px 8px 4px' }}>
@@ -120,6 +120,7 @@ function ContactCard({ props, business, tokens }) {
   if (props.showPhone && phone) actions.push({ icon: Phone, label: 'Call', color: accent });
   if (props.showWhatsApp && phone) actions.push({ icon: MessageCircle, label: 'WhatsApp', color: '#25D366' });
   if (props.showEmail) actions.push({ icon: ExternalLink, label: 'Email', color: '#EA4335' });
+  if (props.showWebsite) actions.push({ icon: Globe, label: 'Website', color: '#3D74DB' });
   if (actions.length === 0) {
     actions.push({ icon: Phone, label: 'Call', color: accent });
     actions.push({ icon: MessageCircle, label: 'WhatsApp', color: '#25D366' });
@@ -143,7 +144,6 @@ function ContactCard({ props, business, tokens }) {
 
 function ShowcaseGallery({ props, tokens }) {
   const accent = tokens.accent || '#6C4FD1';
-  const surface = tokens.surface || '#f8f8f8';
   return (
     <div style={{ padding: '8px 8px 6px' }}>
       {props.title && (
@@ -173,7 +173,6 @@ function LocationMap({ props, tokens }) {
         <p style={{ fontSize: 9, fontWeight: 700, color: tokens.textPrimary || '#111', marginBottom: 5 }}>{props.title}</p>
       )}
       <div style={{ height: 60, borderRadius: 8, background: '#e8f0e8', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {/* Fake map grid */}
         <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, opacity: 0.3 }}>
           {[10,20,30,40,50].map(y => <line key={y} x1="0" y1={`${y}%`} x2="100%" y2={`${y}%`} stroke="#888" strokeWidth="0.5" />)}
           {[20,40,60,80].map(x => <line key={x} x1={`${x}%`} y1="0" x2={`${x}%`} y2="100%" stroke="#888" strokeWidth="0.5" />)}
@@ -207,62 +206,17 @@ function ActionButtons({ props, tokens }) {
   );
 }
 
-function AnnouncementBanner({ props, tokens }) {
-  const accent = tokens.accent || '#6C4FD1';
-  return (
-    <div style={{ margin: '0 8px 4px', borderRadius: 8, background: `${accent}15`, border: `1px solid ${accent}30`, padding: '6px 8px' }}>
-      {props.title && <p style={{ fontSize: 9, fontWeight: 700, color: accent, marginBottom: 2 }}>{props.title}</p>}
-      {props.body && <p style={{ fontSize: 8, color: tokens.textSecondary || '#666', lineHeight: 1.3 }}>{props.body}</p>}
-    </div>
-  );
-}
+// ── NITRO BRONZE renderers ──
 
-function SocialLinks({ props, tokens }) {
-  const accent = tokens.accent || '#6C4FD1';
-  const platforms = [];
-  if (props.instagram) platforms.push('IG');
-  if (props.facebook)  platforms.push('FB');
-  if (props.twitter)   platforms.push('TW');
-  if (props.tiktok)    platforms.push('TK');
-  if (platforms.length === 0) platforms.push('IG', 'FB');
-  return (
-    <div style={{ padding: '6px 8px', display: 'flex', gap: 6, justifyContent: 'center' }}>
-      {platforms.map(p => (
-        <div key={p} style={{ width: 28, height: 28, borderRadius: '50%', background: `${accent}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 7, fontWeight: 800, color: accent }}>{p}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function StaffHighlight({ props, tokens }) {
-  const accent = tokens.accent || '#6C4FD1';
-  const count = Math.min(props.maxStaff || 3, 3);
-  return (
-    <div style={{ padding: '8px 8px 6px' }}>
-      {props.title && <p style={{ fontSize: 9, fontWeight: 700, color: tokens.textPrimary || '#111', marginBottom: 5 }}>{props.title}</p>}
-      <div style={{ display: 'flex', gap: 6 }}>
-        {Array.from({ length: count }).map((_, i) => (
-          <div key={i} style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: `${accent}20`, margin: '0 auto 3px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Users size={14} color={accent} />
-            </div>
-            <div style={{ height: 4, background: '#ddd', borderRadius: 2, margin: '0 4px 2px' }} />
-            <div style={{ height: 4, width: '60%', background: '#eee', borderRadius: 2, margin: '0 auto' }} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function VideoBlock({ props, tokens }) {
+function VideoPlayer({ props, tokens }) {
   const accent = tokens.accent || '#6C4FD1';
   return (
     <div style={{ margin: '0 8px 4px', borderRadius: 8, height: 70, background: `${accent}15`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-      {props.thumbnailUrl && (
-        <img src={props.thumbnailUrl} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+      {props.posterUrl && (
+        <img src={props.posterUrl} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+      )}
+      {props.videoUrl && (
+        <video src={props.videoUrl} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} muted={props.muted} loop={props.loop} autoPlay={props.autoplay} />
       )}
       <div style={{ position: 'relative', zIndex: 1, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Play size={12} color="#fff" fill="#fff" />
@@ -271,16 +225,42 @@ function VideoBlock({ props, tokens }) {
   );
 }
 
-function PromoCountdown({ props, tokens }) {
+function PromoBanner({ props, tokens }) {
   const accent = tokens.accent || '#6C4FD1';
+  const bg = props.backgroundColor || `${accent}15`;
+  const border = props.backgroundColor ? `${props.backgroundColor}40` : `${accent}30`;
   return (
-    <div style={{ margin: '0 8px 4px', borderRadius: 8, background: accent, padding: '8px 10px' }}>
-      {props.title && <p style={{ fontSize: 9, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{props.title}</p>}
-      <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-        {['00', '12', '30'].map((n, i) => (
-          <div key={i} style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 4, padding: '3px 6px', textAlign: 'center' }}>
-            <span style={{ fontSize: 10, fontWeight: 800, color: '#fff', display: 'block' }}>{n}</span>
-            <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.7)' }}>{['HRS','MIN','SEC'][i]}</span>
+    <div style={{ margin: '0 8px 4px', borderRadius: 8, background: bg, border: `1px solid ${border}`, padding: '8px 10px' }}>
+      {props.title && <p style={{ fontSize: 9, fontWeight: 700, color: props.backgroundColor ? '#fff' : accent, marginBottom: 2 }}>{props.title}</p>}
+      {props.subtitle && <p style={{ fontSize: 8, color: props.backgroundColor ? 'rgba(255,255,255,0.85)' : (tokens.textSecondary || '#666'), lineHeight: 1.3 }}>{props.subtitle}</p>}
+      {props.ctaText && (
+        <div style={{ marginTop: 4, display: 'inline-flex', alignItems: 'center', gap: 2, padding: '3px 8px', borderRadius: 4, background: props.backgroundColor ? 'rgba(255,255,255,0.2)' : accent }}>
+          <span style={{ fontSize: 7, fontWeight: 700, color: props.backgroundColor ? '#fff' : '#fff' }}>{props.ctaText}</span>
+          <ChevronRight size={8} color={props.backgroundColor ? '#fff' : '#fff'} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SocialFeed({ props, tokens }) {
+  const accent = tokens.accent || '#6C4FD1';
+  const platform = props.platform || 'instagram';
+  const platformIcons = { instagram: Instagram, tiktok: Sparkles, facebook: Users };
+  const PlatformIcon = platformIcons[platform] || Instagram;
+  const count = Math.min(props.maxPosts || 6, 3);
+  return (
+    <div style={{ padding: '8px 8px 6px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 5 }}>
+        <PlatformIcon size={12} color={accent} />
+        <p style={{ fontSize: 9, fontWeight: 700, color: tokens.textPrimary || '#111' }}>
+          {props.handle ? `@${props.handle}` : `Latest Posts`}
+        </p>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3 }}>
+        {Array.from({ length: count }).map((_, i) => (
+          <div key={i} style={{ aspectRatio: '1', borderRadius: 6, background: `${accent}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Image size={12} color={`${accent}80`} />
           </div>
         ))}
       </div>
@@ -288,57 +268,101 @@ function PromoCountdown({ props, tokens }) {
   );
 }
 
-function LoyaltyWidget({ props, tokens }) {
+// ── NITRO SILVER renderers ──
+
+function LiveStats({ props, tokens }) {
   const accent = tokens.accent || '#6C4FD1';
+  const stats = [];
+  if (props.showFollowers) stats.push({ label: 'Followers', value: '1.2K' });
+  if (props.showReviews) stats.push({ label: 'Reviews', value: '340' });
+  if (props.showOrders) stats.push({ label: 'Orders', value: '5.8K' });
+  if (props.showRating) stats.push({ label: 'Rating', value: '4.8★' });
+  if (stats.length === 0) stats.push({ label: 'Followers', value: '1.2K' }, { label: 'Reviews', value: '340' });
   return (
-    <div style={{ margin: '0 8px 4px', borderRadius: 8, border: `1.5px dashed ${accent}`, padding: '8px 10px' }}>
-      {props.title && <p style={{ fontSize: 9, fontWeight: 700, color: accent, marginBottom: 4 }}>{props.title}</p>}
-      <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
-        {Array.from({ length: props.maxStamps || 5 }).map((_, i) => (
-          <div key={i} style={{ flex: 1, height: 14, borderRadius: 4, background: i < 2 ? accent : `${accent}20`, border: `1px solid ${accent}` }} />
-        ))}
-      </div>
-      <p style={{ fontSize: 7, color: tokens.textSecondary || '#888' }}>2 / {props.maxStamps || 5} stamps collected</p>
+    <div style={{ padding: '8px 8px 6px', display: 'flex', justifyContent: 'space-around' }}>
+      {stats.map((s, i) => (
+        <div key={i} style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: 12, fontWeight: 800, color: accent }}>{s.value}</p>
+          <p style={{ fontSize: 7, color: tokens.textSecondary || '#888', marginTop: 1 }}>{s.label}</p>
+        </div>
+      ))}
     </div>
   );
 }
 
-function RichTextBlock({ props, tokens }) {
+function AnimatedCounter({ props, tokens }) {
+  const accent = tokens.accent || '#6C4FD1';
   return (
-    <div style={{ padding: '6px 10px' }}>
-      {props.title && <p style={{ fontSize: 9, fontWeight: 700, color: tokens.textPrimary || '#111', marginBottom: 3 }}>{props.title}</p>}
-      {props.body
-        ? <p style={{ fontSize: 8, color: tokens.textSecondary || '#666', lineHeight: 1.5 }}>{props.body.substring(0, 120)}{props.body.length > 120 ? '…' : ''}</p>
-        : <>
-            <div style={{ height: 4, background: '#ddd', borderRadius: 2, marginBottom: 3 }} />
-            <div style={{ height: 4, background: '#ddd', borderRadius: 2, marginBottom: 3 }} />
-            <div style={{ height: 4, width: '70%', background: '#eee', borderRadius: 2 }} />
-          </>
-      }
+    <div style={{ padding: '10px 8px', textAlign: 'center' }}>
+      <p style={{ fontSize: 22, fontWeight: 900, color: accent }}>
+        {props.prefix || ''}{props.value ?? 0}{props.suffix || ''}
+      </p>
+      {props.label && (
+        <p style={{ fontSize: 8, color: tokens.textSecondary || '#888', marginTop: 2 }}>{props.label}</p>
+      )}
+    </div>
+  );
+}
+
+// ── NITRO GOLD renderers ──
+
+function CustomHtml({ props, tokens }) {
+  // Preview the raw HTML in a constrained box (sanitization happens on render in Flutter)
+  return (
+    <div style={{ margin: '0 8px 4px', borderRadius: 8, border: `1px solid ${tokens.border || '#eee'}`, padding: '6px 8px', overflow: 'hidden' }}>
+      {props.html ? (
+        <div style={{ fontSize: 8, color: tokens.textPrimary || '#111', lineHeight: 1.4, maxHeight: 60, overflow: 'hidden' }}
+          dangerouslySetInnerHTML={{ __html: props.html.substring(0, 500) }} />
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0.5 }}>
+          <Code size={12} color={tokens.textSecondary || '#888'} />
+          <span style={{ fontSize: 8, color: tokens.textSecondary || '#888' }}>Custom HTML block</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GradientHero({ props, tokens }) {
+  const from = props.gradientFrom || '#6C4FD1';
+  const to = props.gradientTo || '#E07B30';
+  return (
+    <div style={{ height: 90, background: `linear-gradient(135deg, ${from}, ${to})`, position: 'relative', overflow: 'hidden', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '10px 12px' }}>
+      <Sparkles size={14} color="rgba(255,255,255,0.5)" style={{ position: 'absolute', top: 8, right: 8 }} />
+      {props.title && (
+        <p style={{ color: '#fff', fontSize: 12, fontWeight: 800, lineHeight: 1.3, marginBottom: 2, position: 'relative', zIndex: 1 }}>{props.title}</p>
+      )}
+      {props.subtitle && (
+        <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9, position: 'relative', zIndex: 1 }}>{props.subtitle}</p>
+      )}
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────
-// Widget registry (maps widgetType -> mini-renderer component)
+// Widget registry — keys MUST match backend seedWidgetCatalog.js
 // ─────────────────────────────────────────────────────────────
 
 const WIDGET_RENDERERS = {
+  // FREE
   hero_header:         HeroHeader,
   quick_info_bar:      QuickInfoBar,
   product_grid:        ProductGrid,
+  showcase_gallery:    ShowcaseGallery,
   review_carousel:     ReviewCarousel,
   contact_card:        ContactCard,
-  showcase_gallery:    ShowcaseGallery,
   location_map:        LocationMap,
   action_buttons:      ActionButtons,
-  announcement_banner: AnnouncementBanner,
-  social_links:        SocialLinks,
-  staff_highlight:     StaffHighlight,
-  video_block:         VideoBlock,
-  promo_countdown:     PromoCountdown,
-  loyalty_widget:      LoyaltyWidget,
-  rich_text_block:     RichTextBlock,
+  // NITRO_BRONZE
+  video_player:        VideoPlayer,
+  promo_banner:        PromoBanner,
+  social_feed:         SocialFeed,
+  // NITRO_SILVER
+  live_stats:          LiveStats,
+  animated_counter:    AnimatedCounter,
+  // NITRO_GOLD
+  custom_html:         CustomHtml,
+  gradient_hero:       GradientHero,
 };
 
 function FallbackTile({ tile, tokens }) {
@@ -355,11 +379,24 @@ function FallbackTile({ tile, tokens }) {
   );
 }
 
+// Business-type-specific nav bar tabs
+function getNavTabs(businessType) {
+  const tabs = {
+    RESTAURANT: ['Home', 'Menu', 'Orders', 'Profile'],
+    HOTEL: ['Home', 'Rooms', 'Book', 'Profile'],
+    TRANSIT: ['Home', 'Trips', 'Tickets', 'Profile'],
+    RETAIL: ['Home', 'Shop', 'Orders', 'Profile'],
+    SERVICES: ['Home', 'Services', 'Book', 'Profile'],
+    GENERAL: ['Home', 'About', 'Contact', 'Profile'],
+  };
+  return tabs[businessType] || tabs.GENERAL;
+}
+
 // ─────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────
 
-export default function StorefrontPhonePreview({ draft, theme, widgets, business }) {
+export default function StorefrontPhonePreview({ draft, theme, widgets, business, businessType }) {
   const tokens  = theme?.tokenSet || {};
   const accent  = tokens.accent    || 'var(--az-accent)';
   const bg      = tokens.background || '#ffffff';
@@ -370,7 +407,6 @@ export default function StorefrontPhonePreview({ draft, theme, widgets, business
   // Sort tiles by row position so they appear in layout order
   const sortedTiles = [...tiles].sort((a, b) => (a.position?.row ?? 0) - (b.position?.row ?? 0));
 
-  // Business info for widgets that need it (falls back to placeholders)
   const businessInfo = business || {
     name: draft?.businessName || 'Your Business',
     logoUrl: null,
@@ -379,6 +415,8 @@ export default function StorefrontPhonePreview({ draft, theme, widgets, business
     phoneNumber: null,
     category: null,
   };
+
+  const navTabs = getNavTabs(businessType);
 
   return (
     <GlassPanel solid className="p-3">
@@ -446,12 +484,12 @@ export default function StorefrontPhonePreview({ draft, theme, widgets, business
           )}
         </div>
 
-        {/* Nav bar */}
+        {/* Nav bar — adapts to business type */}
         <div style={{ height: 32, background: surface, borderTop: `1px solid ${tokens.border || '#eee'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '0 16px' }}>
-          {['Home', 'Menu', 'Orders', 'Profile'].map(tab => (
+          {navTabs.map((tab, i) => (
             <div key={tab} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <div style={{ width: 14, height: 14, borderRadius: '50%', background: tab === 'Home' ? accent : `${accent}20` }} />
-              <span style={{ fontSize: 5, color: tab === 'Home' ? accent : tokens.textSecondary || '#aaa', fontWeight: tab === 'Home' ? 700 : 400 }}>{tab}</span>
+              <div style={{ width: 14, height: 14, borderRadius: '50%', background: i === 0 ? accent : `${accent}20` }} />
+              <span style={{ fontSize: 5, color: i === 0 ? accent : tokens.textSecondary || '#aaa', fontWeight: i === 0 ? 700 : 400 }}>{tab}</span>
             </div>
           ))}
         </div>

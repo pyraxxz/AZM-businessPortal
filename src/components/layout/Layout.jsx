@@ -102,7 +102,7 @@ const ALL_NAVIGATION_ITEMS = [
   { label: 'Reviews', icon: Star, to: '/reviews', section: 'marketing', perm: 'reviews.view' },
   { label: 'Showcase', icon: ImageIcon, to: '/showcase', section: 'marketing', perm: 'marketing.view' },
   { label: 'Web Ordering', icon: Globe, to: '/marketing/web-ordering', section: 'marketing', perm: 'marketing.view' },
-  { label: 'Storefront', icon: Store, to: '/storefront', section: 'marketing', perm: 'settings.manage' },
+  { label: 'Storefront', icon: Store, to: '/storefront', section: 'marketing', perm: 'storefront.manage' },
 
   // Settings
   { label: 'Settings', icon: Settings, to: '/settings', section: 'settings', perm: null },
@@ -175,10 +175,10 @@ export default function Layout() {
   const isOwner = user?.role === 'owner' || user?.role === 'admin';
 
   // Filter items by permission & businessType rules
-  const bizType = bizProfile?.businessType?.toUpperCase();
-  const isHotel = ['HOTEL'].includes(bizType);
-  const isRestaurant = ['RESTAURANT', 'DINE_IN', 'CAFE'].includes(bizType);
-  const isTransit = ['TRANSIT', 'LOGISTICS'].includes(bizType);
+  const bizType = bizProfile ? getTypeConfig(bizProfile).type : null;
+  const isHotel = bizType === 'HOTEL';
+  const isRestaurant = bizType === 'RESTAURANT';
+  const isTransit = bizType === 'TRANSIT';
 
   const filteredNavItems = ALL_NAVIGATION_ITEMS.filter(item => {
     // Hide hotel-only items for non-hotel businesses

@@ -1,30 +1,74 @@
 // src/components/storefront/TileConfigPanel.jsx
+// Schema-driven tile configuration panel — reads the widget's configSchema
+// from the backend catalog and renders the appropriate input for each property.
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Badge } from '@/components/ui';
 import { useToast } from '@/components/ui/Toast';
-import { Trash2, Settings, Type, AlignLeft, Link, Image, Upload, Loader2 } from 'lucide-react';
+import { Trash2, Settings, Upload, Loader2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { storefrontApi } from '@/services/storefrontApi';
 
-const FIELD_TYPES = {
-  title: { icon: Type, label: 'Title', type: 'text' },
-  subtitle: { icon: AlignLeft, label: 'Subtitle', type: 'text' },
-  body: { icon: AlignLeft, label: 'Body', type: 'textarea' },
-  url: { icon: Link, label: 'URL', type: 'url' },
-  imageUrl: { icon: Image, label: 'Image URL', type: 'url', uploadable: true },
-  mediaUrl: { icon: Image, label: 'Media URL', type: 'url', uploadable: true },
-  videoUrl: { icon: Image, label: 'Video URL', type: 'url', uploadable: true },
-  ctaText: { icon: Type, label: 'Button Text', type: 'text' },
-  ctaUrl: { icon: Link, label: 'Button URL', type: 'url' },
-  customInfo: { icon: Type, label: 'Custom Info', type: 'text' },
+// Human-readable labels for known config keys
+const FIELD_LABELS = {
+  title: 'Title',
+  subtitle: 'Subtitle',
+  mediaUrl: 'Background Media URL',
+  mediaType: 'Media Type',
+  overlayOpacity: 'Overlay Opacity',
+  height: 'Banner Height',
+  showHours: 'Show Hours',
+  showRating: 'Show Rating',
+  showCategory: 'Show Category',
+  customInfo: 'Custom Info Text',
+  maxItems: 'Max Items',
+  columns: 'Columns',
+  showPrice: 'Show Price',
+  autoplay: 'Autoplay',
+  maxReviews: 'Max Reviews',
+  minRating: 'Minimum Rating',
+  showPhone: 'Show Phone',
+  showWhatsApp: 'Show WhatsApp',
+  showEmail: 'Show Email',
+  showWebsite: 'Show Website',
+  zoom: 'Map Zoom Level',
+  showOrder: 'Show Order Button',
+  showBook: 'Show Book Button',
+  showFollow: 'Show Follow Button',
+  showShare: 'Show Share Button',
+  videoUrl: 'Video URL',
+  posterUrl: 'Poster Image URL',
+  loop: 'Loop Video',
+  muted: 'Muted',
+  ctaText: 'Button Text',
+  ctaAction: 'Button Action URL',
+  backgroundColor: 'Background Color',
+  platform: 'Platform',
+  handle: 'Social Handle',
+  maxPosts: 'Max Posts',
+  showFollowers: 'Show Followers',
+  showReviews: 'Show Reviews Count',
+  showOrders: 'Show Orders Count',
+  label: 'Label',
+  value: 'Value',
+  suffix: 'Suffix',
+  prefix: 'Prefix',
+  html: 'HTML Content',
+  sanitize: 'Sanitize HTML',
+  gradientFrom: 'Gradient Start Color',
+  gradientTo: 'Gradient End Color',
+  animationSpeed: 'Animation Speed',
 };
 
-function ConfigField({ fieldKey, value, onChange }) {
+// Fields that support file upload
+const UPLOADABLE_FIELDS = new Set(['mediaUrl', 'videoUrl', 'posterUrl']);
+
+function ConfigField({ fieldKey, schemaProp, value, onChange }) {
   const { toast } = useToast();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
-  const fieldDef = FIELD_TYPES[fieldKey] || { label: fieldKey, type: 'text' };
-  const Icon = fieldDef.icon || Type;
+  const label = FIELD_LABELS[fieldKey] || fieldKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+  const type = schemaProp?.type || 'string';
+  const isUploadable = UPLOADABLE_FIELDS.has(fieldKey);
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -44,27 +88,137 @@ function ConfigField({ fieldKey, value, onChange }) {
     }
   };
 
-  return (
-    <div>
-      <label className="flex items-center gap-1.5 text-xs font-semibold mb-1.5 uppercase tracking-wider"
-        style={{ color: 'var(--az-text-secondary)' }}>
-        <Icon className="w-3 h-3" />{fieldDef.label}
-      </label>
-      <div className="flex gap-2">
-        {fieldDef.type === 'textarea' ? (
-          <textarea value={value || ''} onChange={e => onChange({ [fieldKey]: e.target.value })}
-            rows={3} className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-none"
-            style={{ background: 'var(--az-bg-alt)', border: '1.5px solid var(--az-border)', color: 'var(--az-text)' }}
-            onFocus={e => e.target.style.borderColor='var(--az-accent)'}
-            onBlur={e => e.target.style.borderColor='var(--az-border)'} />
-        ) : (
-          <input type={fieldDef.type} value={value || ''} onChange={e => onChange({ [fieldKey]: e.target.value })}
+  const inputStyle = {
+    background: 'var(--az-bg-alt)',
+    border: '1.5px solid var(--az-border)',
+    color: 'var(--az-text)',
+  };
+  const focusStyle = e => { e.target.style.borderColor = 'var(--az-accent)'; };
+  const blurStyle = e => { e.target.style.borderColor = 'var(--az-border)'; };
+
+  // Boolean → toggle switch
+  if (type === 'boolean') {
+    return (
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-semibold" style={{ color: 'var(--az-text-secondary)' }}>{label}</label>
+        <button
+          onClick={() => onChange({ [fieldKey]: !value })}
+          className="relative w-10 h-5 rounded-full transition-colors"
+          style={{ background: value ? 'var(--az-accent)' : 'var(--az-border)' }}
+        >
+          <div className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            style={{ transform: value ? 'translateX(20px)' : 'translateX(2px)' }} />
+        </button>
+      </div>
+    );
+  }
+
+  // Enum → select dropdown
+  if (schemaProp?.enum) {
+    return (
+      <div>
+        <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--az-text-secondary)' }}>{label}</label>
+        <select
+          value={value ?? schemaProp.default ?? ''}
+          onChange={e => onChange({ [fieldKey]: e.target.value })}
+          className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+          style={inputStyle}
+          onFocus={focusStyle}
+          onBlur={blurStyle}
+        >
+          {schemaProp.enum.map(opt => (
+            <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+
+  // Number → number input
+  if (type === 'number' || type === 'integer') {
+    return (
+      <div>
+        <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--az-text-secondary)' }}>{label}</label>
+        <input
+          type="number"
+          value={value ?? schemaProp.default ?? 0}
+          min={schemaProp.minimum}
+          max={schemaProp.maximum}
+          step={type === 'number' ? '0.1' : '1'}
+          onChange={e => onChange({ [fieldKey]: type === 'integer' ? parseInt(e.target.value) : parseFloat(e.target.value) })}
+          className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+          style={inputStyle}
+          onFocus={focusStyle}
+          onBlur={blurStyle}
+        />
+      </div>
+    );
+  }
+
+  // Color fields (detected by key name)
+  if (fieldKey.toLowerCase().includes('color') || fieldKey === 'gradientFrom' || fieldKey === 'gradientTo') {
+    return (
+      <div>
+        <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--az-text-secondary)' }}>{label}</label>
+        <div className="flex gap-2">
+          <input
+            type="color"
+            value={value || '#6C4FD1'}
+            onChange={e => onChange({ [fieldKey]: e.target.value })}
+            className="w-10 h-9 rounded-lg border-0 cursor-pointer"
+            style={{ background: 'transparent' }}
+          />
+          <input
+            type="text"
+            value={value || ''}
+            onChange={e => onChange({ [fieldKey]: e.target.value })}
+            placeholder="#6C4FD1"
+            className="flex-1 px-3 py-2 rounded-xl text-sm outline-none font-mono"
+            style={inputStyle}
+            onFocus={focusStyle}
+            onBlur={blurStyle}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // HTML content → textarea with hint
+  if (fieldKey === 'html') {
+    return (
+      <div>
+        <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--az-text-secondary)' }}>{label}</label>
+        <textarea
+          value={value || ''}
+          onChange={e => onChange({ [fieldKey]: e.target.value })}
+          rows={5}
+          placeholder="<p>Custom HTML content</p>"
+          className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-none font-mono"
+          style={inputStyle}
+          onFocus={focusStyle}
+          onBlur={blurStyle}
+        />
+        <p className="text-[10px] mt-1" style={{ color: 'var(--az-text-muted)' }}>Sanitized on render. Supports basic HTML tags.</p>
+      </div>
+    );
+  }
+
+  // URL with upload support
+  if (isUploadable) {
+    return (
+      <div>
+        <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--az-text-secondary)' }}>{label}</label>
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={value || ''}
+            onChange={e => onChange({ [fieldKey]: e.target.value })}
+            placeholder="https://..."
             className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-            style={{ background: 'var(--az-bg-alt)', border: '1.5px solid var(--az-border)', color: 'var(--az-text)' }}
-            onFocus={e => e.target.style.borderColor='var(--az-accent)'}
-            onBlur={e => e.target.style.borderColor='var(--az-border)'} />
-        )}
-        {fieldDef.uploadable && (
+            style={inputStyle}
+            onFocus={focusStyle}
+            onBlur={blurStyle}
+          />
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
@@ -74,20 +228,52 @@ function ConfigField({ fieldKey, value, onChange }) {
           >
             {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           </button>
+        </div>
+        <input ref={fileInputRef} type="file" className="hidden" accept="image/*,video/*" onChange={handleUpload} />
+        {value && (
+          <div className="mt-1.5 rounded-lg overflow-hidden" style={{ maxHeight: 80 }}>
+            {value.match(/\.(mp4|mov|avi|webm)$/i) ? (
+              <video src={value} className="w-full h-20 object-cover" controls />
+            ) : (
+              <img src={value} alt="" className="w-full h-20 object-cover" />
+            )}
+          </div>
         )}
       </div>
-      {fieldDef.uploadable && (
-        <input ref={fileInputRef} type="file" className="hidden" accept="image/*,video/*" onChange={handleUpload} />
-      )}
-      {fieldDef.uploadable && value && (
-        <div className="mt-1.5 rounded-lg overflow-hidden" style={{ maxHeight: 80 }}>
-          {value.match(/\.(mp4|mov|avi|webm)$/i) ? (
-            <video src={value} className="w-full h-20 object-cover" controls />
-          ) : (
-            <img src={value} alt="" className="w-full h-20 object-cover" />
-          )}
-        </div>
-      )}
+    );
+  }
+
+  // Long text (subtitle, ctaAction) → textarea
+  if (fieldKey === 'subtitle' || fieldKey === 'ctaAction') {
+    return (
+      <div>
+        <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--az-text-secondary)' }}>{label}</label>
+        <textarea
+          value={value || ''}
+          onChange={e => onChange({ [fieldKey]: e.target.value })}
+          rows={2}
+          className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-none"
+          style={inputStyle}
+          onFocus={focusStyle}
+          onBlur={blurStyle}
+        />
+      </div>
+    );
+  }
+
+  // Default → text input
+  return (
+    <div>
+      <label className="text-xs font-semibold mb-1.5 block" style={{ color: 'var(--az-text-secondary)' }}>{label}</label>
+      <input
+        type="text"
+        value={value ?? ''}
+        onChange={e => onChange({ [fieldKey]: e.target.value })}
+        className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+        style={inputStyle}
+        onFocus={focusStyle}
+        onBlur={blurStyle}
+      />
     </div>
   );
 }
@@ -95,7 +281,8 @@ function ConfigField({ fieldKey, value, onChange }) {
 export default function TileConfigPanel({ tile, widget, onUpdate, onRemove }) {
   const props = tile?.props || {};
   const schema = widget?.configSchema?.properties || {};
-  const editableKeys = Object.keys(schema).length
+  // Use schema keys if available, otherwise fall back to props keys
+  const editableKeys = Object.keys(schema).length > 0
     ? Object.keys(schema)
     : Object.keys(props).filter(k => typeof props[k] === 'string' || typeof props[k] === 'number' || typeof props[k] === 'boolean');
 
@@ -115,7 +302,13 @@ export default function TileConfigPanel({ tile, widget, onUpdate, onRemove }) {
           </p>
         ) : (
           editableKeys.map(key => (
-            <ConfigField key={key} fieldKey={key} value={props[key]} onChange={onUpdate} />
+            <ConfigField
+              key={key}
+              fieldKey={key}
+              schemaProp={schema[key]}
+              value={props[key]}
+              onChange={onUpdate}
+            />
           ))
         )}
       </GlassPanel>
