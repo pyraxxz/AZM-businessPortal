@@ -18,7 +18,8 @@ import MagicLayout from '@/components/storefront/MagicLayout';
 import StorefrontHealthScore from '@/components/storefront/StorefrontHealthScore';
 import TemplateGallery from '@/components/storefront/TemplateGallery';
 import QrCodePanel from '@/components/QrCodePanel';
-import { Eye, EyeOff, History, Save, Rocket, AlertCircle, X, Layout, LayoutTemplate, QrCode } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, History, Save, Rocket, AlertCircle, X, Layout, LayoutTemplate, QrCode, BarChart3 } from 'lucide-react';
 
 export default function StorefrontEditor() {
   const { bizProfile } = useAuth();
@@ -33,6 +34,7 @@ export default function StorefrontEditor() {
   const [selectedTileId, setSelectedTileId]       = useState(null);
   const [showPublishModal, setShowPublishModal]     = useState(false);
   const [showHistory, setShowHistory]               = useState(false);
+  const navigate = useNavigate();
   const [showPreview, setShowPreview]               = useState(true);
   const [showTemplates, setShowTemplates]             = useState(false);
   const [showQR, setShowQR]                           = useState(false);
@@ -100,6 +102,11 @@ export default function StorefrontEditor() {
             style={{ color: 'var(--az-text)', borderColor: 'var(--az-border)', background: showPreview ? 'var(--az-accent-subtle)' : 'transparent' }}>
             {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {showPreview ? 'Hide' : 'Show'} Preview
+          </button>
+          <button onClick={() => navigate('/storefront/analytics')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
+            style={{ color: 'var(--az-text)', borderColor: 'var(--az-border)' }}>
+            <BarChart3 className="w-4 h-4" />Analytics
           </button>
           <button onClick={() => setShowTemplates(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"

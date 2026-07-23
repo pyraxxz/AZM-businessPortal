@@ -75,6 +75,10 @@ export const storefrontApi = {
       body: JSON.stringify({ eventType, metadata }),
     }),
 
+  /** Get aggregated storefront analytics (business owner view) */
+  getAnalytics: (days = 30) =>
+    sfRequest(`${BASE}/me/analytics?days=${days}`),
+
   /** Upload media for a tile (multipart) */
   uploadMedia: (formData) =>
     sfRequest(`${BASE}/me/media`, {

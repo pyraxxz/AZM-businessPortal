@@ -50,7 +50,7 @@ import {
   FileSpreadsheet,
   MessageSquare,
   ShoppingCart,
-  BarChart2, Code2, Globe, Layers, Moon, Sun, Store } from "lucide-react";
+  BarChart2, BarChart3, Code2, Globe, Layers, Moon, Sun, Store } from "lucide-react";
 
 const SECTION_HEADERS = {
   overview: 'Overview',
@@ -103,6 +103,7 @@ const ALL_NAVIGATION_ITEMS = [
   { label: 'Showcase', icon: ImageIcon, to: '/showcase', section: 'marketing', perm: 'marketing.view' },
   { label: 'Web Ordering', icon: Globe, to: '/marketing/web-ordering', section: 'marketing', perm: 'marketing.view' },
   { label: 'Storefront', icon: Store, to: '/storefront', section: 'marketing', perm: 'storefront.manage' },
+  { label: 'Storefront Analytics', icon: BarChart3, to: '/storefront/analytics', section: 'marketing', perm: 'storefront.manage' },
 
   // Settings
   { label: 'Settings', icon: Settings, to: '/settings', section: 'settings', perm: null },

@@ -41,6 +41,7 @@ const BusinessGroups = lazy(() => import('@/pages/BusinessGroups'));
 const MessagingChannels = lazy(() => import('@/pages/settings/MessagingChannels'));
 const WebOrdering = lazy(() => import('@/pages/marketing/WebOrdering'));
 const StorefrontEditor = lazy(() => import('@/pages/StorefrontEditor'));
+const StorefrontAnalytics = lazy(() => import('@/pages/StorefrontAnalytics'));
 const POS = lazy(() => import('@/pages/POS'));
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
