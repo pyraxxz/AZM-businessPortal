@@ -14,7 +14,11 @@ import NitroUpsellBanner from '@/components/storefront/NitroUpsellBanner';
 import PublishConfirmModal from '@/components/storefront/PublishConfirmModal';
 import VersionHistorySidebar from '@/components/storefront/VersionHistorySidebar';
 import KeyboardTileManager from '@/components/storefront/KeyboardTileManager';
-import { Eye, EyeOff, History, Save, Rocket, AlertCircle, X, Layout } from 'lucide-react';
+import MagicLayout from '@/components/storefront/MagicLayout';
+import StorefrontHealthScore from '@/components/storefront/StorefrontHealthScore';
+import TemplateGallery from '@/components/storefront/TemplateGallery';
+import QrCodePanel from '@/components/QrCodePanel';
+import { Eye, EyeOff, History, Save, Rocket, AlertCircle, X, Layout, LayoutTemplate, QrCode } from 'lucide-react';
 
 export default function StorefrontEditor() {
   const { bizProfile } = useAuth();
@@ -30,11 +34,24 @@ export default function StorefrontEditor() {
   const [showPublishModal, setShowPublishModal]     = useState(false);
   const [showHistory, setShowHistory]               = useState(false);
   const [showPreview, setShowPreview]               = useState(true);
+  const [showTemplates, setShowTemplates]             = useState(false);
+  const [showQR, setShowQR]                           = useState(false);
 
   const selectedTile   = useMemo(() => draft?.layoutJson?.tiles?.find(t => t.id === selectedTileId) ?? null, [draft, selectedTileId]);
   const selectedWidget = useMemo(() => selectedTile ? widgets.find(w => w.widgetType === selectedTile.widgetType) : null, [selectedTile, widgets]);
   const theme          = useMemo(() => themes.find(t => t.id === draft?.themeId) ?? null, [draft?.themeId, themes]);
   const bizType        = useMemo(() => bizProfile ? getTypeConfig(bizProfile).type : 'GENERAL', [bizProfile]);
+
+  const handleMagicLayout = useCallback((layoutJson, themeId) => {
+    if (themeId) changeTheme(themeId);
+    saveDraft(layoutJson, themeId).catch(() => {});
+  }, [saveDraft, changeTheme]);
+
+  const handleApplyTemplate = useCallback((layoutJson, themeId) => {
+    if (themeId) changeTheme(themeId);
+    saveDraft(layoutJson, themeId).catch(() => {});
+    setShowTemplates(false);
+  }, [saveDraft, changeTheme]);
 
   const isTileLocked = useCallback((widgetType) => {
     if (!eligibility) return false;
@@ -84,11 +101,23 @@ export default function StorefrontEditor() {
             {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {showPreview ? 'Hide' : 'Show'} Preview
           </button>
+          <button onClick={() => setShowTemplates(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
+            style={{ color: 'var(--az-text)', borderColor: 'var(--az-border)' }}>
+            <LayoutTemplate className="w-4 h-4" />Templates
+          </button>
           <button onClick={() => setShowHistory(h => !h)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
             style={{ color: 'var(--az-text)', borderColor: 'var(--az-border)' }}>
             <History className="w-4 h-4" />History
           </button>
+          {published && (
+            <button onClick={() => setShowQR(q => !q)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
+              style={{ color: 'var(--az-text)', borderColor: 'var(--az-border)', background: showQR ? 'var(--az-accent-subtle)' : 'transparent' }}>
+              <QrCode className="w-4 h-4" />QR
+            </button>
+          )}
           <button onClick={() => saveDraft(draft?.layoutJson, draft?.themeId)} disabled={saving}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all disabled:opacity-50"
             style={{ color: 'var(--az-text)', borderColor: 'var(--az-border)', background: 'var(--az-surface)' }}>
@@ -101,6 +130,16 @@ export default function StorefrontEditor() {
           </button>
         </div>
       </GlassPanel>
+
+      {/* ── QR Code Panel ── */}
+      {showQR && published && (
+        <div className="mx-4 mt-3 p-3">
+          <QrCodePanel
+            label={`${bizProfile?.businessName || 'Storefront'} — Live Preview`}
+            url={`${window.location.origin}/api/storefront/${bizProfile?.id}/render`}
+          />
+        </div>
+      )}
 
       {/* ── Error Banner ── */}
       {error && (
@@ -119,6 +158,9 @@ export default function StorefrontEditor() {
 
         {/* Left: Widget Palette */}
         <div className="w-64 flex-shrink-0 overflow-y-auto border-r" style={{ background: 'var(--az-bg-alt)', borderColor: 'var(--az-border)' }}>
+          <div className="p-3 border-b" style={{ borderColor: 'var(--az-border)' }}>
+            <MagicLayout businessType={bizType} widgets={widgets} themes={themes} draft={draft} onApply={handleMagicLayout} disabled={loading} />
+          </div>
           <WidgetPalette widgets={widgets} eligibility={eligibility} businessType={bizType} onAdd={(widgetType, defaultProps) => {
               const typeDefaults = getWidgetDefaults(widgetType, bizType);
               addTile(widgetType, { ...defaultProps, ...typeDefaults });
@@ -158,7 +200,8 @@ export default function StorefrontEditor() {
               onRemove={() => { removeTile(selectedTileId); setSelectedTileId(null); }}
             />
           ) : (
-            <div className="p-4">
+            <div className="p-4 space-y-4">
+              <StorefrontHealthScore draft={draft} businessType={bizType} />
               <ThemePicker themes={themes} currentThemeId={draft?.themeId} eligibility={eligibility} onThemeChange={changeTheme} businessType={bizType} />
               <NitroUpsellBanner eligibility={eligibility} />
             </div>
@@ -183,6 +226,16 @@ export default function StorefrontEditor() {
           published={published}
           onConfirm={async () => { await publish(); setShowPublishModal(false); }}
           onCancel={() => setShowPublishModal(false)}
+        />
+      )}
+      {showTemplates && (
+        <TemplateGallery
+          businessType={bizType}
+          widgets={widgets}
+          themes={themes}
+          eligibility={eligibility}
+          onApply={handleApplyTemplate}
+          onClose={() => setShowTemplates(false)}
         />
       )}
     </div>
