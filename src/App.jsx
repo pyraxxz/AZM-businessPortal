@@ -52,6 +52,7 @@ import ErrorBoundary, { SectionBoundary } from '@/components/ErrorBoundary';
 import { ToastProvider } from '@/components/ui/Toast';
 import Layout from '@/components/layout/Layout';
 import { AppBackground } from '@/components/AppBackground';
+import { TypeGuardedRoute } from './components/TypeGuardedRoute';
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -112,12 +113,12 @@ function AppRoutes() {
         <Route path="/notifications"  element={<Notifications />} />
         <Route path="/messages"       element={<Messages />} />
         <Route path="/settings"       element={<Settings />} />
-        <Route path="/transit"              element={<TransitTrips />} />
+        <Route path="/transit" element={<TypeGuardedRoute types={['TRANSIT']}>{<TransitTrips />}</TypeGuardedRoute>} />
         <Route path="/reservations"         element={<Reservations />} />
         <Route path="/checkin"              element={<CheckIn />} />
         <Route path="/reviews"              element={<Reviews />} />
-        <Route path="/dine-in"              element={<DineIn />} />
-        <Route path="/guests"               element={<Guests />} />
+        <Route path="/dine-in" element={<TypeGuardedRoute types={['RESTAURANT', 'HOTEL']}>{<DineIn />}</TypeGuardedRoute>} />
+        <Route path="/guests" element={<TypeGuardedRoute types={['HOTEL', 'RESTAURANT']}>{<Guests />}</TypeGuardedRoute>} />
         <Route path="/marketing"            element={<Marketing />} />
         <Route path="/finance"              element={<FinanceV2 />} />
         <Route path="/seat-map"             element={<Navigate to="/transit" replace />} />
@@ -126,18 +127,18 @@ function AppRoutes() {
         <Route path="/scheduling"         element={<Scheduling />} />
         <Route path="/payroll"            element={<Payroll />} />
         <Route path="/time-off"           element={<TimeOff />} />
-        <Route path="/hotel-rooms"          element={<HotelRooms />} />
-        <Route path="/hotel-housekeeping"   element={<HotelHousekeeping />} />
-        <Route path="/hotel-front-desk"     element={<HotelFrontDesk />} />
-        <Route path="/restaurant-kitchen"   element={<RestaurantKitchen />} />
-        <Route path="/restaurant-tables"    element={<RestaurantTables />} />
-        <Route path="/transit-fleet"        element={<TransitFleet />} />
-        <Route path="/transit-drivers"      element={<TransitDrivers />} />
-        <Route path="/transit-manifests"    element={<TransitManifests />} />
-        <Route path="/transit-cargo"         element={<TransitCargo />} />
-        <Route path="/restaurant-inventory" element={<RestaurantInventory />} />
+        <Route path="/hotel-rooms" element={<TypeGuardedRoute types={['HOTEL', 'RESTAURANT']}>{<HotelRooms />}</TypeGuardedRoute>} />
+        <Route path="/hotel-housekeeping" element={<TypeGuardedRoute types={['HOTEL', 'RESTAURANT']}>{<HotelHousekeeping />}</TypeGuardedRoute>} />
+        <Route path="/hotel-front-desk" element={<TypeGuardedRoute types={['HOTEL', 'RESTAURANT']}>{<HotelFrontDesk />}</TypeGuardedRoute>} />
+        <Route path="/restaurant-kitchen" element={<TypeGuardedRoute types={['RESTAURANT', 'HOTEL']}>{<RestaurantKitchen />}</TypeGuardedRoute>} />
+        <Route path="/restaurant-tables" element={<TypeGuardedRoute types={['RESTAURANT', 'HOTEL']}>{<RestaurantTables />}</TypeGuardedRoute>} />
+        <Route path="/transit-fleet" element={<TypeGuardedRoute types={['TRANSIT']}>{<TransitFleet />}</TypeGuardedRoute>} />
+        <Route path="/transit-drivers" element={<TypeGuardedRoute types={['TRANSIT']}>{<TransitDrivers />}</TypeGuardedRoute>} />
+        <Route path="/transit-manifests" element={<TypeGuardedRoute types={['TRANSIT']}>{<TransitManifests />}</TypeGuardedRoute>} />
+        <Route path="/transit-cargo" element={<TypeGuardedRoute types={['TRANSIT']}>{<TransitCargo />}</TypeGuardedRoute>} />
+        <Route path="/restaurant-inventory" element={<TypeGuardedRoute types={['RESTAURANT', 'HOTEL']}>{<RestaurantInventory />}</TypeGuardedRoute>} />
         <Route path="/analytics"            element={<Analytics />} />
-        <Route path="/pos"                   element={<POS />} />
+        <Route path="/pos" element={<TypeGuardedRoute types={['RESTAURANT', 'HOTEL']}>{<POS />}</TypeGuardedRoute>} />
         <Route path="/settings/developer"   element={<Developer />} />
         <Route path="/groups"               element={<BusinessGroups />} />
         <Route path="/settings/messaging"  element={<MessagingChannels />} />

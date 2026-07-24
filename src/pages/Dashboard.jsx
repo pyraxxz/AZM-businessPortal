@@ -300,6 +300,13 @@ export default function Dashboard() {
     retry: false,
   });
 
+  // ── Employee stats (real data, not hardcoded) ──────────────────────────
+  const { data: employeeStatsData, isLoading: employeeStatsLoading } = useQuery({
+    queryKey: ['employee-stats-dashboard'],
+    queryFn:  () => request('/api/business-os/dashboard/employee-stats'),
+    refetchInterval: 60_000,
+  });
+
   // ── Computed values ──────────────────────────────────────────────────────
   const stats  = statsData?.stats  || {};
   const recent = recentData?.orders || [];
@@ -322,6 +329,8 @@ export default function Dashboard() {
   const reviewStats = reviewStatsData?.stats || {};
   const trips = transitData?.trips || [];
 
+  const employeeStats = employeeStatsData?.stats || { totalEmployees: 0, activeShifts: 0, pendingTimeOff: 0, monthlyPayroll: '0.00' };
+
   const kybMeta = KYB_STATUS_META[bizProfile?.kybStatus || 'UNVERIFIED'];
   const needsKyb = bizProfile?.kybStatus !== 'VERIFIED';
 
@@ -340,16 +349,40 @@ export default function Dashboard() {
         className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
       >
         <motion.div variants={itemVariants}>
-          <KpiCard label="Total Employees" value="42" delta="+2 this month" deltaType="positive" icon={Users} />
+          <KpiCard
+            label="Total Employees"
+            value={employeeStatsLoading ? '—' : String(employeeStats.totalEmployees)}
+            delta={employeeStats.totalEmployees > 0 ? `${employeeStats.totalEmployees} active` : 'No employees yet'}
+            deltaType="info"
+            icon={Users}
+          />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <KpiCard label="Active Shifts" value="12" delta="Right now" deltaType="positive" icon={Clock} />
+          <KpiCard
+            label="Active Shifts"
+            value={employeeStatsLoading ? '—' : String(employeeStats.activeShifts)}
+            delta={employeeStats.activeShifts > 0 ? 'On duty now' : 'No active shifts'}
+            deltaType={employeeStats.activeShifts > 0 ? 'positive' : 'info'}
+            icon={Clock}
+          />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <KpiCard label="Time Off Requests" value="3" delta="Pending approval" deltaType="positive" icon={CalendarCheck} />
+          <KpiCard
+            label="Time Off Requests"
+            value={employeeStatsLoading ? '—' : String(employeeStats.pendingTimeOff)}
+            delta={employeeStats.pendingTimeOff > 0 ? 'Pending approval' : 'All clear'}
+            deltaType={employeeStats.pendingTimeOff > 0 ? 'warning' : 'positive'}
+            icon={CalendarCheck}
+          />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <KpiCard label="Monthly Payroll" value="24,500 USDC" delta="+5% vs last" deltaType="positive" icon={DollarSign} />
+          <KpiCard
+            label="Monthly Payroll"
+            value={employeeStatsLoading ? '—' : `${Number(employeeStats.monthlyPayroll).toLocaleString()} USDC`}
+            delta={Number(employeeStats.monthlyPayroll) > 0 ? 'This month (paid)' : 'No payroll yet'}
+            deltaType="info"
+            icon={DollarSign}
+          />
         </motion.div>
       </motion.div>
 
