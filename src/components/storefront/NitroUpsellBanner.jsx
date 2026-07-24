@@ -3,17 +3,21 @@ import { GlassPanel } from '@/components/ui/GlassPanel';
 import { useToast } from '@/components/ui/Toast';
 import { Zap, TrendingUp } from 'lucide-react';
 
-export default function NitroUpsellBanner({ eligibility }) {
+export default function NitroUpsellBanner({ eligibility, onStakeClick }) {
   const { toast } = useToast();
+
   if (!eligibility) return null;
   const staked = eligibility.stakedBalance ?? 0;
   const nextTier = staked < 500   ? { name: 'Bronze', needed: 500  - staked, min: 500 }
-                 : staked < 1500  ? { name: 'Silver', needed: 1500 - staked, min: 1500 }
+                 : staked < 1500  ? { name: 'Silver', needed: 1500 - staked, min: 2000 }
                  : staked < 5000  ? { name: 'Gold',   needed: 5000 - staked, min: 5000 }
                  : null;
   if (!nextTier) return null;
 
   const handleStake = () => {
+    // Track the upsell click (passed from parent that has useStorefront)
+    if (onStakeClick) onStakeClick(nextTier, staked);
+
     toast({
       title: `Stake AZM to unlock ${nextTier.name}`,
       description: `Stake ${nextTier.needed} more AZM (total ${nextTier.min}) via the AZM mobile app to unlock premium themes and widgets.`,

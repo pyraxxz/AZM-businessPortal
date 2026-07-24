@@ -27,7 +27,7 @@ export default function StorefrontEditor() {
 
   const {
     draft, published, themes, widgets, eligibility, loading, saving, error,
-    saveDraft, publish, changeTheme, addTile, updateTile, removeTile, reorderTiles,
+    saveDraft, publish, changeTheme, recordEvent, addTile, updateTile, removeTile, reorderTiles,
     applyTemplate, revertToVersion, setError,
   } = useStorefront(businessId);
 
@@ -221,7 +221,14 @@ export default function StorefrontEditor() {
             <div className="p-4 space-y-4">
               <StorefrontHealthScore draft={draft} businessType={bizType} />
               <ThemePicker themes={themes} currentThemeId={draft?.themeId} eligibility={eligibility} onThemeChange={changeTheme} businessType={bizType} />
-              <NitroUpsellBanner eligibility={eligibility} />
+              <NitroUpsellBanner 
+                eligibility={eligibility} 
+                onStakeClick={(tier, currentStake) => recordEvent('nitro_upsell_clicked', {
+                  targetTier: tier.name,
+                  currentStake,
+                  needed: tier.needed,
+                })}
+              />
             </div>
           )}
 

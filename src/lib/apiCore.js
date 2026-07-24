@@ -30,7 +30,15 @@ export async function request(path, options = {}) {
       if (window.location.pathname !== '/') window.location.replace('/');
       throw new Error('Session expired');
     }
-    throw new Error(msg);
+    // Pass through structured error data (e.g., 402 Nitro eligibility violations)
+    const err = new Error(msg);
+    if (res.status === 402) {
+      err.statusCode = 402;
+      err.violations = data.violations;
+      err.tier = data.tier;
+      err.stakedBalance = data.stakedBalance;
+    }
+    throw err;
   }
 
   return data;

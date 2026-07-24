@@ -78,7 +78,16 @@ export function useStorefront(businessId) {
       setDraft(null);
       return result;
     } catch (err) {
-      setError(err.message);
+      // PHASE 8: Surface Nitro 402 violations to the UI
+      if (err.statusCode === 402 && err.violations) {
+        const summary = err.violations.map(v =>
+          `${v.type === 'theme' ? 'Theme' : 'Widget'} "${v.key}" requires ${v.requiredTier.replace('NITRO_', '')} tier`
+        ).join('; ');
+        setError(`Nitro eligibility failed: ${summary}. Stake more AZM to unlock.`);
+        err.userMessage = `Nitro eligibility failed: ${summary}`;
+      } else {
+        setError(err.message);
+      }
       throw err;
     } finally {
       setSaving(false);
@@ -178,9 +187,18 @@ export function useStorefront(businessId) {
     }
   }, []);
 
+  // PHASE 8: Record analytics event (nitro_upsell_clicked, etc.)
+  const recordEvent = useCallback(async (eventType, metadata = {}) => {
+    try {
+      await storefrontApi.recordEvent(eventType, metadata);
+    } catch (e) {
+      console.warn('[useStorefront] recordEvent error:', e.message);
+    }
+  }, []);
+
   return {
     draft, published, themes, widgets, eligibility, loading, saving, error,
-    loadAll, saveDraft, publish, changeTheme,
+    loadAll, saveDraft, publish, changeTheme, recordEvent,
     addTile, updateTile, removeTile, reorderTiles, applyTemplate, revertToVersion, setError,
   };
 }
