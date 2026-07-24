@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { 
   MessageSquare, Send, Check, Settings as SettingsIcon, AlertCircle, RefreshCw, X, Plus
 } from 'lucide-react';
+import { getSocket } from '@/lib/socket';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DEFAULT_QUICK_REPLIES = [
@@ -47,7 +48,6 @@ export default function Messages() {
     queryKey: ['business-inbox', businessId],
     queryFn: () => request(`/api/direct-messages/business-inbox?businessId=${businessId}`),
     enabled: !!businessId,
-    refetchInterval: 10_000,
   });
 
   const conversations = inboxData?.conversations || [];
@@ -62,7 +62,6 @@ export default function Messages() {
     queryKey: ['chat-thread', selectedUser?.id, businessId],
     queryFn: () => request(`/api/direct-messages/thread?userId=${selectedUser?.id}&businessId=${businessId}`),
     enabled: !!businessId && !!selectedUser?.id,
-    refetchInterval: 5_000,
   });
 
   const messages = threadData?.messages || [];
@@ -97,6 +96,27 @@ export default function Messages() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // ── Socket.IO: real-time inbox + thread updates (replaces polling) ──
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleNewMessage = () => {
+      qc.invalidateQueries(['business-inbox', businessId]);
+      if (selectedUser?.id) {
+        qc.invalidateQueries(['chat-thread', selectedUser.id, businessId]);
+      }
+    };
+
+    socket.on('biz_new_message', handleNewMessage);
+    socket.on('new_message', handleNewMessage);
+
+    return () => {
+      socket.off('biz_new_message', handleNewMessage);
+      socket.off('new_message', handleNewMessage);
+    };
+  }, [qc, businessId, selectedUser?.id]);
 
   // Save quick replies
   useEffect(() => {
